@@ -658,8 +658,8 @@ Makefile: $(TOP)/Makefile.in
 sqlite3.pc: $(TOP)/sqlite3.pc.in
 	./config.status
 
-libsqlite3.la:	$(LIBOBJ)
-	$(LTLINK) -no-undefined -o $@ $(LIBOBJ) $(TLIBS) \
+libsqlite3.la:	$(LIBOBJ) libsqlite3_rs.a
+	$(LTLINK) -no-undefined -o $@ $(LIBOBJ) libsqlite3_rs.a $(TLIBS) \
 		${ALLOWRELEASE} -rpath "$(libdir)" -version-info "8:6:8"
 
 libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
@@ -669,9 +669,9 @@ libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
 		-version-info "8:6:8" \
 		-avoid-version
 
-sqlite3$(TEXE):	shell.c sqlite3.c
+sqlite3$(TEXE):	shell.c sqlite3.c libsqlite3_rs.a
 	$(LTLINK) $(READLINE_FLAGS) $(SHELL_OPT) -o $@ \
-		shell.c sqlite3.c \
+		shell.c sqlite3.c libsqlite3_rs.a \
 		$(LIBREADLINE) $(TLIBS) -rpath "$(libdir)"
 
 sqldiff$(TEXE):	$(TOP)/tool/sqldiff.c sqlite3.lo sqlite3.h
@@ -825,6 +825,11 @@ parse.lo:	parse.c $(HDR)
 
 opcodes.lo:	opcodes.c
 	$(LTCOMPILE) $(TEMP_STORE) -c opcodes.c
+
+.PHONY: libsqlite3_rs.a
+libsqlite3_rs.a:
+	cargo rustc --release --manifest-path=$(TOP)/src/rs/Cargo.toml --target-dir=./target
+	cp ./target/release/libsqlite3_rs.a .
 
 # Rules to build individual *.o files from files in the src directory.
 #
