@@ -1,4 +1,4 @@
-use cbindgen::{Config, ExportConfig, ItemType, Language};
+use cbindgen::{Config, ExportConfig, FunctionConfig, ItemType, Language, RenameRule};
 use std::env;
 use std::path::PathBuf;
 
@@ -13,16 +13,21 @@ fn main() {
 
     let config = Config {
         language: Language::C,
+        function: FunctionConfig {
+            // TODO: figure out why this isn't working
+            rename_args: RenameRule::CamelCase,
+            ..Default::default()
+        },
         export: ExportConfig {
-            include: vec!["Test".into()],
+            include: vec!["SQLITE_PTRSIZE".into()],
             item_types: vec![
                 ItemType::Constants,
-                // ItemType::Globals,
+                ItemType::Globals,
                 ItemType::Enums,
                 ItemType::Structs,
                 ItemType::Unions,
-                // ItemType::Typedefs,
-                // ItemType::OpaqueItems,
+                ItemType::Typedefs,
+                ItemType::OpaqueItems,
                 ItemType::Functions,
             ],
             ..Default::default()
