@@ -311,7 +311,8 @@ SRC = \
   $(TOP)/src/wherecode.c \
   $(TOP)/src/whereexpr.c \
   $(TOP)/src/whereInt.h \
-  $(TOP)/src/window.c
+  $(TOP)/src/window.c \
+  sqlite3_rs.h
 
 # Source code for extensions
 #
@@ -542,6 +543,9 @@ HDR = \
    $(TOP)/src/vxworks.h \
    $(TOP)/src/whereInt.h \
    sqlite_cfg.h
+
+HDR += \
+   sqlite3_rs.h
 
 # Header files used by extensions
 #
@@ -826,10 +830,15 @@ parse.lo:	parse.c $(HDR)
 opcodes.lo:	opcodes.c
 	$(LTCOMPILE) $(TEMP_STORE) -c opcodes.c
 
+CARGO = cargo
+CARGO_FLAGS = --release --manifest-path=$(TOP)/src/rs/Cargo.toml --target-dir=./target
+HEADER_PATH = $(shell $(CARGO) )
+
 .PHONY: libsqlite3_rs.a
-libsqlite3_rs.a:
-	cargo rustc --release --manifest-path=$(TOP)/src/rs/Cargo.toml --target-dir=./target
+libsqlite3_rs.a sqlite3_rs.h:
+	$(CARGO) build $(CARGO_FLAGS)
 	cp ./target/release/libsqlite3_rs.a .
+	cp $(shell $(CARGO) check $(CARGO_FLAGS) --message-format=json | jq -r 'select(.reason == "build-script-executed" and (.package_id | startswith("sqlite3_rs"))) | .out_dir')/sqlite3_rs.h .
 
 # Rules to build individual *.o files from files in the src directory.
 #
