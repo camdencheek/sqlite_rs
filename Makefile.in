@@ -201,7 +201,7 @@ LIBOBJS1 = sqlite3.lo
 
 # Determine the real value of LIBOBJ based on the 'configure' script
 #
-LIBOBJ = $(LIBOBJS$(USE_AMALGAMATION))
+LIBOBJ = $(LIBOBJS$(USE_AMALGAMATION)) libsqlite3_rs.a
 
 
 # All of the source code files.
@@ -662,8 +662,8 @@ Makefile: $(TOP)/Makefile.in
 sqlite3.pc: $(TOP)/sqlite3.pc.in
 	./config.status
 
-libsqlite3.la:	$(LIBOBJ) libsqlite3_rs.a
-	$(LTLINK) -no-undefined -o $@ $(LIBOBJ) libsqlite3_rs.a $(TLIBS) \
+libsqlite3.la:	$(LIBOBJ)
+	$(LTLINK) -no-undefined -o $@ $(LIBOBJ) $(TLIBS) \
 		${ALLOWRELEASE} -rpath "$(libdir)" -version-info "8:6:8"
 
 libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
@@ -1266,7 +1266,7 @@ TESTFIXTURE_FLAGS += -DSQLITE_ENABLE_DBPAGE_VTAB
 TESTFIXTURE_FLAGS += -DSQLITE_ENABLE_BYTECODE_VTAB
 TESTFIXTURE_FLAGS += -DSQLITE_CKSUMVFS_STATIC
 
-TESTFIXTURE_SRC0 = $(TESTSRC2) libsqlite3.la
+TESTFIXTURE_SRC0 = $(TESTSRC2) libsqlite3.la libsqlite3_rs.a
 TESTFIXTURE_SRC1 = sqlite3.c
 TESTFIXTURE_SRC = $(TESTSRC) $(TOP)/src/tclsqlite.c
 TESTFIXTURE_SRC += $(TESTFIXTURE_SRC$(USE_AMALGAMATION))
