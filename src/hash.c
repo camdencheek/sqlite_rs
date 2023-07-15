@@ -16,19 +16,6 @@
 #include "sqlite3_rs.h"
 #include <assert.h>
 
-/* Turn bulk memory into a hash table object by initializing the
-** fields of the Hash structure.
-**
-** "pNew" is a pointer to the hash table that is to be initialized.
-*/
-void sqlite3HashInit(Hash *pNew){
-  assert( pNew!=0 );
-  pNew->first = 0;
-  pNew->count = 0;
-  pNew->htsize = 0;
-  pNew->ht = 0;
-}
-
 /* Remove all entries from a hash table.  Reclaim all memory.
 ** Call this routine to delete a hash table or to reset a hash table
 ** to the empty state.
@@ -55,7 +42,7 @@ void sqlite3HashClear(Hash *pH){
 */
 static void insertElement(
   Hash *pH,              /* The complete hash table */
-  struct _ht *pEntry,    /* The entry into which pNew is inserted */
+  struct HashTable *pEntry,    /* The entry into which pNew is inserted */
   HashElem *pNew         /* The element to be inserted */
 ){
   HashElem *pHead;       /* First element already in pEntry */
@@ -88,12 +75,12 @@ static void insertElement(
 ** Return TRUE if the resize occurs and false if not.
 */
 static int rehash(Hash *pH, unsigned int new_size){
-  struct _ht *new_ht;            /* The new hash table */
+  struct HashTable *new_ht;            /* The new hash table */
   HashElem *elem, *next_elem;    /* For looping over existing elements */
 
 #if SQLITE_MALLOC_SOFT_LIMIT>0
-  if( new_size*sizeof(struct _ht)>SQLITE_MALLOC_SOFT_LIMIT ){
-    new_size = SQLITE_MALLOC_SOFT_LIMIT/sizeof(struct _ht);
+  if( new_size*sizeof(struct HashTable)>SQLITE_MALLOC_SOFT_LIMIT ){
+    new_size = SQLITE_MALLOC_SOFT_LIMIT/sizeof(struct HashTable);
   }
   if( new_size==pH->htsize ) return 0;
 #endif
@@ -107,14 +94,14 @@ static int rehash(Hash *pH, unsigned int new_size){
   ** may be larger than the requested amount).
   */
   sqlite3BeginBenignMalloc();
-  new_ht = (struct _ht *)sqlite3Malloc( new_size*sizeof(struct _ht) );
+  new_ht = (struct HashTable *)sqlite3Malloc( new_size*sizeof(struct HashTable) );
   sqlite3EndBenignMalloc();
 
   if( new_ht==0 ) return 0;
   sqlite3_free(pH->ht);
   pH->ht = new_ht;
-  pH->htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct _ht);
-  memset(new_ht, 0, new_size*sizeof(struct _ht));
+  pH->htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct HashTable);
+  memset(new_ht, 0, new_size*sizeof(struct HashTable));
   for(elem=pH->first, pH->first=0; elem; elem = next_elem){
     unsigned int h = strHash(elem->pKey) % new_size;
     next_elem = elem->next;
@@ -139,7 +126,7 @@ static HashElem *findElementWithHash(
   static HashElem nullElement = { 0, 0, 0, 0 };
 
   if( pH->ht ){   /*OPTIMIZATION-IF-TRUE*/
-    struct _ht *pEntry;
+    struct HashTable *pEntry;
     h = strHash(pKey) % pH->htsize;
     pEntry = &pH->ht[h];
     elem = pEntry->chain;
@@ -169,7 +156,7 @@ static void removeElementGivenHash(
   HashElem* elem,   /* The element to be removed from the pH */
   unsigned int h    /* Hash value for the element */
 ){
-  struct _ht *pEntry;
+  struct HashTable *pEntry;
   if( elem->prev ){
     elem->prev->next = elem->next; 
   }else{

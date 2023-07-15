@@ -20,7 +20,6 @@ fn main() {
             ..Default::default()
         },
         export: ExportConfig {
-            include: vec!["SQLITE_PTRSIZE".into()],
             item_types: vec![
                 ItemType::Constants,
                 ItemType::Globals,

@@ -834,7 +834,6 @@ CARGO = cargo
 CARGO_FLAGS = --release --manifest-path=$(TOP)/src/rs/Cargo.toml --target-dir=./target
 HEADER_PATH = $(shell $(CARGO) )
 
-.PHONY: libsqlite3_rs.a
 libsqlite3_rs.a sqlite3_rs.h:
 	$(CARGO) build $(CARGO_FLAGS)
 	cp ./target/release/libsqlite3_rs.a .
@@ -1520,6 +1519,7 @@ clean:
 	rm -f sqlite3.dll sqlite3.lib sqlite3.exp sqlite3.def
 	rm -f sqlite3.c
 	rm -f sqlite3rc.h
+	rm -f sqlite3_rs.h
 	rm -f shell.c sqlite3ext.h
 	rm -f sqlite3_analyzer$(TEXE) sqlite3_analyzer.c
 	rm -f sqlite-*-output.vsix
@@ -1532,6 +1532,7 @@ clean:
 	rm -f dbhash dbhash.exe
 	rm -f fts5.* fts5parse.*
 	rm -f threadtest5
+	rm -rf target
 
 distclean:	clean
 	rm -f sqlite_cfg.h config.log config.status libtool Makefile sqlite3.pc \
