@@ -1,4 +1,4 @@
-use libc::c_uchar;
+use libc::{c_char, c_uchar};
 
 /* An array to map all upper-case characters into their corresponding
 ** lower-case character.
@@ -69,3 +69,20 @@ pub static sqlite3UpperToLower: [c_uchar; 274] = [
     0, 1, 0, 1, 0, 1, /* aEQb[]: Use when compare(A,B) equals zero */
     1, 0, 1, 0, 0, 1, /* aGTb[]: Use when compare(A,B) greater than zero*/
 ];
+
+/*
+** Compute an 8-bit hash on a string that is insensitive to case differences
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3StrIHash(mut z: *const c_char) -> u8 {
+    if z.is_null() {
+        return 0;
+    }
+
+    let mut h: u8 = 0;
+    while *z != 0 {
+        h += sqlite3UpperToLower[*z as u8 as usize];
+        z = z.add(1);
+    }
+    h
+}
