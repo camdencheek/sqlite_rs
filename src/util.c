@@ -16,6 +16,7 @@
 **
 */
 #include "sqliteInt.h"
+#include "sqlite3_rs.h"
 #include <stdarg.h>
 #ifndef SQLITE_OMIT_FLOATING_POINT
 #include <math.h>

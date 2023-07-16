@@ -834,10 +834,14 @@ CARGO = cargo
 CARGO_FLAGS = --release --manifest-path=$(TOP)/src/rs/Cargo.toml --target-dir=./target
 HEADER_PATH = $(shell $(CARGO) )
 
-libsqlite3_rs.a sqlite3_rs.h:
+libsqlite3_rs.a sqlite3_rs.h: FORCE
 	$(CARGO) build $(CARGO_FLAGS)
 	cp ./target/release/libsqlite3_rs.a .
 	cp $(shell $(CARGO) check $(CARGO_FLAGS) --message-format=json | jq -r 'select(.reason == "build-script-executed" and (.package_id | startswith("sqlite3_rs"))) | .out_dir')/sqlite3_rs.h .
+
+.PHONY: FORCE
+
+FORCE:
 
 # Rules to build individual *.o files from files in the src directory.
 #

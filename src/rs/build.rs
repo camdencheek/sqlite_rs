@@ -13,6 +13,7 @@ fn main() {
         .to_string();
 
     let config = Config {
+        include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
         function: FunctionConfig {
             // TODO: figure out why this isn't working
@@ -20,6 +21,7 @@ fn main() {
             ..Default::default()
         },
         export: ExportConfig {
+            include: vec!["sqlite3UpperToLower".into()],
             item_types: vec![
                 ItemType::Constants,
                 ItemType::Globals,
