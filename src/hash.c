@@ -37,37 +37,6 @@ void sqlite3HashClear(Hash *pH){
   pH->count = 0;
 }
 
-/* Link pNew element into the hash table pH.  If pEntry!=0 then also
-** insert pNew into the pEntry hash bucket.
-*/
-static void insertElement(
-  Hash *pH,              /* The complete hash table */
-  struct HashTable *pEntry,    /* The entry into which pNew is inserted */
-  HashElem *pNew         /* The element to be inserted */
-){
-  HashElem *pHead;       /* First element already in pEntry */
-  if( pEntry ){
-    pHead = pEntry->count ? pEntry->chain : 0;
-    pEntry->count++;
-    pEntry->chain = pNew;
-  }else{
-    pHead = 0;
-  }
-  if( pHead ){
-    pNew->next = pHead;
-    pNew->prev = pHead->prev;
-    if( pHead->prev ){ pHead->prev->next = pNew; }
-    else             { pH->first = pNew; }
-    pHead->prev = pNew;
-  }else{
-    pNew->next = pH->first;
-    if( pH->first ){ pH->first->prev = pNew; }
-    pNew->prev = 0;
-    pH->first = pNew;
-  }
-}
-
-
 /* Resize the hash table so that it cantains "new_size" buckets.
 **
 ** The hash table might fail to resize if sqlite3_malloc() fails or

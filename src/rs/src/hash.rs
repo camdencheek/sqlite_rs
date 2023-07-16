@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::{ffi::CStr, ptr};
 
 use libc::{c_char, c_uint, c_void};
 
@@ -58,6 +58,39 @@ pub unsafe extern "C" fn sqlite3HashInit(hash: *mut Hash) {
         count: 0,
         first: std::ptr::null_mut(),
         ht: std::ptr::null_mut(),
+    }
+}
+
+/* Link pNew element into the hash table pH.  If pEntry!=0 then also
+** insert pNew into the pEntry hash bucket.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, new: *mut HashElem) {
+    let mut head: *mut HashElem = std::ptr::null_mut();
+    if !entry.is_null() {
+        if (*entry).count > 0 {
+            head = (*entry).chain;
+        }
+        (*entry).count += 1;
+        (*entry).chain = new;
+    }
+
+    if !head.is_null() {
+        (*new).next = head;
+        (*new).prev = (*head).prev;
+        if !(*head).prev.is_null() {
+            (*(*head).prev).next = new;
+        } else {
+            (*hash).first = new;
+        }
+        (*head).prev = new;
+    } else {
+        (*new).next = (*hash).first;
+        if !(*hash).first.is_null() {
+            (*(*hash).first).prev = new;
+        }
+        (*new).prev = std::ptr::null_mut();
+        (*hash).first = new;
     }
 }
 
