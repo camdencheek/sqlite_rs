@@ -1,6 +1,6 @@
-use std::ffi::CStr;
+use crate::util::strings::UpperToLower;
 
-use libc::{c_char, c_uint, c_void};
+use libc::{c_char, c_uchar, c_uint, c_void};
 
 /* A complete hash table is an instance of the following structure.
 ** The internals of this structure are intended to be opaque -- client
@@ -95,13 +95,19 @@ pub unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, n
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn strHash(z: *const c_char) -> c_uint {
-    let bytes = CStr::from_ptr(z).to_bytes();
+pub unsafe extern "C" fn strHash(mut z: *const c_char) -> c_uint {
     let mut h: c_uint = 0;
-    for byte in bytes {
-        // TODO: compare performance to lookup table sqlite3UpperToLower
-        h += byte.to_ascii_lowercase() as c_uint;
+    loop {
+        let c = *z as c_uchar;
+        if c == 0 {
+            break;
+        }
+        /* Knuth multiplicative hashing.  (Sorting & Searching, p. 510).
+         ** 0x9e3779b1 is 2654435761 which is the closest prime number to
+         ** (2**32)*golden_ratio, where golden_ratio = (sqrt(5) - 1)/2. */
+        h += UpperToLower[c as usize] as c_uint;
         h *= 0x9e3779b1;
+        z = z.add(1);
     }
-    h
+    return h;
 }
