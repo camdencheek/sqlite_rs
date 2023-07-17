@@ -16,27 +16,6 @@
 #include "sqlite3_rs.h"
 #include <assert.h>
 
-/* Remove all entries from a hash table.  Reclaim all memory.
-** Call this routine to delete a hash table or to reset a hash table
-** to the empty state.
-*/
-void sqlite3HashClear(Hash *pH){
-  HashElem *elem;         /* For looping over all elements of the table */
-
-  assert( pH!=0 );
-  elem = pH->first;
-  pH->first = 0;
-  sqlite3_free(pH->ht);
-  pH->ht = 0;
-  pH->htsize = 0;
-  while( elem ){
-    HashElem *next_elem = elem->next;
-    sqlite3_free(elem);
-    elem = next_elem;
-  }
-  pH->count = 0;
-}
-
 /* Resize the hash table so that it cantains "new_size" buckets.
 **
 ** The hash table might fail to resize if sqlite3_malloc() fails or

@@ -1,4 +1,6 @@
-use crate::util::strings::UpperToLower;
+use std::ptr;
+
+use crate::{mem::sqlite3_free, util::strings::UpperToLower};
 
 use libc::{c_char, c_uchar, c_uint, c_void};
 
@@ -59,6 +61,22 @@ pub unsafe extern "C" fn sqlite3HashInit(hash: *mut Hash) {
         first: std::ptr::null_mut(),
         ht: std::ptr::null_mut(),
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3HashClear(hash: *mut Hash) {
+    assert!(!hash.is_null());
+    let mut elem = (*hash).first;
+    (*hash).first = ptr::null_mut();
+    sqlite3_free((*hash).ht as *mut c_void);
+    (*hash).ht = ptr::null_mut();
+    (*hash).htsize = 0;
+    while !elem.is_null() {
+        let next_elem = (*elem).next;
+        sqlite3_free(elem as *mut c_void);
+        elem = next_elem;
+    }
+    (*hash).count = 0;
 }
 
 /* Link pNew element into the hash table pH.  If pEntry!=0 then also
