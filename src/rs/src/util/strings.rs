@@ -1,4 +1,4 @@
-use libc::{c_char, c_uchar};
+use libc::{c_char, c_int, c_uchar};
 
 /* An array to map all upper-case characters into their corresponding
 ** lower-case character.
@@ -70,6 +70,9 @@ pub static sqlite3UpperToLower: [c_uchar; 274] = [
     1, 0, 1, 0, 0, 1, /* aGTb[]: Use when compare(A,B) greater than zero*/
 ];
 
+/* Convenient short-hand */
+pub static UpperToLower: [c_uchar; 274] = sqlite3UpperToLower;
+
 /*
 ** Compute an 8-bit hash on a string that is insensitive to case differences
 */
@@ -85,4 +88,43 @@ pub unsafe extern "C" fn sqlite3StrIHash(mut z: *const c_char) -> u8 {
         z = z.add(1);
     }
     h
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3StrICmp(left: *const c_char, right: *const c_char) -> c_int {
+    let mut a = left as *const c_uchar;
+    let mut b = right as *const c_uchar;
+
+    let mut c: c_int = 0;
+    let mut x: c_int = 0;
+
+    loop {
+        c = *a as c_int;
+        x = *b as c_int;
+
+        if c == x {
+            if c == 0 {
+                break;
+            }
+        } else {
+            c = UpperToLower[c as usize] as c_int - UpperToLower[x as usize] as c_int;
+            if c != 0 {
+                break;
+            }
+        }
+
+        a = a.add(1);
+        b = b.add(1);
+    }
+    return c;
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3_stricmp(left: *const c_char, right: *const c_char) -> c_int {
+    if left.is_null() {
+        return if right.is_null() { 0 } else { -1 };
+    } else if right.is_null() {
+        return 1;
+    }
+    return sqlite3StrICmp(left, right);
 }

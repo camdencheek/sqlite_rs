@@ -4459,7 +4459,6 @@ int sqlite3IsIdChar(u8);
 /*
 ** Internal function prototypes
 */
-int sqlite3StrICmp(const char*,const char*);
 int sqlite3Strlen30(const char*);
 #define sqlite3Strlen30NN(C) (strlen(C)&0x3fffffff)
 char *sqlite3ColumnType(Column*,char*);
