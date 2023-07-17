@@ -1,4 +1,4 @@
-use std::{ffi::CStr, ptr};
+use std::ffi::CStr;
 
 use libc::{c_char, c_uint, c_void};
 
