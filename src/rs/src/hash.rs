@@ -86,10 +86,46 @@ impl Hash {
         while !elem.is_null() {
             let h = strHash((*elem).key) % new_size;
             let next_elem = (*elem).next;
-            self.insertElement(new_ht.add(h as usize), elem);
+            self.insert_element(new_ht.add(h as usize), elem);
             elem = next_elem;
         }
         return 1;
+    }
+
+    /* Remove a single entry from the hash table given a pointer to that
+     ** element and a hash on the element's key.
+     */
+    unsafe fn remove_element_given_hash(
+        &mut self,
+        elem: *mut HashElem, /* The element to be removed from the pH */
+        h: c_uint,           /* Hash value for the element */
+    ) {
+        if !(*elem).prev.is_null() {
+            (*(*elem).prev).next = (*elem).next;
+        } else {
+            self.first = (*elem).next;
+        }
+
+        if !(*elem).next.is_null() {
+            (*(*elem).next).prev = (*elem).prev;
+        }
+
+        if !self.ht.is_null() {
+            let entry = self.ht.add(h as usize);
+            // pointer comparison, not value comparison
+            if (*entry).chain as usize == elem as usize {
+                (*entry).chain = (*elem).next;
+            }
+            assert!((*entry).count > 0);
+            (*entry).count -= 1;
+        }
+        sqlite3_free(elem as *mut c_void);
+        self.count -= 1;
+        if self.count == 0 {
+            assert!(self.first.is_null());
+            assert!(self.count == 0);
+            sqlite3HashClear(self);
+        }
     }
 
     /* This function (for internal use only) locates an element in an
@@ -97,7 +133,11 @@ impl Hash {
      ** a pointer to a static null element with HashElem.data==0 is returned.
      ** If pH is not NULL, then the hash for this key is written to *pH.
      */
-    unsafe fn findElementWithHash(&self, key: *const c_char, hash: *mut c_uint) -> *mut HashElem {
+    unsafe fn find_element_with_hash(
+        &self,
+        key: *const c_char,
+        hash: *mut c_uint,
+    ) -> *mut HashElem {
         let mut elem: *mut HashElem = ptr::null_mut();
         let mut count: c_uint = 0;
         let mut h: c_uint = 0;
@@ -130,7 +170,7 @@ impl Hash {
     /* Link pNew element into the hash table pH.  If pEntry!=0 then also
      ** insert pNew into the pEntry hash bucket.
      */
-    unsafe fn insertElement(&mut self, entry: *mut HashTable, new: *mut HashElem) {
+    unsafe fn insert_element(&mut self, entry: *mut HashTable, new: *mut HashElem) {
         let mut head: *mut HashElem = std::ptr::null_mut();
         if !entry.is_null() {
             if (*entry).count > 0 {
@@ -236,45 +276,8 @@ pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char)
     return (*hash
         .as_ref()
         .unwrap()
-        .findElementWithHash(pKey, ptr::null_mut()))
+        .find_element_with_hash(pKey, ptr::null_mut()))
     .data;
-}
-
-/* Remove a single entry from the hash table given a pointer to that
-** element and a hash on the element's key.
-*/
-#[no_mangle]
-unsafe extern "C" fn removeElementGivenHash(
-    pH: *mut Hash,       /* The pH containing "elem" */
-    elem: *mut HashElem, /* The element to be removed from the pH */
-    h: c_uint,           /* Hash value for the element */
-) {
-    if !(*elem).prev.is_null() {
-        (*(*elem).prev).next = (*elem).next;
-    } else {
-        (*pH).first = (*elem).next;
-    }
-
-    if !(*elem).next.is_null() {
-        (*(*elem).next).prev = (*elem).prev;
-    }
-
-    if !(*pH).ht.is_null() {
-        let pEntry = (*pH).ht.add(h as usize);
-        // pointer comparison, not value comparison
-        if (*pEntry).chain as usize == elem as usize {
-            (*pEntry).chain = (*elem).next;
-        }
-        assert!((*pEntry).count > 0);
-        (*pEntry).count -= 1;
-    }
-    sqlite3_free(elem as *mut c_void);
-    (*pH).count -= 1;
-    if (*pH).count == 0 {
-        assert!((*pH).first.is_null());
-        assert!((*pH).count == 0);
-        sqlite3HashClear(pH);
-    }
 }
 
 /* Insert an element into the hash table pH.  The key is pKey
@@ -300,11 +303,11 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     assert!(!pH.is_null());
     assert!(!pKey.is_null());
     let mut h: c_uint = 0;
-    let elem = pH.as_ref().unwrap().findElementWithHash(pKey, &mut h);
+    let elem = pH.as_ref().unwrap().find_element_with_hash(pKey, &mut h);
     if !(*elem).data.is_null() {
         let old_data = (*elem).data;
         if data.is_null() {
-            removeElementGivenHash(pH, elem, h);
+            pH.as_mut().unwrap().remove_element_given_hash(elem, h);
         } else {
             (*elem).data = data;
             (*elem).key = pKey;
@@ -330,7 +333,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
             h = strHash(pKey) % (*pH).htsize;
         }
     }
-    pH.as_mut().unwrap().insertElement(
+    pH.as_mut().unwrap().insert_element(
         if (*pH).ht.is_null() {
             ptr::null_mut()
         } else {
