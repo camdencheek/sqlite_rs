@@ -1,4 +1,8 @@
-use std::{mem::size_of, ptr};
+use std::{
+    alloc::{alloc, dealloc, Layout},
+    mem::size_of,
+    ptr,
+};
 
 use crate::{
     mem::{sqlite3Malloc, sqlite3MallocSize, sqlite3_free},
@@ -68,8 +72,10 @@ impl Hash {
          */
         // TODO: support BenignMalloc
         // sqlite3BeginBenignMalloc();
-        let new_ht =
-            sqlite3Malloc(new_size as u64 * size_of::<HashTable>() as u64) as *mut HashTable;
+        let new_ht = alloc(Layout::from_size_align_unchecked(
+            new_size as usize * size_of::<HashTable>(),
+            8,
+        )) as *mut HashTable;
         // sqlite3EndBenignMalloc();
 
         if new_ht.is_null() {
