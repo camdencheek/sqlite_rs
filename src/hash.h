@@ -21,7 +21,6 @@
 ** Access routines.  To delete, insert a NULL pointer.
 */
 void *sqlite3HashInsert(Hash*, const char *pKey, void *pData);
-void *sqlite3HashFind(const Hash*, const char *pKey);
 
 /*
 ** Macros for looping over all elements of a hash table.  The idiom is

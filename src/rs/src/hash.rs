@@ -177,3 +177,14 @@ pub unsafe extern "C" fn findElementWithHash(
     }
     return &mut NULL_ELEMENT as *mut HashElem;
 }
+
+/* Attempt to locate an element of the hash table pH with a key
+** that matches pKey.  Return the data for this element if it is
+** found, or NULL if there is no match.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char) -> *mut c_void {
+    assert!(!hash.is_null());
+    assert!(!pKey.is_null());
+    return (*findElementWithHash(hash, pKey, ptr::null_mut())).data;
+}

@@ -92,16 +92,6 @@ static void removeElementGivenHash(
   }
 }
 
-/* Attempt to locate an element of the hash table pH with a key
-** that matches pKey.  Return the data for this element if it is
-** found, or NULL if there is no match.
-*/
-void *sqlite3HashFind(const Hash *pH, const char *pKey){
-  assert( pH!=0 );
-  assert( pKey!=0 );
-  return findElementWithHash(pH, pKey, 0)->data;
-}
-
 /* Insert an element into the hash table pH.  The key is pKey
 ** and the data is "data".
 **
@@ -149,3 +139,4 @@ void *sqlite3HashInsert(Hash *pH, const char *pKey, void *data){
   insertElement(pH, pH->ht ? &pH->ht[h] : 0, new_elem);
   return 0;
 }
+
