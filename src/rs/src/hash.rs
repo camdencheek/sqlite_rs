@@ -1,6 +1,6 @@
 use std::ptr;
 
-use crate::{mem::sqlite3_free, util::strings::UpperToLower};
+use crate::{mem::sqlite3_free, sqlite3StrICmp, util::strings::UpperToLower};
 
 use libc::{c_char, c_uchar, c_uint, c_void};
 
@@ -128,4 +128,52 @@ pub unsafe extern "C" fn strHash(mut z: *const c_char) -> c_uint {
         z = z.add(1);
     }
     return h;
+}
+
+static mut NULL_ELEMENT: HashElem = HashElem {
+    next: ptr::null_mut(),
+    prev: ptr::null_mut(),
+    data: ptr::null_mut(),
+    pKey: ptr::null(),
+};
+
+/* This function (for internal use only) locates an element in an
+** hash table that matches the given key.  If no element is found,
+** a pointer to a static null element with HashElem.data==0 is returned.
+** If pH is not NULL, then the hash for this key is written to *pH.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn findElementWithHash(
+    hash: *const Hash,
+    pKey: *const c_char,
+    pHash: *mut c_uint,
+) -> *mut HashElem {
+    let mut elem: *mut HashElem = ptr::null_mut();
+    let mut count: c_uint = 0;
+    let mut h: c_uint = 0;
+
+    if !(*hash).ht.is_null() {
+        h = strHash(pKey) % (*hash).htsize;
+        let pEntry = (*hash).ht.add(h as usize);
+        elem = (*pEntry).chain;
+        count = (*pEntry).count;
+    } else {
+        h = 0;
+        elem = (*hash).first;
+        count = (*hash).count;
+    }
+
+    if !pHash.is_null() {
+        *pHash = h;
+    }
+
+    while count > 0 {
+        assert!(!elem.is_null());
+        if sqlite3StrICmp((*elem).pKey, pKey) == 0 {
+            return elem;
+        }
+        elem = (*elem).next;
+        count -= 1;
+    }
+    return &mut NULL_ELEMENT as *mut HashElem;
 }

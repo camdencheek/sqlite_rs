@@ -58,44 +58,6 @@ static int rehash(Hash *pH, unsigned int new_size){
   return 1;
 }
 
-/* This function (for internal use only) locates an element in an
-** hash table that matches the given key.  If no element is found,
-** a pointer to a static null element with HashElem.data==0 is returned.
-** If pH is not NULL, then the hash for this key is written to *pH.
-*/
-static HashElem *findElementWithHash(
-  const Hash *pH,     /* The pH to be searched */
-  const char *pKey,   /* The key we are searching for */
-  unsigned int *pHash /* Write the hash value here */
-){
-  HashElem *elem;                /* Used to loop thru the element list */
-  unsigned int count;            /* Number of elements left to test */
-  unsigned int h;                /* The computed hash */
-  static HashElem nullElement = { 0, 0, 0, 0 };
-
-  if( pH->ht ){   /*OPTIMIZATION-IF-TRUE*/
-    struct HashTable *pEntry;
-    h = strHash(pKey) % pH->htsize;
-    pEntry = &pH->ht[h];
-    elem = pEntry->chain;
-    count = pEntry->count;
-  }else{
-    h = 0;
-    elem = pH->first;
-    count = pH->count;
-  }
-  if( pHash ) *pHash = h;
-  while( count ){
-    assert( elem!=0 );
-    if( sqlite3StrICmp(elem->pKey,pKey)==0 ){ 
-      return elem;
-    }
-    elem = elem->next;
-    count--;
-  }
-  return &nullElement;
-}
-
 /* Remove a single entry from the hash table given a pointer to that
 ** element and a hash on the element's key.
 */
