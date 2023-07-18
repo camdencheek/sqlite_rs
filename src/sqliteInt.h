@@ -596,7 +596,7 @@
 #define likely(X)    (X)
 #define unlikely(X)  (X)
 
-#include "hash.h"
+#include "sqlite3_rs.h"
 #include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>

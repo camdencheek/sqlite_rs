@@ -95,7 +95,6 @@ if {$addstatic} {
 foreach hdr {
    btree.h
    btreeInt.h
-   hash.h
    hwtime.h
    keywordhash.h
    msvc.h

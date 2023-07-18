@@ -1386,7 +1386,6 @@ SRC03 = \
 SRC04 = \
   $(TOP)\src\btree.h \
   $(TOP)\src\btreeInt.h \
-  $(TOP)\src\hash.h \
   $(TOP)\src\hwtime.h \
   $(TOP)\src\msvc.h \
   $(TOP)\src\mutex.h \
@@ -1588,7 +1587,6 @@ TESTSRC2 = \
 HDR = \
    $(TOP)\src\btree.h \
    $(TOP)\src\btreeInt.h \
-   $(TOP)\src\hash.h \
    $(TOP)\src\hwtime.h \
    keywordhash.h \
    $(TOP)\src\msvc.h \

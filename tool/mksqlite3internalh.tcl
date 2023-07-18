@@ -55,7 +55,6 @@ puts $out [subst \
 foreach hdr {
    btree.h
    btreeInt.h
-   hash.h
    hwtime.h
    keywordhash.h
    msvc.h
@@ -133,7 +132,6 @@ foreach file {
    sqliteInt.h
    sqlite3.h
    btree.h
-   hash.h
    os.h
    pager.h
    parse.h

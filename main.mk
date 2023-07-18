@@ -107,7 +107,6 @@ SRC = \
   $(TOP)/src/fkey.c \
   $(TOP)/src/func.c \
   $(TOP)/src/global.c \
-  $(TOP)/src/hash.h \
   $(TOP)/src/hwtime.h \
   $(TOP)/src/insert.c \
   $(TOP)/src/json.c \
@@ -435,7 +434,6 @@ TESTSRC2 = \
 HDR = \
    $(TOP)/src/btree.h \
    $(TOP)/src/btreeInt.h \
-   $(TOP)/src/hash.h \
    $(TOP)/src/hwtime.h \
    keywordhash.h \
    $(TOP)/src/msvc.h \

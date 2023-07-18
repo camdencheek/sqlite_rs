@@ -140,7 +140,6 @@ foreach hdr {
    fts3_hash.h
    fts3_tokenizer.h
    geopoly.c
-   hash.h
    hwtime.h
    keywordhash.h
    msvc.h
