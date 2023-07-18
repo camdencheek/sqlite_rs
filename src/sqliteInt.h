@@ -4466,7 +4466,6 @@ char *sqlite3ColumnType(Column*,char*);
 
 int sqlite3MallocInit(void);
 void sqlite3MallocEnd(void);
-void *sqlite3Malloc(u64);
 void *sqlite3MallocZero(u64);
 void *sqlite3DbMallocZero(sqlite3*, u64);
 void *sqlite3DbMallocRaw(sqlite3*, u64);
@@ -4480,7 +4479,6 @@ void *sqlite3DbRealloc(sqlite3 *, void *, u64);
 void sqlite3DbFree(sqlite3*, void*);
 void sqlite3DbFreeNN(sqlite3*, void*);
 void sqlite3DbNNFreeNN(sqlite3*, void*);
-int sqlite3MallocSize(const void*);
 int sqlite3DbMallocSize(sqlite3*, const void*);
 void *sqlite3PageMalloc(int);
 void sqlite3PageFree(void*);

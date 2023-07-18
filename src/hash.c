@@ -16,48 +16,6 @@
 #include "sqlite3_rs.h"
 #include <assert.h>
 
-/* Resize the hash table so that it cantains "new_size" buckets.
-**
-** The hash table might fail to resize if sqlite3_malloc() fails or
-** if the new size is the same as the prior size.
-** Return TRUE if the resize occurs and false if not.
-*/
-static int rehash(Hash *pH, unsigned int new_size){
-  struct HashTable *new_ht;            /* The new hash table */
-  HashElem *elem, *next_elem;    /* For looping over existing elements */
-
-#if SQLITE_MALLOC_SOFT_LIMIT>0
-  if( new_size*sizeof(struct HashTable)>SQLITE_MALLOC_SOFT_LIMIT ){
-    new_size = SQLITE_MALLOC_SOFT_LIMIT/sizeof(struct HashTable);
-  }
-  if( new_size==pH->htsize ) return 0;
-#endif
-
-  /* The inability to allocates space for a larger hash table is
-  ** a performance hit but it is not a fatal error.  So mark the
-  ** allocation as a benign. Use sqlite3Malloc()/memset(0) instead of 
-  ** sqlite3MallocZero() to make the allocation, as sqlite3MallocZero()
-  ** only zeroes the requested number of bytes whereas this module will
-  ** use the actual amount of space allocated for the hash table (which
-  ** may be larger than the requested amount).
-  */
-  sqlite3BeginBenignMalloc();
-  new_ht = (struct HashTable *)sqlite3Malloc( new_size*sizeof(struct HashTable) );
-  sqlite3EndBenignMalloc();
-
-  if( new_ht==0 ) return 0;
-  sqlite3_free(pH->ht);
-  pH->ht = new_ht;
-  pH->htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct HashTable);
-  memset(new_ht, 0, new_size*sizeof(struct HashTable));
-  for(elem=pH->first, pH->first=0; elem; elem = next_elem){
-    unsigned int h = strHash(elem->pKey) % new_size;
-    next_elem = elem->next;
-    insertElement(pH, &new_ht[h], elem);
-  }
-  return 1;
-}
-
 /* Insert an element into the hash table pH.  The key is pKey
 ** and the data is "data".
 **

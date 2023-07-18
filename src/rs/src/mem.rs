@@ -82,4 +82,7 @@ extern "C" {
     pub fn sqlite3_realloc64(p: *mut c_void, n: u64) -> *mut c_void;
     pub fn sqlite3_free(p: *mut c_void);
     pub fn sqlite3_msize(p: *mut c_void) -> u64;
+
+    pub fn sqlite3MallocSize(p: *const c_void) -> c_int;
+    pub fn sqlite3Malloc(n: u64) -> *mut c_void;
 }

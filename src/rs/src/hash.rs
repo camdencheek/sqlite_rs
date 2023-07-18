@@ -1,8 +1,12 @@
-use std::ptr;
+use std::{mem::size_of, ptr};
 
-use crate::{mem::sqlite3_free, sqlite3StrICmp, util::strings::UpperToLower};
+use crate::{
+    mem::{sqlite3Malloc, sqlite3MallocSize, sqlite3_free},
+    sqlite3StrICmp,
+    util::strings::UpperToLower,
+};
 
-use libc::{c_char, c_uchar, c_uint, c_void};
+use libc::{c_char, c_int, c_uchar, c_uint, c_void};
 
 /* A complete hash table is an instance of the following structure.
 ** The internals of this structure are intended to be opaque -- client
@@ -224,4 +228,54 @@ pub unsafe extern "C" fn removeElementGivenHash(
         assert!((*pH).count == 0);
         sqlite3HashClear(pH);
     }
+}
+
+/* Resize the hash table so that it cantains "new_size" buckets.
+**
+** The hash table might fail to resize if sqlite3_malloc() fails or
+** if the new size is the same as the prior size.
+** Return TRUE if the resize occurs and false if not.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn rehash(pH: *mut Hash, new_size: c_uint) -> c_int {
+    // TODO: support SQLITE_MALLOC_SOFT_LIMIT
+    // #if SQLITE_MALLOC_SOFT_LIMIT>0
+    //   if( new_size*sizeof(struct HashTable)>SQLITE_MALLOC_SOFT_LIMIT ){
+    //     new_size = SQLITE_MALLOC_SOFT_LIMIT/sizeof(struct HashTable);
+    //   }
+    //   if( new_size==pH->htsize ) return 0;
+    // #endif
+
+    /* The inability to allocates space for a larger hash table is
+     ** a performance hit but it is not a fatal error.  So mark the
+     ** allocation as a benign. Use sqlite3Malloc()/memset(0) instead of
+     ** sqlite3MallocZero() to make the allocation, as sqlite3MallocZero()
+     ** only zeroes the requested number of bytes whereas this module will
+     ** use the actual amount of space allocated for the hash table (which
+     ** may be larger than the requested amount).
+     */
+    // TODO: support BenignMalloc
+    // sqlite3BeginBenignMalloc();
+    let mut new_ht =
+        sqlite3Malloc(new_size as u64 * size_of::<HashTable>() as u64) as *mut HashTable;
+    // sqlite3EndBenignMalloc();
+
+    if new_ht.is_null() {
+        return 0;
+    }
+    sqlite3_free((*pH).ht as *mut c_void);
+    (*pH).ht = new_ht;
+    let new_size =
+        sqlite3MallocSize(new_ht as *mut c_void) as c_uint / size_of::<HashTable>() as c_uint;
+    (*pH).htsize = new_size;
+    new_ht.write_bytes(0, new_size as usize);
+    let mut elem = (*pH).first;
+    (*pH).first = ptr::null_mut();
+    while !elem.is_null() {
+        let h = strHash((*elem).pKey) % new_size;
+        let next_elem = (*elem).next;
+        insertElement(pH, new_ht.add(h as usize), elem);
+        elem = next_elem;
+    }
+    return 1;
 }
