@@ -280,6 +280,20 @@ pub unsafe extern "C" fn rehash(pH: *mut Hash, new_size: c_uint) -> c_int {
     return 1;
 }
 
+/* Insert an element into the hash table pH.  The key is pKey
+** and the data is "data".
+**
+** If no element exists with a matching key, then a new
+** element is created and NULL is returned.
+**
+** If another element already exists with the same key, then the
+** new data replaces the old data and the old data is returned.
+** The key is not copied in this instance.  If a malloc fails, then
+** the new data is returned and the hash table is unchanged.
+**
+** If the "data" parameter to this function is NULL, then the
+** element corresponding to "key" is removed from the hash table.
+*/
 #[no_mangle]
 pub unsafe extern "C" fn sqlite3HashInsert(
     pH: *mut Hash,
@@ -329,4 +343,39 @@ pub unsafe extern "C" fn sqlite3HashInsert(
         new_elem,
     );
     return ptr::null_mut();
+}
+
+/*
+** Macros for looping over all elements of a hash table.  The idiom is
+** like this:
+**
+**   Hash h;
+**   HashElem *p;
+**   ...
+**   for(p=sqliteHashFirst(&h); p; p=sqliteHashNext(p)){
+**     SomeStructure *pData = sqliteHashData(p);
+**     // do something with pData
+**   }
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqliteHashFirst(pH: *const Hash) -> *mut HashElem {
+    return (*pH).first;
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqliteHashNext(elem: *const HashElem) -> *mut HashElem {
+    return (*elem).next;
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqliteHashData(elem: *const HashElem) -> *mut c_void {
+    return (*elem).data;
+}
+
+/*
+** Number of entries in a hash table
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqliteHashCount(pH: *const Hash) -> c_uint {
+    return (*pH).count;
 }

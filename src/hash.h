@@ -17,27 +17,4 @@
 
 #include "sqlite3_rs.h"
 
-/*
-** Macros for looping over all elements of a hash table.  The idiom is
-** like this:
-**
-**   Hash h;
-**   HashElem *p;
-**   ...
-**   for(p=sqliteHashFirst(&h); p; p=sqliteHashNext(p)){
-**     SomeStructure *pData = sqliteHashData(p);
-**     // do something with pData
-**   }
-*/
-#define sqliteHashFirst(H)  ((H)->first)
-#define sqliteHashNext(E)   ((E)->next)
-#define sqliteHashData(E)   ((E)->data)
-/* #define sqliteHashKey(E)    ((E)->pKey) // NOT USED */
-/* #define sqliteHashKeysize(E) ((E)->nKey)  // NOT USED */
-
-/*
-** Number of entries in a hash table
-*/
-#define sqliteHashCount(H)  ((H)->count)
-
 #endif /* SQLITE_HASH_H */
