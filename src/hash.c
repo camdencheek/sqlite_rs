@@ -58,40 +58,6 @@ static int rehash(Hash *pH, unsigned int new_size){
   return 1;
 }
 
-/* Remove a single entry from the hash table given a pointer to that
-** element and a hash on the element's key.
-*/
-static void removeElementGivenHash(
-  Hash *pH,         /* The pH containing "elem" */
-  HashElem* elem,   /* The element to be removed from the pH */
-  unsigned int h    /* Hash value for the element */
-){
-  struct HashTable *pEntry;
-  if( elem->prev ){
-    elem->prev->next = elem->next; 
-  }else{
-    pH->first = elem->next;
-  }
-  if( elem->next ){
-    elem->next->prev = elem->prev;
-  }
-  if( pH->ht ){
-    pEntry = &pH->ht[h];
-    if( pEntry->chain==elem ){
-      pEntry->chain = elem->next;
-    }
-    assert( pEntry->count>0 );
-    pEntry->count--;
-  }
-  sqlite3_free( elem );
-  pH->count--;
-  if( pH->count==0 ){
-    assert( pH->first==0 );
-    assert( pH->count==0 );
-    sqlite3HashClear(pH);
-  }
-}
-
 /* Insert an element into the hash table pH.  The key is pKey
 ** and the data is "data".
 **

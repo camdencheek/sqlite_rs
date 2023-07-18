@@ -188,3 +188,40 @@ pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char)
     assert!(!pKey.is_null());
     return (*findElementWithHash(hash, pKey, ptr::null_mut())).data;
 }
+
+/* Remove a single entry from the hash table given a pointer to that
+** element and a hash on the element's key.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn removeElementGivenHash(
+    pH: *mut Hash,       /* The pH containing "elem" */
+    elem: *mut HashElem, /* The element to be removed from the pH */
+    h: c_uint,           /* Hash value for the element */
+) {
+    if !(*elem).prev.is_null() {
+        (*(*elem).prev).next = (*elem).next;
+    } else {
+        (*pH).first = (*elem).next;
+    }
+
+    if !(*elem).next.is_null() {
+        (*(*elem).next).prev = (*elem).prev;
+    }
+
+    if !(*pH).ht.is_null() {
+        let pEntry = (*pH).ht.add(h as usize);
+        // pointer comparison, not value comparison
+        if (*pEntry).chain as usize == elem as usize {
+            (*pEntry).chain = (*elem).next;
+        }
+        assert!((*pEntry).count > 0);
+        (*pEntry).count -= 1;
+    }
+    sqlite3_free(elem as *mut c_void);
+    (*pH).count -= 1;
+    if (*pH).count == 0 {
+        assert!((*pH).first.is_null());
+        assert!((*pH).count == 0);
+        sqlite3HashClear(pH);
+    }
+}
