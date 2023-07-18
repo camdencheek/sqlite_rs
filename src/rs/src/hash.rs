@@ -91,6 +91,42 @@ impl Hash {
         }
         return 1;
     }
+
+    /* This function (for internal use only) locates an element in an
+     ** hash table that matches the given key.  If no element is found,
+     ** a pointer to a static null element with HashElem.data==0 is returned.
+     ** If pH is not NULL, then the hash for this key is written to *pH.
+     */
+    unsafe fn findElementWithHash(&self, key: *const c_char, hash: *mut c_uint) -> *mut HashElem {
+        let mut elem: *mut HashElem = ptr::null_mut();
+        let mut count: c_uint = 0;
+        let mut h: c_uint = 0;
+
+        if !self.ht.is_null() {
+            h = strHash(key) % self.htsize;
+            let entry = self.ht.add(h as usize);
+            elem = (*entry).chain;
+            count = (*entry).count;
+        } else {
+            h = 0;
+            elem = self.first;
+            count = self.count;
+        }
+
+        if !hash.is_null() {
+            *hash = h;
+        }
+
+        while count > 0 {
+            assert!(!elem.is_null());
+            if sqlite3StrICmp((*elem).key, key) == 0 {
+                return elem;
+            }
+            elem = (*elem).next;
+            count -= 1;
+        }
+        return &mut NULL_ELEMENT as *mut HashElem;
+    }
 }
 
 #[repr(C)]
@@ -192,47 +228,6 @@ static mut NULL_ELEMENT: HashElem = HashElem {
     key: ptr::null(),
 };
 
-/* This function (for internal use only) locates an element in an
-** hash table that matches the given key.  If no element is found,
-** a pointer to a static null element with HashElem.data==0 is returned.
-** If pH is not NULL, then the hash for this key is written to *pH.
-*/
-#[no_mangle]
-unsafe extern "C" fn findElementWithHash(
-    hash: *const Hash,
-    pKey: *const c_char,
-    pHash: *mut c_uint,
-) -> *mut HashElem {
-    let mut elem: *mut HashElem = ptr::null_mut();
-    let mut count: c_uint = 0;
-    let mut h: c_uint = 0;
-
-    if !(*hash).ht.is_null() {
-        h = strHash(pKey) % (*hash).htsize;
-        let pEntry = (*hash).ht.add(h as usize);
-        elem = (*pEntry).chain;
-        count = (*pEntry).count;
-    } else {
-        h = 0;
-        elem = (*hash).first;
-        count = (*hash).count;
-    }
-
-    if !pHash.is_null() {
-        *pHash = h;
-    }
-
-    while count > 0 {
-        assert!(!elem.is_null());
-        if sqlite3StrICmp((*elem).key, pKey) == 0 {
-            return elem;
-        }
-        elem = (*elem).next;
-        count -= 1;
-    }
-    return &mut NULL_ELEMENT as *mut HashElem;
-}
-
 /* Attempt to locate an element of the hash table pH with a key
 ** that matches pKey.  Return the data for this element if it is
 ** found, or NULL if there is no match.
@@ -241,7 +236,11 @@ unsafe extern "C" fn findElementWithHash(
 pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char) -> *mut c_void {
     assert!(!hash.is_null());
     assert!(!pKey.is_null());
-    return (*findElementWithHash(hash, pKey, ptr::null_mut())).data;
+    return (*hash
+        .as_ref()
+        .unwrap()
+        .findElementWithHash(pKey, ptr::null_mut()))
+    .data;
 }
 
 /* Remove a single entry from the hash table given a pointer to that
@@ -304,7 +303,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     assert!(!pH.is_null());
     assert!(!pKey.is_null());
     let mut h: c_uint = 0;
-    let elem = findElementWithHash(pH, pKey, &mut h);
+    let elem = pH.as_ref().unwrap().findElementWithHash(pKey, &mut h);
     if !(*elem).data.is_null() {
         let old_data = (*elem).data;
         if data.is_null() {
