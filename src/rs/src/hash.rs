@@ -1,5 +1,6 @@
 use std::{
     alloc::{alloc, dealloc, Layout},
+    ffi::CStr,
     mem::size_of,
     ptr,
 };
@@ -90,7 +91,7 @@ impl Hash {
         let mut elem = self.first;
         self.first = ptr::null_mut();
         while !elem.is_null() {
-            let h = strHash((*elem).key) % new_size;
+            let h = strHash((*elem).key.as_ref().unwrap()) % new_size;
             let next_elem = (*elem).next;
             self.insert_element(new_ht.add(h as usize), elem);
             elem = next_elem;
@@ -138,7 +139,7 @@ impl Hash {
      ** a pointer to a static null element with HashElem.data==0 is returned.
      ** If pH is not NULL, then the hash for this key is written to *pH.
      */
-    unsafe fn find_element_with_hash(&self, key: *const c_char, hash: *mut u32) -> *mut HashElem {
+    unsafe fn find_element_with_hash(&self, key: &CStr, hash: *mut u32) -> Option<*mut HashElem> {
         let mut elem: *mut HashElem = ptr::null_mut();
         let mut count: c_uint = 0;
         let mut h: u32 = 0;
@@ -160,13 +161,13 @@ impl Hash {
 
         while count > 0 {
             assert!(!elem.is_null());
-            if sqlite3StrICmp((*elem).key, key) == 0 {
-                return elem;
+            if sqlite3StrICmp((*elem).key.as_ref().unwrap().as_ptr(), key.as_ptr()) == 0 {
+                return Some(elem);
             }
             elem = (*elem).next;
             count -= 1;
         }
-        return &mut NULL_ELEMENT as *mut HashElem;
+        None
     }
     /* Link pNew element into the hash table pH.  If pEntry!=0 then also
      ** insert pNew into the pEntry hash bucket.
@@ -213,12 +214,12 @@ pub struct HashTable {
 ** Again, this structure is intended to be opaque, but it can't really
 ** be opaque because it is used by macros.
 */
-#[repr(C)]
 pub struct HashElem {
     next: *mut HashElem,
     prev: *mut HashElem,
     data: *mut c_void,
-    key: *const c_char,
+    // Static lifetime because key lifetimes are guaranteed to outlive the Hash.
+    key: *const CStr,
 }
 
 #[no_mangle]
@@ -242,29 +243,17 @@ pub unsafe extern "C" fn sqlite3HashClear(hash: *mut Hash) {
     (*hash).count = 0;
 }
 
-unsafe fn strHash(mut z: *const c_char) -> u32 {
+unsafe fn strHash(z: &CStr) -> u32 {
     let mut h: u32 = 0;
-    loop {
-        let c = *z as c_uchar;
-        if c == 0 {
-            break;
-        }
+    for c in z.to_bytes() {
         /* Knuth multiplicative hashing.  (Sorting & Searching, p. 510).
          ** 0x9e3779b1 is 2654435761 which is the closest prime number to
          ** (2**32)*golden_ratio, where golden_ratio = (sqrt(5) - 1)/2. */
-        h += UpperToLower[c as usize] as c_uint;
+        h += UpperToLower[*c as usize] as c_uint;
         h *= 0x9e3779b1;
-        z = z.add(1);
     }
     return h;
 }
-
-static mut NULL_ELEMENT: HashElem = HashElem {
-    next: ptr::null_mut(),
-    prev: ptr::null_mut(),
-    data: ptr::null_mut(),
-    key: ptr::null(),
-};
 
 /* Attempt to locate an element of the hash table pH with a key
 ** that matches pKey.  Return the data for this element if it is
@@ -274,11 +263,10 @@ static mut NULL_ELEMENT: HashElem = HashElem {
 pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char) -> *mut c_void {
     assert!(!hash.is_null());
     assert!(!pKey.is_null());
-    return (*hash
-        .as_ref()
+    hash.as_ref()
         .unwrap()
-        .find_element_with_hash(pKey, ptr::null_mut()))
-    .data;
+        .find_element_with_hash(CStr::from_ptr(pKey), ptr::null_mut())
+        .map_or(ptr::null_mut(), |elem| (*elem).data)
 }
 
 /* Insert an element into the hash table pH.  The key is pKey
@@ -301,16 +289,17 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     pKey: *const c_char,
     data: *mut c_void,
 ) -> *mut c_void {
-    assert!(!pH.is_null());
     assert!(!pKey.is_null());
+    let pKey = CStr::from_ptr(pKey);
+    let pH = pH.as_mut().unwrap();
+
     let mut h: u32 = 0;
-    let elem = pH.as_ref().unwrap().find_element_with_hash(pKey, &mut h);
-    if !(*elem).data.is_null() {
+    let elem = pH.find_element_with_hash(pKey, &mut h);
+    if elem.is_some() && !(*elem.unwrap()).data.is_null() {
+        let elem = elem.unwrap();
         let old_data = (*elem).data;
         if data.is_null() {
-            pH.as_mut()
-                .unwrap()
-                .remove_element_given_hash(Box::from_raw(elem), h);
+            pH.remove_element_given_hash(Box::from_raw(elem), h);
         } else {
             (*elem).data = data;
             (*elem).key = pKey;
@@ -329,14 +318,14 @@ pub unsafe extern "C" fn sqlite3HashInsert(
 
     (*new_elem).key = pKey;
     (*new_elem).data = data;
-    (*pH).count += 1;
+    pH.count += 1;
     if (*pH).count >= 10 && (*pH).count > 2 * (*pH).htsize {
-        if pH.as_mut().unwrap().rehash((*pH).count as usize * 2) != 0 {
+        if pH.rehash((*pH).count as usize * 2) != 0 {
             assert!((*pH).htsize > 0);
             h = strHash(pKey) % (*pH).htsize;
         }
     }
-    pH.as_mut().unwrap().insert_element(
+    pH.insert_element(
         if (*pH).ht.is_null() {
             ptr::null_mut()
         } else {
