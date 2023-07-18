@@ -203,8 +203,7 @@ unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, new: 
     }
 }
 
-#[no_mangle]
-unsafe extern "C" fn strHash(mut z: *const c_char) -> c_uint {
+unsafe fn strHash(mut z: *const c_char) -> c_uint {
     let mut h: c_uint = 0;
     loop {
         let c = *z as c_uchar;
