@@ -54,6 +54,50 @@ impl Default for Hash {
 }
 
 impl Hash {
+    pub unsafe fn insert(&mut self, key: &CStr, data: *mut c_void) -> *mut c_void {
+        let mut h: u32 = 0;
+        let elem = self.find_element_with_hash(key, &mut h);
+        if elem.is_some() && !(*elem.unwrap()).data.is_null() {
+            let elem = elem.unwrap();
+            let old_data = (*elem).data;
+            if data.is_null() {
+                self.remove_element_given_hash(Box::from_raw(elem), h);
+            } else {
+                (*elem).data = data;
+                (*elem).key = key;
+            }
+            return old_data;
+        }
+
+        if data.is_null() {
+            return ptr::null_mut();
+        }
+
+        let new_elem = sqlite3Malloc(size_of::<HashElem>() as u64) as *mut HashElem;
+        if new_elem.is_null() {
+            return data;
+        }
+
+        (*new_elem).key = key;
+        (*new_elem).data = data;
+        self.count += 1;
+        if self.count >= 10 && self.count > 2 * self.htsize {
+            if self.rehash(self.count as usize * 2) != 0 {
+                assert!(self.htsize > 0);
+                h = strHash(key) % self.htsize;
+            }
+        }
+        self.insert_element(
+            if self.ht.is_null() {
+                ptr::null_mut()
+            } else {
+                self.ht.add(h as usize)
+            },
+            new_elem,
+        );
+        return ptr::null_mut();
+    }
+
     unsafe fn rehash(&mut self, new_size: usize) -> c_int {
         // TODO: support SQLITE_MALLOC_SOFT_LIMIT
         // #if SQLITE_MALLOC_SOFT_LIMIT>0
@@ -293,47 +337,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     let pKey = CStr::from_ptr(pKey);
     let pH = pH.as_mut().unwrap();
 
-    let mut h: u32 = 0;
-    let elem = pH.find_element_with_hash(pKey, &mut h);
-    if elem.is_some() && !(*elem.unwrap()).data.is_null() {
-        let elem = elem.unwrap();
-        let old_data = (*elem).data;
-        if data.is_null() {
-            pH.remove_element_given_hash(Box::from_raw(elem), h);
-        } else {
-            (*elem).data = data;
-            (*elem).key = pKey;
-        }
-        return old_data;
-    }
-
-    if data.is_null() {
-        return ptr::null_mut();
-    }
-
-    let new_elem = sqlite3Malloc(size_of::<HashElem>() as u64) as *mut HashElem;
-    if new_elem.is_null() {
-        return data;
-    }
-
-    (*new_elem).key = pKey;
-    (*new_elem).data = data;
-    pH.count += 1;
-    if (*pH).count >= 10 && (*pH).count > 2 * (*pH).htsize {
-        if pH.rehash((*pH).count as usize * 2) != 0 {
-            assert!((*pH).htsize > 0);
-            h = strHash(pKey) % (*pH).htsize;
-        }
-    }
-    pH.insert_element(
-        if (*pH).ht.is_null() {
-            ptr::null_mut()
-        } else {
-            (*pH).ht.add(h as usize)
-        },
-        new_elem,
-    );
-    return ptr::null_mut();
+    pH.insert(pKey, data)
 }
 
 /*
