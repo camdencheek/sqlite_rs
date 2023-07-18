@@ -87,7 +87,7 @@ pub unsafe extern "C" fn sqlite3HashClear(hash: *mut Hash) {
 ** insert pNew into the pEntry hash bucket.
 */
 #[no_mangle]
-pub unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, new: *mut HashElem) {
+unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, new: *mut HashElem) {
     let mut head: *mut HashElem = std::ptr::null_mut();
     if !entry.is_null() {
         if (*entry).count > 0 {
@@ -117,7 +117,7 @@ pub unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, n
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn strHash(mut z: *const c_char) -> c_uint {
+unsafe extern "C" fn strHash(mut z: *const c_char) -> c_uint {
     let mut h: c_uint = 0;
     loop {
         let c = *z as c_uchar;
@@ -147,7 +147,7 @@ static mut NULL_ELEMENT: HashElem = HashElem {
 ** If pH is not NULL, then the hash for this key is written to *pH.
 */
 #[no_mangle]
-pub unsafe extern "C" fn findElementWithHash(
+unsafe extern "C" fn findElementWithHash(
     hash: *const Hash,
     pKey: *const c_char,
     pHash: *mut c_uint,
@@ -197,7 +197,7 @@ pub unsafe extern "C" fn sqlite3HashFind(hash: *const Hash, pKey: *const c_char)
 ** element and a hash on the element's key.
 */
 #[no_mangle]
-pub unsafe extern "C" fn removeElementGivenHash(
+unsafe extern "C" fn removeElementGivenHash(
     pH: *mut Hash,       /* The pH containing "elem" */
     elem: *mut HashElem, /* The element to be removed from the pH */
     h: c_uint,           /* Hash value for the element */
@@ -237,7 +237,7 @@ pub unsafe extern "C" fn removeElementGivenHash(
 ** Return TRUE if the resize occurs and false if not.
 */
 #[no_mangle]
-pub unsafe extern "C" fn rehash(pH: *mut Hash, new_size: c_uint) -> c_int {
+unsafe extern "C" fn rehash(pH: *mut Hash, new_size: c_uint) -> c_int {
     // TODO: support SQLITE_MALLOC_SOFT_LIMIT
     // #if SQLITE_MALLOC_SOFT_LIMIT>0
     //   if( new_size*sizeof(struct HashTable)>SQLITE_MALLOC_SOFT_LIMIT ){
