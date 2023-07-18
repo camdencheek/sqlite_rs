@@ -53,7 +53,7 @@ impl Default for Hash {
 }
 
 impl Hash {
-    unsafe fn rehash(&mut self, new_size: c_uint) -> c_int {
+    unsafe fn rehash(&mut self, new_size: usize) -> c_int {
         // TODO: support SQLITE_MALLOC_SOFT_LIMIT
         // #if SQLITE_MALLOC_SOFT_LIMIT>0
         //   if( new_size*sizeof(struct HashTable)>SQLITE_MALLOC_SOFT_LIMIT ){
@@ -73,7 +73,7 @@ impl Hash {
         // TODO: support BenignMalloc
         // sqlite3BeginBenignMalloc();
         let new_ht = alloc(Layout::from_size_align_unchecked(
-            new_size as usize * size_of::<HashTable>(),
+            new_size * size_of::<HashTable>(),
             8,
         )) as *mut HashTable;
         // sqlite3EndBenignMalloc();
@@ -104,7 +104,7 @@ impl Hash {
     unsafe fn remove_element_given_hash(
         &mut self,
         elem: *mut HashElem, /* The element to be removed from the pH */
-        h: c_uint,           /* Hash value for the element */
+        h: u32,              /* Hash value for the element */
     ) {
         if !(*elem).prev.is_null() {
             (*(*elem).prev).next = (*elem).next;
@@ -139,14 +139,10 @@ impl Hash {
      ** a pointer to a static null element with HashElem.data==0 is returned.
      ** If pH is not NULL, then the hash for this key is written to *pH.
      */
-    unsafe fn find_element_with_hash(
-        &self,
-        key: *const c_char,
-        hash: *mut c_uint,
-    ) -> *mut HashElem {
+    unsafe fn find_element_with_hash(&self, key: *const c_char, hash: *mut u32) -> *mut HashElem {
         let mut elem: *mut HashElem = ptr::null_mut();
         let mut count: c_uint = 0;
-        let mut h: c_uint = 0;
+        let mut h: u32 = 0;
 
         if !self.ht.is_null() {
             h = strHash(key) % self.htsize;
@@ -247,8 +243,8 @@ pub unsafe extern "C" fn sqlite3HashClear(hash: *mut Hash) {
     (*hash).count = 0;
 }
 
-unsafe fn strHash(mut z: *const c_char) -> c_uint {
-    let mut h: c_uint = 0;
+unsafe fn strHash(mut z: *const c_char) -> u32 {
+    let mut h: u32 = 0;
     loop {
         let c = *z as c_uchar;
         if c == 0 {
@@ -308,7 +304,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
 ) -> *mut c_void {
     assert!(!pH.is_null());
     assert!(!pKey.is_null());
-    let mut h: c_uint = 0;
+    let mut h: u32 = 0;
     let elem = pH.as_ref().unwrap().find_element_with_hash(pKey, &mut h);
     if !(*elem).data.is_null() {
         let old_data = (*elem).data;
@@ -334,7 +330,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     (*new_elem).data = data;
     (*pH).count += 1;
     if (*pH).count >= 10 && (*pH).count > 2 * (*pH).htsize {
-        if pH.as_mut().unwrap().rehash((*pH).count * 2) != 0 {
+        if pH.as_mut().unwrap().rehash((*pH).count as usize * 2) != 0 {
             assert!((*pH).htsize > 0);
             h = strHash(pKey) % (*pH).htsize;
         }
