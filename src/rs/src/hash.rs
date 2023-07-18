@@ -103,29 +103,28 @@ impl Hash {
      */
     unsafe fn remove_element_given_hash(
         &mut self,
-        elem: *mut HashElem, /* The element to be removed from the pH */
+        elem: Box<HashElem>, /* The element to be removed from the pH */
         h: u32,              /* Hash value for the element */
     ) {
-        if !(*elem).prev.is_null() {
-            (*(*elem).prev).next = (*elem).next;
+        if !elem.prev.is_null() {
+            (*elem.prev).next = (*elem).next;
         } else {
             self.first = (*elem).next;
         }
 
-        if !(*elem).next.is_null() {
-            (*(*elem).next).prev = (*elem).prev;
+        if !elem.next.is_null() {
+            (*elem.next).prev = (*elem).prev;
         }
 
         if !self.ht.is_null() {
             let entry = self.ht.add(h as usize);
             // pointer comparison, not value comparison
-            if (*entry).chain as usize == elem as usize {
+            if std::ptr::eq((*entry).chain, &*elem) {
                 (*entry).chain = (*elem).next;
             }
             assert!((*entry).count > 0);
             (*entry).count -= 1;
         }
-        sqlite3_free(elem as *mut c_void);
         self.count -= 1;
         if self.count == 0 {
             assert!(self.first.is_null());
@@ -309,7 +308,9 @@ pub unsafe extern "C" fn sqlite3HashInsert(
     if !(*elem).data.is_null() {
         let old_data = (*elem).data;
         if data.is_null() {
-            pH.as_mut().unwrap().remove_element_given_hash(elem, h);
+            pH.as_mut()
+                .unwrap()
+                .remove_element_given_hash(Box::from_raw(elem), h);
         } else {
             (*elem).data = data;
             (*elem).key = pKey;
