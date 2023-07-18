@@ -1,4 +1,5 @@
 use libc::{c_int, c_void};
+use std::alloc::GlobalAlloc;
 
 /*
 ** CAPI3REF: Memory Allocation Subsystem
@@ -85,4 +86,27 @@ extern "C" {
 
     pub fn sqlite3MallocSize(p: *const c_void) -> c_int;
     pub fn sqlite3Malloc(n: u64) -> *mut c_void;
+}
+
+pub struct SQLiteAllocator();
+
+unsafe impl GlobalAlloc for SQLiteAllocator {
+    unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
+        sqlite3_malloc64(layout.size() as u64) as *mut u8
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, _layout: std::alloc::Layout) {
+        sqlite3_free(ptr as *mut c_void)
+    }
+
+    unsafe fn realloc(
+        &self,
+        ptr: *mut u8,
+        _layout: std::alloc::Layout,
+        new_size: usize,
+    ) -> *mut u8 {
+        sqlite3_realloc64(ptr as *mut c_void, new_size as u64) as *mut u8
+    }
+
+    // Skipping alloc_zero because it looks like that's manually implemented with memset anyways.
 }
