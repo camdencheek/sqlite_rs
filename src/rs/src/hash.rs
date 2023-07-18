@@ -86,7 +86,7 @@ impl Hash {
         while !elem.is_null() {
             let h = strHash((*elem).key) % new_size;
             let next_elem = (*elem).next;
-            insertElement(self as *mut Hash, new_ht.add(h as usize), elem);
+            self.insertElement(new_ht.add(h as usize), elem);
             elem = next_elem;
         }
         return 1;
@@ -126,6 +126,37 @@ impl Hash {
             count -= 1;
         }
         return &mut NULL_ELEMENT as *mut HashElem;
+    }
+    /* Link pNew element into the hash table pH.  If pEntry!=0 then also
+     ** insert pNew into the pEntry hash bucket.
+     */
+    unsafe fn insertElement(&mut self, entry: *mut HashTable, new: *mut HashElem) {
+        let mut head: *mut HashElem = std::ptr::null_mut();
+        if !entry.is_null() {
+            if (*entry).count > 0 {
+                head = (*entry).chain;
+            }
+            (*entry).count += 1;
+            (*entry).chain = new;
+        }
+
+        if !head.is_null() {
+            (*new).next = head;
+            (*new).prev = (*head).prev;
+            if !(*head).prev.is_null() {
+                (*(*head).prev).next = new;
+            } else {
+                self.first = new;
+            }
+            (*head).prev = new;
+        } else {
+            (*new).next = self.first;
+            if !self.first.is_null() {
+                (*self.first).prev = new;
+            }
+            (*new).prev = std::ptr::null_mut();
+            self.first = new;
+        }
     }
 }
 
@@ -168,39 +199,6 @@ pub unsafe extern "C" fn sqlite3HashClear(hash: *mut Hash) {
         elem = next_elem;
     }
     (*hash).count = 0;
-}
-
-/* Link pNew element into the hash table pH.  If pEntry!=0 then also
-** insert pNew into the pEntry hash bucket.
-*/
-#[no_mangle]
-unsafe extern "C" fn insertElement(hash: *mut Hash, entry: *mut HashTable, new: *mut HashElem) {
-    let mut head: *mut HashElem = std::ptr::null_mut();
-    if !entry.is_null() {
-        if (*entry).count > 0 {
-            head = (*entry).chain;
-        }
-        (*entry).count += 1;
-        (*entry).chain = new;
-    }
-
-    if !head.is_null() {
-        (*new).next = head;
-        (*new).prev = (*head).prev;
-        if !(*head).prev.is_null() {
-            (*(*head).prev).next = new;
-        } else {
-            (*hash).first = new;
-        }
-        (*head).prev = new;
-    } else {
-        (*new).next = (*hash).first;
-        if !(*hash).first.is_null() {
-            (*(*hash).first).prev = new;
-        }
-        (*new).prev = std::ptr::null_mut();
-        (*hash).first = new;
-    }
 }
 
 unsafe fn strHash(mut z: *const c_char) -> c_uint {
@@ -332,8 +330,7 @@ pub unsafe extern "C" fn sqlite3HashInsert(
             h = strHash(pKey) % (*pH).htsize;
         }
     }
-    insertElement(
-        pH,
+    pH.as_mut().unwrap().insertElement(
         if (*pH).ht.is_null() {
             ptr::null_mut()
         } else {
