@@ -1312,7 +1312,6 @@ SRC00 = \
   $(TOP)\src\fkey.c \
   $(TOP)\src\func.c \
   $(TOP)\src\global.c \
-  $(TOP)\src\hash.c \
   $(TOP)\src\insert.c \
   $(TOP)\src\json.c \
   $(TOP)\src\legacy.c \
@@ -1989,9 +1988,6 @@ func.lo:	$(TOP)\src\func.c $(HDR)
 
 global.lo:	$(TOP)\src\global.c $(HDR)
 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\global.c
-
-hash.lo:	$(TOP)\src\hash.c $(HDR)
-	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\hash.c
 
 insert.lo:	$(TOP)\src\insert.c $(HDR)
 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\insert.c

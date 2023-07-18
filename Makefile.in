@@ -179,7 +179,7 @@ LIBOBJS0 = alter.lo analyze.lo attach.lo auth.lo \
          fts3_tokenize_vtab.lo \
          fts3_unicode.lo fts3_unicode2.lo fts3_write.lo \
 	 fts5.lo \
-         func.lo global.lo hash.lo \
+         func.lo global.lo \
          icu.lo insert.lo json.lo legacy.lo loadext.lo \
          main.lo malloc.lo mem0.lo mem1.lo mem2.lo mem3.lo mem5.lo \
          memdb.lo memjournal.lo \
@@ -230,7 +230,6 @@ SRC = \
   $(TOP)/src/fkey.c \
   $(TOP)/src/func.c \
   $(TOP)/src/global.c \
-  $(TOP)/src/hash.c \
   $(TOP)/src/hash.h \
   $(TOP)/src/hwtime.h \
   $(TOP)/src/insert.c \
@@ -907,9 +906,6 @@ func.lo:	$(TOP)/src/func.c $(HDR)
 
 global.lo:	$(TOP)/src/global.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/global.c
-
-hash.lo:	$(TOP)/src/hash.c $(HDR)
-	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/hash.c
 
 insert.lo:	$(TOP)/src/insert.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/insert.c

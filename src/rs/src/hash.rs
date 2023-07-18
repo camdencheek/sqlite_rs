@@ -279,3 +279,54 @@ pub unsafe extern "C" fn rehash(pH: *mut Hash, new_size: c_uint) -> c_int {
     }
     return 1;
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3HashInsert(
+    pH: *mut Hash,
+    pKey: *const c_char,
+    data: *mut c_void,
+) -> *mut c_void {
+    assert!(!pH.is_null());
+    assert!(!pKey.is_null());
+    let mut h: c_uint = 0;
+    let elem = findElementWithHash(pH, pKey, &mut h);
+    if !(*elem).data.is_null() {
+        let old_data = (*elem).data;
+        if data.is_null() {
+            removeElementGivenHash(pH, elem, h);
+        } else {
+            (*elem).data = data;
+            (*elem).pKey = pKey;
+        }
+        return old_data;
+    }
+
+    if data.is_null() {
+        return ptr::null_mut();
+    }
+
+    let new_elem = sqlite3Malloc(size_of::<HashElem>() as u64) as *mut HashElem;
+    if new_elem.is_null() {
+        return data;
+    }
+
+    (*new_elem).pKey = pKey;
+    (*new_elem).data = data;
+    (*pH).count += 1;
+    if (*pH).count >= 10 && (*pH).count > 2 * (*pH).htsize {
+        if rehash(pH, (*pH).count * 2) != 0 {
+            assert!((*pH).htsize > 0);
+            h = strHash(pKey) % (*pH).htsize;
+        }
+    }
+    insertElement(
+        pH,
+        if (*pH).ht.is_null() {
+            ptr::null_mut()
+        } else {
+            (*pH).ht.add(h as usize)
+        },
+        new_elem,
+    );
+    return ptr::null_mut();
+}

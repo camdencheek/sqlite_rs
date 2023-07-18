@@ -358,7 +358,6 @@ set flist {
    threads.c
    utf.c
    util.c
-   hash.c
    opcodes.c
 
    os_kv.c

@@ -18,11 +18,6 @@
 #include "sqlite3_rs.h"
 
 /*
-** Access routines.  To delete, insert a NULL pointer.
-*/
-void *sqlite3HashInsert(Hash*, const char *pKey, void *pData);
-
-/*
 ** Macros for looping over all elements of a hash table.  The idiom is
 ** like this:
 **
