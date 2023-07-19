@@ -1,4 +1,4 @@
-use cbindgen::{Config, ExportConfig, FunctionConfig, ItemType, Language, RenameRule};
+use cbindgen::{Config, EnumConfig, ExportConfig, FunctionConfig, ItemType, Language, RenameRule};
 use std::env;
 use std::path::PathBuf;
 
@@ -20,8 +20,17 @@ fn main() {
             rename_args: RenameRule::CamelCase,
             ..Default::default()
         },
+        enumeration: EnumConfig {
+            rename_variants: RenameRule::ScreamingSnakeCase,
+            prefix_with_name: true,
+            ..Default::default()
+        },
         export: ExportConfig {
-            include: vec!["sqlite3UpperToLower".into(), "Column".into()],
+            include: vec![
+                "sqlite3UpperToLower".into(),
+                "Column".into(),
+                "Coltype".into(),
+            ],
             item_types: vec![
                 ItemType::Constants,
                 ItemType::Globals,

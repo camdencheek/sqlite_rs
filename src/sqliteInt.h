@@ -2104,21 +2104,6 @@ struct Module {
   Table *pEpoTab;                      /* Eponymous table for this module */
 };
 
-/* Allowed values for Column.eCType.
-**
-** Values must match entries in the global constant arrays
-** sqlite3StdTypeLen[] and sqlite3StdType[].  Each value is one more
-** than the offset into these arrays for the corresponding name.
-** Adjust the SQLITE_N_STDTYPE value if adding or removing entries.
-*/
-#define COLTYPE_CUSTOM      0   /* Type appended to zName */
-#define COLTYPE_ANY         1
-#define COLTYPE_BLOB        2
-#define COLTYPE_INT         3
-#define COLTYPE_INTEGER     4
-#define COLTYPE_REAL        5
-#define COLTYPE_TEXT        6
-#define SQLITE_N_STDTYPE    6  /* Number of standard types */
 
 /* Allowed values for Column.colFlags.
 **

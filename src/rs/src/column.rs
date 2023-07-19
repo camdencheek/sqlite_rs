@@ -39,3 +39,23 @@ pub struct Column {
     iDflt: u16,       /* 1-based index of DEFAULT.  0 means "none" */
     colFlags: u16,    /* Boolean properties.  See COLFLAG_ defines below */
 }
+
+/* Allowed values for Column.eCType.
+**
+** Values must match entries in the global constant arrays
+** sqlite3StdTypeLen[] and sqlite3StdType[].  Each value is one more
+** than the offset into these arrays for the corresponding name.
+** Adjust the SQLITE_N_STDTYPE value if adding or removing entries.
+*/
+#[repr(C)]
+pub enum Coltype {
+    Custom = 0,
+    Any = 1,
+    Blob = 2,
+    Int = 3,
+    Integer = 4,
+    Real = 5,
+    Text = 6,
+}
+
+pub const SQLITE_N_STDTYPE: u8 = 6; /* Number of standard types */
