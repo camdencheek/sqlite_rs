@@ -246,7 +246,6 @@ impl Hash {
     }
 }
 
-#[repr(C)]
 pub struct HashTable {
     count: c_uint,        /* Number of entries with this hash */
     chain: *mut HashElem, /* Pointer to first entry with this hash */
