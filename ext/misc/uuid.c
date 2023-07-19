@@ -64,10 +64,6 @@ SQLITE_EXTENSION_INIT1
 #include <string.h>
 #include <ctype.h>
 
-#if !defined(SQLITE_ASCII) && !defined(SQLITE_EBCDIC)
-# define SQLITE_ASCII 1
-#endif
-
 /*
 ** Translate a single byte of Hex into an integer.
 ** This routine only works if h really is a valid hexadecimal
@@ -77,9 +73,6 @@ static unsigned char sqlite3UuidHexToInt(int h){
   assert( (h>='0' && h<='9') ||  (h>='a' && h<='f') ||  (h>='A' && h<='F') );
 #ifdef SQLITE_ASCII
   h += 9*(1&(h>>6));
-#endif
-#ifdef SQLITE_EBCDIC
-  h += 9*(1&~(h>>4));
 #endif
   return (unsigned char)(h & 0xf);
 }

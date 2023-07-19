@@ -23,13 +23,7 @@
 ** This is defined in tokenize.c.  We just have to import the definition.
 */
 #ifndef SQLITE_AMALGAMATION
-#ifdef SQLITE_ASCII
 #define IdChar(C)  ((sqlite3CtypeMap[(unsigned char)C]&0x46)!=0)
-#endif
-#ifdef SQLITE_EBCDIC
-extern const char sqlite3IsEbcdicIdChar[];
-#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsEbcdicIdChar[c-0x40]))
-#endif
 #endif /* SQLITE_AMALGAMATION */
 
 
@@ -195,9 +189,6 @@ int sqlite3_complete(const char *zSql){
         break;
       }
       default: {
-#ifdef SQLITE_EBCDIC
-        unsigned char c;
-#endif
         if( IdChar((u8)*zSql) ){
           /* Keywords and unquoted identifiers */
           int nId;

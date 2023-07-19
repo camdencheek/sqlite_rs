@@ -629,12 +629,7 @@ struct compareInfo {
 ** macro for fast reading of the next character in the common case where
 ** the next character is ASCII.
 */
-#if defined(SQLITE_EBCDIC)
-# define sqlite3Utf8Read(A)        (*((*A)++))
-# define Utf8Read(A)               (*(A++))
-#else
 # define Utf8Read(A)               (A[0]<0x80?*(A++):sqlite3Utf8Read(&A))
-#endif
 
 static const struct compareInfo globInfo = { '*', '?', '[', 0 };
 /* The correct SQL-92 behavior is for the LIKE operator to ignore

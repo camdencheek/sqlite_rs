@@ -499,11 +499,7 @@ static void jsonReturnJson(
 */
 static u8 jsonHexToInt(int h){
   assert( (h>='0' && h<='9') ||  (h>='a' && h<='f') ||  (h>='A' && h<='F') );
-#ifdef SQLITE_EBCDIC
-  h += 9*(1&~(h>>4));
-#else
   h += 9*(1&(h>>6));
-#endif
   return (u8)(h & 0xf);
 }
 

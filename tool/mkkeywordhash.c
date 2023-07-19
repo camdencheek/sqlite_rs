@@ -678,12 +678,6 @@ int main(int argc, char **argv){
   printf("      j = 2;\n");
   printf("      while( j<n && (z[j]&~0x20)==zKW[j] ){ j++; }\n");
   printf("#endif\n");
-  printf("#ifdef SQLITE_EBCDIC\n");
-  printf("      if( toupper(z[0])!=zKW[0] ) continue;\n");
-  printf("      if( toupper(z[1])!=zKW[1] ) continue;\n");
-  printf("      j = 2;\n");
-  printf("      while( j<n && toupper(z[j])==zKW[j] ){ j++; }\n");
-  printf("#endif\n");
   printf("      if( j<n ) continue;\n");
   for(i=0; i<nKeyword; i++){
     printf("      testcase( i==%d ); /* %s */\n",

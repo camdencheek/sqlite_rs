@@ -190,9 +190,6 @@ static int isLikeOrGlob(
   if( !sqlite3IsLikeFunction(db, pExpr, pnoCase, (char*)wc) ){
     return 0;
   }
-#ifdef SQLITE_EBCDIC
-  if( *pnoCase ) return 0;
-#endif
   assert( ExprUseXList(pExpr) );
   pList = pExpr->x.pList;
   pLeft = pList->a[1].pExpr;

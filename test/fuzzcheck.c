@@ -684,11 +684,7 @@ static void disableOom(void){
 ** character:  0..9a..fA..F
 */
 static unsigned char hexToInt(unsigned int h){
-#ifdef SQLITE_EBCDIC
-  h += 9*(1&~(h>>4));   /* EBCDIC */
-#else
   h += 9*(1&(h>>6));    /* ASCII */
-#endif
   return h & 0xf;
 }
 
