@@ -1,4 +1,4 @@
-use libc::c_char;
+use libc::{c_char, c_int};
 
 /*
 ** Information about each column of an SQL table is held in an instance
@@ -83,3 +83,47 @@ pub enum Colflag {
     Generated = 0x0060, /* Combo: _STORED, _VIRTUAL */
     Noinsert = 0x0062,  /* Combo: _HIDDEN, _STORED, _VIRTUAL */
 }
+
+/*
+** Column affinity types.
+**
+** These used to have mnemonic name like 'i' for SQLITE_AFF_INTEGER and
+** 't' for SQLITE_AFF_TEXT.  But we can save a little space and improve
+** the speed a little by numbering the values consecutively.
+**
+** But rather than start with 0 or 1, we begin with 'A'.  That way,
+** when multiple affinity types are concatenated into a string and
+** used as the P4 operand, they will be more readable.
+**
+** Note also that the numeric types are grouped together so that testing
+** for a numeric type is a single comparison.  And the BLOB type is first.
+*/
+#[repr(C)]
+pub enum SqliteAff {
+    None = 0x40,    /* '@' */
+    Blob = 0x41,    /* 'A' */
+    Text = 0x42,    /* 'B' */
+    Numeric = 0x43, /* 'C' */
+    Integer = 0x44, /* 'D' */
+    Real = 0x45,    /* 'E' */
+    Flexnum = 0x46, /* 'F' */
+}
+
+/*
+** The SQLITE_AFF_MASK values masks off the significant bits of an
+** affinity value.
+*/
+pub const SQLITE_AFF_MASK: c_int = 0x47;
+
+/*
+** Additional bit values that can be ORed with an affinity without
+** changing the affinity.
+**
+** The SQLITE_NOTNULL flag is a combination of NULLEQ and JUMPIFNULL.
+** It causes an assert() to fire if either operand to a comparison
+** operator is NULL.  It is added to certain comparison operators to
+** prove that the operands are always NOT NULL.
+*/
+pub const SQLITE_JUMPIFNULL: c_int = 0x10; /* jumps if either operand is NULL */
+pub const SQLITE_NULLEQ: c_int = 0x80; /* NULL=NULL */
+pub const SQLITE_NOTNULL: c_int = 0x90; /* Assert that operands are never NULL */

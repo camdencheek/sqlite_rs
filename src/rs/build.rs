@@ -31,6 +31,7 @@ fn main() {
                 "Column".into(),
                 "Coltype".into(),
                 "Colflag".into(),
+                "SqliteAff".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

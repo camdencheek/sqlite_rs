@@ -1214,7 +1214,6 @@ typedef struct AuthContext AuthContext;
 typedef struct AutoincInfo AutoincInfo;
 typedef struct Bitvec Bitvec;
 typedef struct CollSeq CollSeq;
-typedef struct Column Column;
 typedef struct Cte Cte;
 typedef struct CteUse CteUse;
 typedef struct Db Db;
@@ -2129,48 +2128,10 @@ struct CollSeq {
 #define SQLITE_SO_DESC      1  /* Sort in ascending order */
 #define SQLITE_SO_UNDEFINED -1 /* No sort order specified */
 
-/*
-** Column affinity types.
-**
-** These used to have mnemonic name like 'i' for SQLITE_AFF_INTEGER and
-** 't' for SQLITE_AFF_TEXT.  But we can save a little space and improve
-** the speed a little by numbering the values consecutively.
-**
-** But rather than start with 0 or 1, we begin with 'A'.  That way,
-** when multiple affinity types are concatenated into a string and
-** used as the P4 operand, they will be more readable.
-**
-** Note also that the numeric types are grouped together so that testing
-** for a numeric type is a single comparison.  And the BLOB type is first.
-*/
-#define SQLITE_AFF_NONE     0x40  /* '@' */
-#define SQLITE_AFF_BLOB     0x41  /* 'A' */
-#define SQLITE_AFF_TEXT     0x42  /* 'B' */
-#define SQLITE_AFF_NUMERIC  0x43  /* 'C' */
-#define SQLITE_AFF_INTEGER  0x44  /* 'D' */
-#define SQLITE_AFF_REAL     0x45  /* 'E' */
-#define SQLITE_AFF_FLEXNUM  0x46  /* 'F' */
 
+// TODO: move this to rust
 #define sqlite3IsNumericAffinity(X)  ((X)>=SQLITE_AFF_NUMERIC)
 
-/*
-** The SQLITE_AFF_MASK values masks off the significant bits of an
-** affinity value.
-*/
-#define SQLITE_AFF_MASK     0x47
-
-/*
-** Additional bit values that can be ORed with an affinity without
-** changing the affinity.
-**
-** The SQLITE_NOTNULL flag is a combination of NULLEQ and JUMPIFNULL.
-** It causes an assert() to fire if either operand to a comparison
-** operator is NULL.  It is added to certain comparison operators to
-** prove that the operands are always NOT NULL.
-*/
-#define SQLITE_JUMPIFNULL   0x10  /* jumps if either operand is NULL */
-#define SQLITE_NULLEQ       0x80  /* NULL=NULL */
-#define SQLITE_NOTNULL      0x90  /* Assert that operands are never NULL */
 
 /*
 ** An object of this type is created for each virtual table present in
