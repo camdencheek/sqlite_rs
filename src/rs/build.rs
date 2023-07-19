@@ -21,7 +21,7 @@ fn main() {
             ..Default::default()
         },
         export: ExportConfig {
-            include: vec!["sqlite3UpperToLower".into()],
+            include: vec!["sqlite3UpperToLower".into(), "Column".into()],
             item_types: vec![
                 ItemType::Constants,
                 ItemType::Globals,
