@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    mem::{sqlite3Malloc, sqlite3MallocSize, sqlite3_free},
+    mem::{sqlite3Malloc, sqlite3MallocSize, sqlite3_free, sqlite3_msize},
     sqlite3StrICmp,
     util::strings::UpperToLower,
 };
@@ -54,6 +54,14 @@ impl Default for Hash {
 }
 
 impl Hash {
+    // Does not include self. Only memory owned by self.
+    pub unsafe fn byte_size(&self) -> usize {
+        let mut n_bytes = 0;
+        n_bytes += self.count as usize * sqlite3_msize(self.first as *mut c_void) as usize;
+        n_bytes += sqlite3_msize(self.ht as *mut c_void) as usize;
+        n_bytes
+    }
+
     pub unsafe fn insert(&mut self, key: &CStr, data: *mut c_void) -> *mut c_void {
         let mut h: u32 = 0;
         let elem = self.find_element_with_hash(key, &mut h);
@@ -372,4 +380,10 @@ pub unsafe extern "C" fn sqliteHashData(elem: *const HashElem) -> *mut c_void {
 #[no_mangle]
 pub unsafe extern "C" fn sqliteHashCount(pH: *const Hash) -> c_uint {
     return (*pH).count;
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqliteHashByteSize(pH: *const Hash) -> c_uint {
+    let pH = pH.as_ref().unwrap();
+    pH.byte_size() as c_uint
 }

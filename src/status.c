@@ -298,18 +298,10 @@ int sqlite3_db_status(
         if( ALWAYS(pSchema!=0) ){
           HashElem *p;
 
-          // TODO: size this properly
-          // nByte += sqlite3GlobalConfig.m.xRoundup(sizeof(HashElem)) * (
-          nByte += sqlite3GlobalConfig.m.xRoundup(8*4) * (
-              pSchema->tblHash.count 
-            + pSchema->trigHash.count
-            + pSchema->idxHash.count
-            + pSchema->fkeyHash.count
-          );
-          nByte += sqlite3_msize(pSchema->tblHash.ht);
-          nByte += sqlite3_msize(pSchema->trigHash.ht);
-          nByte += sqlite3_msize(pSchema->idxHash.ht);
-          nByte += sqlite3_msize(pSchema->fkeyHash.ht);
+          nByte += sqliteHashByteSize(&pSchema->tblHash);
+          nByte += sqliteHashByteSize(&pSchema->trigHash);
+          nByte += sqliteHashByteSize(&pSchema->idxHash);
+          nByte += sqliteHashByteSize(&pSchema->fkeyHash);
 
           for(p=sqliteHashFirst(&pSchema->trigHash); p; p=sqliteHashNext(p)){
             sqlite3DeleteTrigger(db, (Trigger*)sqliteHashData(p));
