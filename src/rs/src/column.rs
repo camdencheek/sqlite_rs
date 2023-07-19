@@ -59,3 +59,27 @@ pub enum Coltype {
 }
 
 pub const SQLITE_N_STDTYPE: u8 = 6; /* Number of standard types */
+
+/* Allowed values for Column.colFlags.
+**
+** Constraints:
+**         TF_HasVirtual == COLFLAG_VIRTUAL
+**         TF_HasStored  == COLFLAG_STORED
+**         TF_HasHidden  == COLFLAG_HIDDEN
+*/
+#[repr(C)]
+pub enum Colflag {
+    Primkey = 0x0001,   /* Column is part of the primary key */
+    Hidden = 0x0002,    /* A hidden column in a virtual table */
+    Hastype = 0x0004,   /* Type name follows column name */
+    Unique = 0x0008,    /* Column def contains "UNIQUE" or "PK" */
+    Sorterref = 0x0010, /* Use sorter-refs with this column */
+    Virtual = 0x0020,   /* GENERATED ALWAYS AS ... VIRTUAL */
+    Stored = 0x0040,    /* GENERATED ALWAYS AS ... STORED */
+    Notavail = 0x0080,  /* STORED column not yet calculated */
+    Busy = 0x0100,      /* Blocks recursion on GENERATED columns */
+    Hascoll = 0x0200,   /* Has collating sequence name in zCnName */
+    Noexpand = 0x0400,  /* Omit this column when expanding "*" */
+    Generated = 0x0060, /* Combo: _STORED, _VIRTUAL */
+    Noinsert = 0x0062,  /* Combo: _HIDDEN, _STORED, _VIRTUAL */
+}

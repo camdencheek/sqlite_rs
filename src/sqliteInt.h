@@ -2105,27 +2105,6 @@ struct Module {
 };
 
 
-/* Allowed values for Column.colFlags.
-**
-** Constraints:
-**         TF_HasVirtual == COLFLAG_VIRTUAL
-**         TF_HasStored  == COLFLAG_STORED
-**         TF_HasHidden  == COLFLAG_HIDDEN
-*/
-#define COLFLAG_PRIMKEY   0x0001   /* Column is part of the primary key */
-#define COLFLAG_HIDDEN    0x0002   /* A hidden column in a virtual table */
-#define COLFLAG_HASTYPE   0x0004   /* Type name follows column name */
-#define COLFLAG_UNIQUE    0x0008   /* Column def contains "UNIQUE" or "PK" */
-#define COLFLAG_SORTERREF 0x0010   /* Use sorter-refs with this column */
-#define COLFLAG_VIRTUAL   0x0020   /* GENERATED ALWAYS AS ... VIRTUAL */
-#define COLFLAG_STORED    0x0040   /* GENERATED ALWAYS AS ... STORED */
-#define COLFLAG_NOTAVAIL  0x0080   /* STORED column not yet calculated */
-#define COLFLAG_BUSY      0x0100   /* Blocks recursion on GENERATED columns */
-#define COLFLAG_HASCOLL   0x0200   /* Has collating sequence name in zCnName */
-#define COLFLAG_NOEXPAND  0x0400   /* Omit this column when expanding "*" */
-#define COLFLAG_GENERATED 0x0060   /* Combo: _STORED, _VIRTUAL */
-#define COLFLAG_NOINSERT  0x0062   /* Combo: _HIDDEN, _STORED, _VIRTUAL */
-
 /*
 ** A "Collating Sequence" is defined by an instance of the following
 ** structure. Conceptually, a collating sequence consists of a name and

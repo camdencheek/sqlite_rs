@@ -30,6 +30,7 @@ fn main() {
                 "sqlite3UpperToLower".into(),
                 "Column".into(),
                 "Coltype".into(),
+                "Colflag".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
