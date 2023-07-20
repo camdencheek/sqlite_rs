@@ -2,6 +2,7 @@ use libc::{c_char, c_int, c_uint};
 
 use crate::expr::ExprList;
 use crate::index::Index;
+use crate::returning::Returning;
 use crate::sqlite3;
 use crate::table::Table;
 use crate::token::Token;
@@ -9,7 +10,6 @@ use crate::trigger::{Trigger, TriggerPrg};
 use crate::with::With;
 
 // TODO: define these in rust
-struct Returning;
 struct RenameToken;
 struct Vdbe;
 struct IndexedExpr;

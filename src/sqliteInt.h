@@ -2915,19 +2915,6 @@ struct AuthContext {
 #define TRIGGER_AFTER   2
 
 /*
-** Information about a RETURNING clause
-*/
-struct Returning {
-  Parse *pParse;        /* The parse that includes the RETURNING clause */
-  ExprList *pReturnEL;  /* List of expressions to return */
-  Trigger retTrig;      /* The transient trigger that implements RETURNING */
-  TriggerStep retTStep; /* The trigger step */
-  int iRetCur;          /* Transient table holding RETURNING results */
-  int nRetCol;          /* Number of in pReturnEL after expansion */
-  int iRetReg;          /* Register array for holding a row of RETURNING */
-};
-
-/*
 ** An objected used to accumulate the text of a string where we
 ** do not necessarily know how big the string will be in the end.
 */

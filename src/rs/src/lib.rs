@@ -12,6 +12,7 @@ mod index;
 mod mem;
 mod module;
 mod parse;
+mod returning;
 mod savepoint;
 mod schema;
 mod select;
