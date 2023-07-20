@@ -4081,27 +4081,6 @@ struct With {
   Cte a[1];               /* For each CTE in the WITH clause.... */
 };
 
-/*
-** The Cte object is not guaranteed to persist for the entire duration
-** of code generation.  (The query flattener or other parser tree
-** edits might delete it.)  The following object records information
-** about each Common Table Expression that must be preserved for the
-** duration of the parse.
-**
-** The CteUse objects are freed using sqlite3ParserAddCleanup() rather
-** than sqlite3SelectDelete(), which is what enables them to persist
-** until the end of code generation.
-*/
-struct CteUse {
-  int nUse;              /* Number of users of this CTE */
-  int addrM9e;           /* Start of subroutine to compute materialization */
-  int regRtn;            /* Return address register for addrM9e subroutine */
-  int iCur;              /* Ephemeral table holding the materialization */
-  LogEst nRowEst;        /* Estimated number of rows in the table */
-  u8 eM10d;              /* The MATERIALIZED flag */
-};
-
-
 #ifdef SQLITE_DEBUG
 /*
 ** An instance of the TreeView object is used for printing the content of

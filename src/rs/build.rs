@@ -34,6 +34,7 @@ fn main() {
                 "SqliteAff".into(),
                 "LogEst".into(),
                 "CollSeq".into(),
+                "CteUse".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
