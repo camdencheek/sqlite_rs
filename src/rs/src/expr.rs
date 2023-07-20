@@ -6,7 +6,6 @@ type ynVar = i16;
 struct AggInfo;
 struct Table;
 struct Window;
-struct ExprList;
 struct Select;
 
 /*
@@ -148,4 +147,83 @@ pub union Expr_y {
 pub struct Expr_sub {
     iAddr: c_int,     /* Subroutine entry address */
     regReturn: c_int, /* Register used to hold return address */
+}
+
+/*
+** A list of expressions.  Each expression may optionally have a
+** name.  An expr/name combination can be used in several ways, such
+** as the list of "expr AS ID" fields following a "SELECT" or in the
+** list of "ID = expr" items in an UPDATE.  A list of expressions can
+** also be used as the argument to a function, in which case the a.zName
+** field is not used.
+**
+** In order to try to keep memory usage down, the Expr.a.zEName field
+** is used for multiple purposes:
+**
+**     eEName          Usage
+**    ----------       -------------------------
+**    ENAME_NAME       (1) the AS of result set column
+**                     (2) COLUMN= of an UPDATE
+**
+**    ENAME_TAB        DB.TABLE.NAME used to resolve names
+**                     of subqueries
+**
+**    ENAME_SPAN       Text of the original result set
+**                     expression.
+*/
+/// This is defined manually because cbindgen doesn't
+/// support variable-length array fields.
+///
+/// cbindgen:ignore
+#[repr(C)]
+pub struct ExprList {
+    nExpr: c_int,
+    nAlloc: c_int,
+    a: [ExprList_item],
+}
+
+/* For each expression in the list */
+#[repr(C)]
+pub struct ExprList_item {
+    pExpr: *mut Expr,
+    zEName: *mut c_char,
+    fg: ExprList_item_fg,
+    u: ExprList_item_u,
+}
+
+#[repr(C)]
+pub struct ExprList_item_fg {
+    sortFlags: u8, /* Mask of KEYINFO_ORDER_* flags */
+    // TODO: make these smaller
+    // unsigned eEName :2;
+    // unsigned done :1;
+    // unsigned reusable :1;
+    // unsigned bSorterRef :1;
+    // unsigned bNulls :1;
+    // unsigned bUsed :1;
+    // unsigned bUsingTerm:1;
+    // unsigned bNoExpand: 1;
+    eEName: u8,     /* Meaning of zEName */
+    done: u8,       /* Indicates when processing is finished */
+    reusable: u8,   /* Constant expression is reusable */
+    bSorterRef: u8, /* Defer evaluation until after sorting */
+    bNulls: u8,     /* True if explicit "NULLS FIRST/LAST" */
+    bUsed: u8,      /* This column used in a SF_NestedFrom subquery */
+    bUsingTerm: u8, /* Term from the USING clause of a NestedFrom */
+    bNoExpand: u8,  /* Term is an auxiliary in NestedFrom and should
+                     ** not be expanded by "*" in parent queries */
+    u: ExprList_item_u,
+}
+
+#[repr(C)]
+pub struct ExprList_item_u {
+    x: ExprList_item_u_x, /* Used by any ExprList other than Parse.pConsExpr */
+    iConstExprReg: c_int, /* Register in which Expr value is cached. Used only
+                           ** by Parse.pConstExpr */
+}
+
+#[repr(C)]
+pub struct ExprList_item_u_x {
+    iOrderByCol: u16, /* For ORDER BY, column number in result set */
+    iAlias: u16,      /* Index into Parse.aAlias[] for zName */
 }

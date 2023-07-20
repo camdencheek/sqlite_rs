@@ -1,8 +1,8 @@
+use crate::expr::ExprList;
 use crate::util::log_est::LogEst;
 use libc::{c_char, c_int};
 
 // TODO: pull these into Rust
-struct ExprList;
 struct Select;
 
 /*

@@ -2,6 +2,10 @@ use cbindgen::{Config, EnumConfig, ExportConfig, FunctionConfig, ItemType, Langu
 use std::env;
 use std::path::PathBuf;
 
+const custom: &str = r#"
+typedef struct ExprList ExprList;
+"#;
+
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -15,6 +19,7 @@ fn main() {
     let config = Config {
         include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
+        after_includes: Some(custom.into()),
         function: FunctionConfig {
             // TODO: figure out why this isn't working
             rename_args: RenameRule::CamelCase,
@@ -42,6 +47,7 @@ fn main() {
                 "Token".into(),
                 "Cte".into(),
                 "Expr".into(),
+                "ExprList_item".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
