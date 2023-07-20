@@ -36,6 +36,8 @@ fn main() {
                 "CollSeq".into(),
                 "CteUse".into(),
                 "FuncDestructor".into(),
+                "IndexSample".into(),
+                "tRowcnt".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

@@ -810,12 +810,6 @@ typedef INT8_TYPE i8;              /* 1-byte signed integer */
 #define SQLITE_MAX_U32  ((((u64)1)<<32)-1)
 
 /*
-** The datatype used to store estimates of the number of rows in a
-** table or index.
-*/
-typedef u64 tRowcnt;
-
-/*
 ** Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer
 */
 #ifndef SQLITE_PTRSIZE
@@ -2527,19 +2521,6 @@ struct Index {
 */
 #define XN_ROWID     (-1)     /* Indexed column is the rowid */
 #define XN_EXPR      (-2)     /* Indexed column is an expression */
-
-/*
-** Each sample stored in the sqlite_stat4 table is represented in memory
-** using a structure of this type.  See documentation at the top of the
-** analyze.c source file for additional information.
-*/
-struct IndexSample {
-  void *p;          /* Pointer to sampled record */
-  int n;            /* Size of record in bytes */
-  tRowcnt *anEq;    /* Est. number of rows where the key equals this sample */
-  tRowcnt *anLt;    /* Est. number of rows where key is less than this sample */
-  tRowcnt *anDLt;   /* Est. number of distinct keys less than this sample */
-};
 
 /*
 ** Possible values to use within the flags argument to sqlite3GetToken().
