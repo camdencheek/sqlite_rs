@@ -3970,25 +3970,6 @@ void sqlite3SelectPopWith(Walker*, Select*);
 #define WRC_Abort       2   /* Abandon the tree walk */
 
 /*
-** A single common table expression
-*/
-struct Cte {
-  char *zName;            /* Name of this CTE */
-  ExprList *pCols;        /* List of explicit column names, or NULL */
-  Select *pSelect;        /* The definition of this CTE */
-  const char *zCteErr;    /* Error message for circular references */
-  CteUse *pUse;           /* Usage information for this CTE */
-  u8 eM10d;               /* The MATERIALIZED flag */
-};
-
-/*
-** Allowed values for the materialized flag (eM10d):
-*/
-#define M10d_Yes       0  /* AS MATERIALIZED */
-#define M10d_Any       1  /* Not specified.  Query planner's choice */
-#define M10d_No        2  /* AS NOT MATERIALIZED */
-
-/*
 ** An instance of the With object represents a WITH clause containing
 ** one or more CTEs (common table expressions).
 */

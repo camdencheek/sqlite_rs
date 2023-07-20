@@ -40,6 +40,7 @@ fn main() {
                 "tRowcnt".into(),
                 "Savepoint".into(),
                 "Token".into(),
+                "Cte".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
