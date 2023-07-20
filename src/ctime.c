@@ -387,9 +387,6 @@ static const char * const sqlite3azCompileOpt[] = {
 #ifdef SQLITE_IGNORE_FLOCK_LOCK_ERRORS
   "IGNORE_FLOCK_LOCK_ERRORS",
 #endif
-#ifdef SQLITE_INLINE_MEMCPY
-  "INLINE_MEMCPY",
-#endif
 #ifdef SQLITE_INT64_TYPE
   "INT64_TYPE",
 #endif
