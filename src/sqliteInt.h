@@ -1298,37 +1298,6 @@ struct Db {
 };
 
 /*
-** An instance of the following structure stores a database schema.
-**
-** Most Schema objects are associated with a Btree.  The exception is
-** the Schema for the TEMP databaes (sqlite3.aDb[1]) which is free-standing.
-** In shared cache mode, a single Schema object can be shared by multiple
-** Btrees that refer to the same underlying BtShared object.
-**
-** Schema objects are automatically deallocated when the last Btree that
-** references them is destroyed.   The TEMP Schema is manually freed by
-** sqlite3_close().
-*
-** A thread must be holding a mutex on the corresponding Btree in order
-** to access Schema content.  This implies that the thread must also be
-** holding a mutex on the sqlite3 connection pointer that owns the Btree.
-** For a TEMP Schema, only the connection mutex is required.
-*/
-struct Schema {
-  int schema_cookie;   /* Database schema version number for this file */
-  int iGeneration;     /* Generation counter.  Incremented with each change */
-  Hash tblHash;        /* All tables indexed by name */
-  Hash idxHash;        /* All (named) indices indexed by name */
-  Hash trigHash;       /* All triggers indexed by name */
-  Hash fkeyHash;       /* All foreign keys by referenced table name */
-  Table *pSeqTab;      /* The sqlite_sequence table used by AUTOINCREMENT */
-  u8 file_format;      /* Schema format version for this file */
-  u8 enc;              /* Text encoding used by this database */
-  u16 schemaFlags;     /* Flags associated with this schema */
-  int cache_size;      /* Number of pages to use in the cache */
-};
-
-/*
 ** These macros can be used to test, set, or clear bits in the
 ** Db.pSchema->flags field.
 */
