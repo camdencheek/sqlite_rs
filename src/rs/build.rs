@@ -38,6 +38,7 @@ fn main() {
                 "FuncDestructor".into(),
                 "IndexSample".into(),
                 "tRowcnt".into(),
+                "Savepoint".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

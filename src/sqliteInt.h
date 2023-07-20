@@ -2017,28 +2017,6 @@ struct FuncDef {
 
 
 /*
-** All current savepoints are stored in a linked list starting at
-** sqlite3.pSavepoint. The first element in the list is the most recently
-** opened savepoint. Savepoints are added to the list by the vdbe
-** OP_Savepoint instruction.
-*/
-struct Savepoint {
-  char *zName;                        /* Savepoint name (nul-terminated) */
-  i64 nDeferredCons;                  /* Number of deferred fk violations */
-  i64 nDeferredImmCons;               /* Number of deferred imm fk. */
-  Savepoint *pNext;                   /* Parent savepoint (if any) */
-};
-
-/*
-** The following are used as the second parameter to sqlite3Savepoint(),
-** and as the P1 argument to the OP_Savepoint instruction.
-*/
-#define SAVEPOINT_BEGIN      0
-#define SAVEPOINT_RELEASE    1
-#define SAVEPOINT_ROLLBACK   2
-
-
-/*
 ** Each SQLite module (virtual table definition) is defined by an
 ** instance of the following structure, stored in the sqlite3.aModule
 ** hash table.
