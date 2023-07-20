@@ -2617,42 +2617,6 @@ struct NameContext {
 #define NC_OrderAgg 0x8000000 /* Has an aggregate other than count/min/max */
 
 /*
-** An instance of the following object describes a single ON CONFLICT
-** clause in an upsert.
-**
-** The pUpsertTarget field is only set if the ON CONFLICT clause includes
-** conflict-target clause.  (In "ON CONFLICT(a,b)" the "(a,b)" is the
-** conflict-target clause.)  The pUpsertTargetWhere is the optional
-** WHERE clause used to identify partial unique indexes.
-**
-** pUpsertSet is the list of column=expr terms of the UPDATE statement. 
-** The pUpsertSet field is NULL for a ON CONFLICT DO NOTHING.  The
-** pUpsertWhere is the WHERE clause for the UPDATE and is NULL if the
-** WHERE clause is omitted.
-*/
-struct Upsert {
-  ExprList *pUpsertTarget;  /* Optional description of conflict target */
-  Expr *pUpsertTargetWhere; /* WHERE clause for partial index targets */
-  ExprList *pUpsertSet;     /* The SET clause from an ON CONFLICT UPDATE */
-  Expr *pUpsertWhere;       /* WHERE clause for the ON CONFLICT UPDATE */
-  Upsert *pNextUpsert;      /* Next ON CONFLICT clause in the list */
-  u8 isDoUpdate;            /* True for DO UPDATE.  False for DO NOTHING */
-  /* Above this point is the parse tree for the ON CONFLICT clauses.
-  ** The next group of fields stores intermediate data. */
-  void *pToFree;            /* Free memory when deleting the Upsert object */
-  /* All fields above are owned by the Upsert object and must be freed
-  ** when the Upsert is destroyed.  The fields below are used to transfer
-  ** information from the INSERT processing down into the UPDATE processing
-  ** while generating code.  The fields below are owned by the INSERT
-  ** statement and will be freed by INSERT processing. */
-  Index *pUpsertIdx;        /* UNIQUE constraint specified by pUpsertTarget */
-  SrcList *pUpsertSrc;      /* Table to be updated */
-  int regData;              /* First register holding array of VALUES */
-  int iDataCur;             /* Index of the data cursor */
-  int iIdxCur;              /* Index of the first index cursor */
-};
-
-/*
 ** Allowed values for Select.selFlags.  The "SF" prefix stands for
 ** "Select Flag".
 **
