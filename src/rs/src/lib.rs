@@ -10,6 +10,7 @@ mod hash;
 mod id;
 mod index;
 mod mem;
+mod module;
 mod savepoint;
 mod schema;
 mod select;
@@ -49,6 +50,9 @@ pub use util::varint::*;
 pub use vtable::*;
 pub use window::*;
 pub use with::*;
+
+pub struct sqlite3;
+pub struct sqlite3_vtab;
 
 use mem::SQLiteAllocator;
 
