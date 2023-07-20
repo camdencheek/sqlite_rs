@@ -2457,17 +2457,11 @@ struct OnOrUsing {
   IdList *pUsing;    /* The USING clause of a join */
 };
 
-/*
-** This object represents one or more tables that are the source of
-** content for an SQL statement.  For example, a single SrcList object
-** is used to hold the FROM clause of a SELECT statement.  SrcList also
-** represents the target tables for DELETE, INSERT, and UPDATE statements.
-**
-*/
+// Retained definition because cbindgen does not work with variable-length structs
 struct SrcList {
-  int nSrc;        /* Number of tables or subqueries in the FROM clause */
-  u32 nAlloc;      /* Number of entries allocated in a[] below */
-  SrcItem a[1];    /* One entry for each identifier on the list */
+  int nSrc;        
+  u32 nAlloc;      
+  SrcItem a[1];    
 };
 
 /*
