@@ -1,11 +1,11 @@
+use crate::agg::AggInfo;
+use crate::window::Window;
 use libc::{c_char, c_int};
 
 // TODO: compiletime option to switch this data type as defined in sqliteInt.h
 type ynVar = i16;
 
-struct AggInfo;
 struct Table;
-struct Window;
 struct Select;
 
 /*

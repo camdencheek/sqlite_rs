@@ -2489,53 +2489,6 @@ struct Index {
 #define XN_EXPR      (-2)     /* Indexed column is an expression */
 
 /*
-** An instance of this structure contains information needed to generate
-** code for a SELECT that contains aggregate functions.
-**
-** If Expr.op==TK_AGG_COLUMN or TK_AGG_FUNCTION then Expr.pAggInfo is a
-** pointer to this structure.  The Expr.iAgg field is the index in
-** AggInfo.aCol[] or AggInfo.aFunc[] of information needed to generate
-** code for that node.
-**
-** AggInfo.pGroupBy and AggInfo.aFunc.pExpr point to fields within the
-** original Select structure that describes the SELECT statement.  These
-** fields do not need to be freed when deallocating the AggInfo structure.
-*/
-struct AggInfo {
-  u8 directMode;          /* Direct rendering mode means take data directly
-                          ** from source tables rather than from accumulators */
-  u8 useSortingIdx;       /* In direct mode, reference the sorting index rather
-                          ** than the source table */
-  u16 nSortingColumn;     /* Number of columns in the sorting index */
-  int sortingIdx;         /* Cursor number of the sorting index */
-  int sortingIdxPTab;     /* Cursor number of pseudo-table */
-  int iFirstReg;          /* First register in range for aCol[] and aFunc[] */
-  ExprList *pGroupBy;     /* The group by clause */
-  struct AggInfo_col {    /* For each column used in source tables */
-    Table *pTab;             /* Source table */
-    Expr *pCExpr;            /* The original expression */
-    int iTable;              /* Cursor number of the source table */
-    i16 iColumn;             /* Column number within the source table */
-    i16 iSorterColumn;       /* Column number in the sorting index */
-  } *aCol;
-  int nColumn;            /* Number of used entries in aCol[] */
-  int nAccumulator;       /* Number of columns that show through to the output.
-                          ** Additional columns are used only as parameters to
-                          ** aggregate functions */
-  struct AggInfo_func {   /* For each aggregate function */
-    Expr *pFExpr;            /* Expression encoding the function */
-    FuncDef *pFunc;          /* The aggregate function implementation */
-    int iDistinct;           /* Ephemeral table used to enforce DISTINCT */
-    int iDistAddr;           /* Address of OP_OpenEphemeral */
-  } *aFunc;
-  int nFunc;              /* Number of entries in aFunc[] */
-  u32 selId;              /* Select to which this AggInfo belongs */
-#ifdef SQLITE_DEBUG
-  Select *pSelect;        /* SELECT statement that this AggInfo supports */
-#endif
-};
-
-/*
 ** Macros to compute aCol[] and aFunc[] register numbers.
 **
 ** These macros should not be used prior to the call to 

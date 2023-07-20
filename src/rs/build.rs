@@ -51,6 +51,7 @@ fn main() {
                 "With".into(),
                 "Window".into(),
                 "SrcItem".into(),
+                "AggInfo".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

@@ -1,3 +1,4 @@
+mod agg;
 mod coll_seq;
 mod column;
 mod cte;
@@ -13,6 +14,7 @@ mod util;
 mod window;
 mod with;
 
+pub use agg::*;
 pub use coll_seq::*;
 pub use column::*;
 pub use cte::*;
