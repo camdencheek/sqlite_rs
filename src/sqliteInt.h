@@ -1970,21 +1970,6 @@ struct sqlite3 {
 
 
 /*
-** Each SQLite module (virtual table definition) is defined by an
-** instance of the following structure, stored in the sqlite3.aModule
-** hash table.
-*/
-struct Module {
-  const sqlite3_module *pModule;       /* Callback pointers */
-  const char *zName;                   /* Name passed to create_module() */
-  int nRefModule;                      /* Number of pointers to this object */
-  void *pAux;                          /* pAux passed to create_module() */
-  void (*xDestroy)(void *);            /* Module destructor function */
-  Table *pEpoTab;                      /* Eponymous table for this module */
-};
-
-
-/*
 ** A sort order can be either ASC or DESC.
 */
 #define SQLITE_SO_ASC       0  /* Sort in ascending order */
