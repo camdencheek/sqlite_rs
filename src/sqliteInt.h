@@ -2724,68 +2724,6 @@ struct IdList {
 #define EU4_EXPR   2   /* Uses IdList.a.u4.pExpr -- NOT CURRENTLY USED */
 
 /*
-** The SrcItem object represents a single term in the FROM clause of a query.
-** The SrcList object is mostly an array of SrcItems.
-**
-** The jointype starts out showing the join type between the current table
-** and the next table on the list.  The parser builds the list this way.
-** But sqlite3SrcListShiftJoinType() later shifts the jointypes so that each
-** jointype expresses the join between the table and the previous table.
-**
-** In the colUsed field, the high-order bit (bit 63) is set if the table
-** contains more than 63 columns and the 64-th or later column is used.
-**
-** Union member validity:
-**
-**    u1.zIndexedBy          fg.isIndexedBy && !fg.isTabFunc
-**    u1.pFuncArg            fg.isTabFunc   && !fg.isIndexedBy
-**    u2.pIBIndex            fg.isIndexedBy && !fg.isCte
-**    u2.pCteUse             fg.isCte       && !fg.isIndexedBy
-*/
-struct SrcItem {
-  Schema *pSchema;  /* Schema to which this item is fixed */
-  char *zDatabase;  /* Name of database holding this table */
-  char *zName;      /* Name of the table */
-  char *zAlias;     /* The "B" part of a "A AS B" phrase.  zName is the "A" */
-  Table *pTab;      /* An SQL table corresponding to zName */
-  Select *pSelect;  /* A SELECT statement used in place of a table name */
-  int addrFillSub;  /* Address of subroutine to manifest a subquery */
-  int regReturn;    /* Register holding return address of addrFillSub */
-  int regResult;    /* Registers holding results of a co-routine */
-  struct {
-    u8 jointype;      /* Type of join between this table and the previous */
-    unsigned notIndexed :1;    /* True if there is a NOT INDEXED clause */
-    unsigned isIndexedBy :1;   /* True if there is an INDEXED BY clause */
-    unsigned isTabFunc :1;     /* True if table-valued-function syntax */
-    unsigned isCorrelated :1;  /* True if sub-query is correlated */
-    unsigned isMaterialized:1; /* This is a materialized view */
-    unsigned viaCoroutine :1;  /* Implemented as a co-routine */
-    unsigned isRecursive :1;   /* True for recursive reference in WITH */
-    unsigned fromDDL :1;       /* Comes from sqlite_schema */
-    unsigned isCte :1;         /* This is a CTE */
-    unsigned notCte :1;        /* This item may not match a CTE */
-    unsigned isUsing :1;       /* u3.pUsing is valid */
-    unsigned isOn :1;          /* u3.pOn was once valid and non-NULL */
-    unsigned isSynthUsing :1;  /* u3.pUsing is synthensized from NATURAL */
-    unsigned isNestedFrom :1;  /* pSelect is a SF_NestedFrom subquery */
-  } fg;
-  int iCursor;      /* The VDBE cursor number used to access this table */
-  union {
-    Expr *pOn;        /* fg.isUsing==0 =>  The ON clause of a join */
-    IdList *pUsing;   /* fg.isUsing==1 =>  The USING clause of a join */
-  } u3;
-  Bitmask colUsed;  /* Bit N set if column N used. Details above for N>62 */
-  union {
-    char *zIndexedBy;    /* Identifier from "INDEXED BY <zIndex>" clause */
-    ExprList *pFuncArg;  /* Arguments to table-valued-function */
-  } u1;
-  union {
-    Index *pIBIndex;  /* Index structure corresponding to u1.zIndexedBy */
-    CteUse *pCteUse;  /* CTE Usage info when fg.isCte is true */
-  } u2;
-};
-
-/*
 ** The OnOrUsing object represents either an ON clause or a USING clause.
 ** It can never be both at the same time, but it can be neither.
 */

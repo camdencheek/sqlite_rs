@@ -50,6 +50,7 @@ fn main() {
                 "ExprList_item".into(),
                 "With".into(),
                 "Window".into(),
+                "SrcItem".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
