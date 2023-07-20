@@ -61,3 +61,27 @@ pub extern "C" fn sqlite3LogEstAdd(a: LogEst, b: LogEst) -> LogEst {
         return b + X[(b - a) as usize] as i16;
     }
 }
+
+/*
+** Convert an integer into a LogEst.  In other words, compute an
+** approximation for 10*log2(x).
+*/
+#[no_mangle]
+pub const extern "C" fn sqlite3LogEst(mut x: u64) -> LogEst {
+    const A: [LogEst; 8] = [0, 2, 3, 5, 6, 7, 8, 9];
+    let mut y: LogEst = 40;
+    if x < 8 {
+        if x < 2 {
+            return 0;
+        }
+        while x < 8 {
+            y -= 10;
+            x <<= 1;
+        }
+    } else {
+        let i = 60 - x.leading_zeros();
+        y += (i * 10) as i16;
+        x >>= i
+    }
+    return A[(x & 7) as usize] + y - 10;
+}
