@@ -7,6 +7,8 @@ use crate::upsert::Upsert;
 
 use libc::c_char;
 
+pub struct TriggerPrg;
+
 /*
 ** Each trigger present in the database schema is stored as an instance of
 ** struct Trigger.

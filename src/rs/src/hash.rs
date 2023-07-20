@@ -7,8 +7,7 @@ use std::{
 
 use crate::{
     mem::{sqlite3Malloc, sqlite3MallocSize, sqlite3_free, sqlite3_msize},
-    sqlite3StrICmp,
-    util::strings::UpperToLower,
+    util::strings::{sqlite3StrICmp, UpperToLower},
 };
 
 use libc::{c_char, c_int, c_uint, c_void};

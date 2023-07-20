@@ -2825,22 +2825,6 @@ struct ParseCleanup {
   void (*xCleanup)(sqlite3*,void*);  /* Deallocation routine */
 };
 
-/*
-** An SQL parser context.  A copy of this structure is passed through
-** the parser and down into all the parser action routine in order to
-** carry around information that is global to the entire parse.
-**
-** The structure is divided into two parts.  When the parser and code
-** generate call themselves recursively, the first part of the structure
-** is constant but the second part is reset at the beginning and end of
-** each recursion.
-**
-** The nTableLock and aTableLock variables are only used if the shared-cache
-** feature is enabled (if sqlite3Tsd()->useSharedData is true). They are
-** used to store the set of table-locks required by the statement being
-** compiled. Function sqlite3TableLock() is used to add entries to the
-** list.
-*/
 struct Parse {
   sqlite3 *db;         /* The main database structure */
   char *zErrMsg;       /* An error message */
