@@ -5,12 +5,11 @@ use crate::index::Index;
 use crate::returning::Returning;
 use crate::sqlite3;
 use crate::table::Table;
-use crate::token::Token;
+use crate::token::{RenameToken, Token};
 use crate::trigger::{Trigger, TriggerPrg};
 use crate::with::With;
 
 // TODO: define these in rust
-struct RenameToken;
 struct Vdbe;
 struct IndexedExpr;
 struct AutoincInfo;

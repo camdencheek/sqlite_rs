@@ -677,29 +677,6 @@ void sqlite3AlterRenameColumn(
 }
 
 /*
-** Each RenameToken object maps an element of the parse tree into
-** the token that generated that element.  The parse tree element
-** might be one of:
-**
-**     *  A pointer to an Expr that represents an ID
-**     *  The name of a table column in Column.zName
-**
-** A list of RenameToken objects can be constructed during parsing.
-** Each new object is created by sqlite3RenameTokenMap().
-** As the parse tree is transformed, the sqlite3RenameTokenRemap()
-** routine is used to keep the mapping current.
-**
-** After the parse finishes, renameTokenFind() routine can be used
-** to look up the actual token value that created some element in
-** the parse tree.
-*/
-struct RenameToken {
-  const void *p;         /* Parse tree element created by token t */
-  Token t;               /* The token that created parse tree element p */
-  RenameToken *pNext;    /* Next is a list of all RenameToken objects */
-};
-
-/*
 ** The context of an ALTER TABLE RENAME COLUMN operation that gets passed
 ** down into the Walker.
 */
