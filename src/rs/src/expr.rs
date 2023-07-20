@@ -226,3 +226,27 @@ pub struct ExprList_item_u_x {
     iOrderByCol: u16, /* For ORDER BY, column number in result set */
     iAlias: u16,      /* Index into Parse.aAlias[] for zName */
 }
+
+/*
+** For each index X that has as one of its arguments either an expression
+** or the name of a virtual generated column, and if X is in scope such that
+** the value of the expression can simply be read from the index, then
+** there is an instance of this object on the Parse.pIdxExpr list.
+**
+** During code generation, while generating code to evaluate expressions,
+** this list is consulted and if a matching expression is found, the value
+** is read from the index rather than being recomputed.
+*/
+#[repr(C)]
+pub struct IndexedExpr {
+    pExpr: *mut Expr,          /* The expression contained in the index */
+    iDataCur: c_int,           /* The data cursor associated with the index */
+    iIdxCur: c_int,            /* The index cursor */
+    iIdxCol: c_int,            /* The index column that contains value of pExpr */
+    bMaybeNullRow: u8,         /* True if we need an OP_IfNullRow check */
+    aff: u8,                   /* Affinity of the pExpr expression */
+    pIENext: *mut IndexedExpr, /* Next in a list of all indexed expressions */
+
+    #[cfg(enable_explain_comments)]
+    zIdxName: *const c_char, /* Name of index, used only for bytecode comments */
+}

@@ -36,6 +36,10 @@ fn main() {
                 "omit_progress_callback".into(),
                 "SQLITE_OMIT_PROGRESS_CALLBACK".into(),
             );
+            h.insert(
+                "enable_explain_comments".into(),
+                "SQLITE_ENABLE_EXPLAIN_COMMENTS".into(),
+            );
             h
         },
         function: FunctionConfig {
