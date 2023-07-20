@@ -3,12 +3,6 @@ use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
-const custom: &str = r#"
-typedef struct ExprList ExprList;
-typedef struct With With;
-typedef struct FKey FKey;
-"#;
-
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -22,7 +16,6 @@ fn main() {
     let config = Config {
         include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
-        after_includes: Some(custom.into()),
         defines: {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());
@@ -70,7 +63,6 @@ fn main() {
                 "Cte".into(),
                 "Expr".into(),
                 "ExprList_item".into(),
-                "With".into(),
                 "Window".into(),
                 "SrcItem".into(),
                 "AggInfo".into(),

@@ -148,37 +148,12 @@ pub struct Expr_sub {
     regReturn: c_int, /* Register used to hold return address */
 }
 
-/*
-** A list of expressions.  Each expression may optionally have a
-** name.  An expr/name combination can be used in several ways, such
-** as the list of "expr AS ID" fields following a "SELECT" or in the
-** list of "ID = expr" items in an UPDATE.  A list of expressions can
-** also be used as the argument to a function, in which case the a.zName
-** field is not used.
-**
-** In order to try to keep memory usage down, the Expr.a.zEName field
-** is used for multiple purposes:
-**
-**     eEName          Usage
-**    ----------       -------------------------
-**    ENAME_NAME       (1) the AS of result set column
-**                     (2) COLUMN= of an UPDATE
-**
-**    ENAME_TAB        DB.TABLE.NAME used to resolve names
-**                     of subqueries
-**
-**    ENAME_SPAN       Text of the original result set
-**                     expression.
-*/
-/// This is defined manually because cbindgen doesn't
-/// support variable-length array fields.
-///
-/// cbindgen:ignore
-#[repr(C)]
+/// Opaque struct because we do not want Rust to know
+/// it's a dynamically sized type.
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 pub struct ExprList {
-    nExpr: c_int,
-    nAlloc: c_int,
-    a: [ExprList_item],
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
 
 /* For each expression in the list */
