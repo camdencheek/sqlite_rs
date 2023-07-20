@@ -9,6 +9,8 @@ mod mem;
 mod savepoint;
 mod token;
 mod util;
+mod window;
+mod with;
 
 pub use coll_seq::*;
 pub use column::*;
@@ -22,6 +24,8 @@ pub use token::*;
 pub use util::log_est::*;
 pub use util::strings::*;
 pub use util::varint::*;
+pub use window::*;
+pub use with::*;
 
 use mem::SQLiteAllocator;
 

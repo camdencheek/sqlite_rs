@@ -3788,15 +3788,12 @@ void sqlite3SelectPopWith(Walker*, Select*);
 #define WRC_Prune       1   /* Omit children but continue walking siblings */
 #define WRC_Abort       2   /* Abandon the tree walk */
 
-/*
-** An instance of the With object represents a WITH clause containing
-** one or more CTEs (common table expressions).
-*/
+// Duplicated here because cbindgen cannot handle variable-length arrays
 struct With {
-  int nCte;               /* Number of CTEs in the WITH clause */
-  int bView;              /* Belongs to the outermost Select of a view */
-  With *pOuter;           /* Containing WITH clause, or NULL */
-  Cte a[1];               /* For each CTE in the WITH clause.... */
+  int nCte;               
+  int bView;              
+  With *pOuter;           
+  Cte a[1];               
 };
 
 #ifdef SQLITE_DEBUG
@@ -3809,61 +3806,6 @@ struct TreeView {
   u8  bLine[100];         /* Draw vertical in column i if bLine[i] is true */
 };
 #endif /* SQLITE_DEBUG */
-
-/*
-** This object is used in various ways, most (but not all) related to window
-** functions.
-**
-**   (1) A single instance of this structure is attached to the
-**       the Expr.y.pWin field for each window function in an expression tree.
-**       This object holds the information contained in the OVER clause,
-**       plus additional fields used during code generation.
-**
-**   (2) All window functions in a single SELECT form a linked-list
-**       attached to Select.pWin.  The Window.pFunc and Window.pExpr
-**       fields point back to the expression that is the window function.
-**
-**   (3) The terms of the WINDOW clause of a SELECT are instances of this
-**       object on a linked list attached to Select.pWinDefn.
-**
-**   (4) For an aggregate function with a FILTER clause, an instance
-**       of this object is stored in Expr.y.pWin with eFrmType set to
-**       TK_FILTER. In this case the only field used is Window.pFilter.
-**
-** The uses (1) and (2) are really the same Window object that just happens
-** to be accessible in two different ways.  Use case (3) are separate objects.
-*/
-struct Window {
-  char *zName;            /* Name of window (may be NULL) */
-  char *zBase;            /* Name of base window for chaining (may be NULL) */
-  ExprList *pPartition;   /* PARTITION BY clause */
-  ExprList *pOrderBy;     /* ORDER BY clause */
-  u8 eFrmType;            /* TK_RANGE, TK_GROUPS, TK_ROWS, or 0 */
-  u8 eStart;              /* UNBOUNDED, CURRENT, PRECEDING or FOLLOWING */
-  u8 eEnd;                /* UNBOUNDED, CURRENT, PRECEDING or FOLLOWING */
-  u8 bImplicitFrame;      /* True if frame was implicitly specified */
-  u8 eExclude;            /* TK_NO, TK_CURRENT, TK_TIES, TK_GROUP, or 0 */
-  Expr *pStart;           /* Expression for "<expr> PRECEDING" */
-  Expr *pEnd;             /* Expression for "<expr> FOLLOWING" */
-  Window **ppThis;        /* Pointer to this object in Select.pWin list */
-  Window *pNextWin;       /* Next window function belonging to this SELECT */
-  Expr *pFilter;          /* The FILTER expression */
-  FuncDef *pWFunc;        /* The function */
-  int iEphCsr;            /* Partition buffer or Peer buffer */
-  int regAccum;           /* Accumulator */
-  int regResult;          /* Interim result */
-  int csrApp;             /* Function cursor (used by min/max) */
-  int regApp;             /* Function register (also used by min/max) */
-  int regPart;            /* Array of registers for PARTITION BY values */
-  Expr *pOwner;           /* Expression object this window is attached to */
-  int nBufferCol;         /* Number of columns in buffer table */
-  int iArgCol;            /* Offset of first argument for this function */
-  int regOne;             /* Register containing constant value 1 */
-  int regStartRowid;
-  int regEndRowid;
-  u8 bExprArgs;           /* Defer evaluation of window function arguments
-                          ** due to the SQLITE_SUBTYPE flag */
-};
 
 #ifndef SQLITE_OMIT_WINDOWFUNC
 void sqlite3WindowDelete(sqlite3*, Window*);

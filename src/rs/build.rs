@@ -48,6 +48,8 @@ fn main() {
                 "Cte".into(),
                 "Expr".into(),
                 "ExprList_item".into(),
+                "With".into(),
+                "Window".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
