@@ -1512,19 +1512,6 @@ void sqlite3FileSuffix3(const char *zBaseFilename, char *z){
 #endif
 
 /*
-** Convert a LogEst into an integer.
-*/
-u64 sqlite3LogEstToInt(LogEst x){
-  u64 n;
-  n = x%10;
-  x /= 10;
-  if( n>=5 ) n -= 2;
-  else if( n>=1 ) n -= 1;
-  if( x>60 ) return (u64)LARGEST_INT64;
-  return x>=3 ? (n+8)<<(x-3) : (n+8)>>(3-x);
-}
-
-/*
 ** Add a new name/number pair to a VList.  This might require that the
 ** VList object be reallocated, so return the new VList.  If an OOM
 ** error occurs, the original VList returned and the

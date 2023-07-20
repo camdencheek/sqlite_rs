@@ -104,3 +104,25 @@ pub unsafe extern "C" fn sqlite3LogEstFromDouble(x: f64) -> LogEst {
     let e = ((a >> 52) - 1022) as i16;
     return e * 10;
 }
+
+/*
+** Convert a LogEst into an integer.
+*/
+#[no_mangle]
+pub const extern "C" fn sqlite3LogEstToInt(mut x: LogEst) -> u64 {
+    let mut n = (x % 10) as u64;
+    x /= 10;
+    if n >= 5 {
+        n -= 2;
+    } else if n >= 1 {
+        n -= 1;
+    }
+    if x > 60 {
+        return i64::MAX as u64;
+    }
+    return if x >= 3 {
+        (n + 8) << (x - 3)
+    } else {
+        (n + 8) >> (3 - x)
+    };
+}
