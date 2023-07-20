@@ -1,4 +1,7 @@
 use libc::{c_int, c_void};
+
+pub struct Index;
+
 /*
 ** The datatype used to store estimates of the number of rows in a
 ** table or index.

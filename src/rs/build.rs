@@ -61,6 +61,7 @@ fn main() {
                 "SrcItem".into(),
                 "AggInfo".into(),
                 "Select".into(),
+                "Table".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

@@ -2056,50 +2056,6 @@ struct VTable {
 #define SQLITE_VTABRISK_High         2
 
 /*
-** The schema for each SQL table, virtual table, and view is represented
-** in memory by an instance of the following structure.
-*/
-struct Table {
-  char *zName;         /* Name of the table or view */
-  Column *aCol;        /* Information about each column */
-  Index *pIndex;       /* List of SQL indexes on this table. */
-  char *zColAff;       /* String defining the affinity of each column */
-  ExprList *pCheck;    /* All CHECK constraints */
-                       /*   ... also used as column name list in a VIEW */
-  Pgno tnum;           /* Root BTree page for this table */
-  u32 nTabRef;         /* Number of pointers to this Table */
-  u32 tabFlags;        /* Mask of TF_* values */
-  i16 iPKey;           /* If not negative, use aCol[iPKey] as the rowid */
-  i16 nCol;            /* Number of columns in this table */
-  i16 nNVCol;          /* Number of columns that are not VIRTUAL */
-  LogEst nRowLogEst;   /* Estimated rows in table - from sqlite_stat1 table */
-  LogEst szTabRow;     /* Estimated size of each table row in bytes */
-#ifdef SQLITE_ENABLE_COSTMULT
-  LogEst costMult;     /* Cost multiplier for using this table */
-#endif
-  u8 keyConf;          /* What to do in case of uniqueness conflict on iPKey */
-  u8 eTabType;         /* 0: normal, 1: virtual, 2: view */
-  union {
-    struct {             /* Used by ordinary tables: */
-      int addColOffset;    /* Offset in CREATE TABLE stmt to add a new column */
-      FKey *pFKey;         /* Linked list of all foreign keys in this table */
-      ExprList *pDfltList; /* DEFAULT clauses on various columns.
-                           ** Or the AS clause for generated columns. */
-    } tab;
-    struct {             /* Used by views: */
-      Select *pSelect;     /* View definition */
-    } view;
-    struct {             /* Used by virtual tables only: */
-      int nArg;            /* Number of arguments to the module */
-      char **azArg;        /* 0: module 1: schema 2: vtab name 3...: args */
-      VTable *p;           /* List of VTable objects. */
-    } vtab;
-  } u;
-  Trigger *pTrigger;   /* List of triggers on this object */
-  Schema *pSchema;     /* Schema that contains this table */
-};
-
-/*
 ** Allowed values for Table.tabFlags.
 **
 ** TF_OOOHidden applies to tables or view that have hidden columns that are
