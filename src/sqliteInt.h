@@ -2080,23 +2080,6 @@ struct Module {
 
 
 /*
-** A "Collating Sequence" is defined by an instance of the following
-** structure. Conceptually, a collating sequence consists of a name and
-** a comparison routine that defines the order of that sequence.
-**
-** If CollSeq.xCmp is NULL, it means that the
-** collating sequence is undefined.  Indices built on an undefined
-** collating sequence may not be read or written.
-*/
-struct CollSeq {
-  char *zName;          /* Name of the collating sequence, UTF-8 encoded */
-  u8 enc;               /* Text encoding handled by xCmp() */
-  void *pUser;          /* First argument to xCmp() */
-  int (*xCmp)(void*,int, const void*, int, const void*);
-  void (*xDel)(void*);  /* Destructor for pUser */
-};
-
-/*
 ** A sort order can be either ASC or DESC.
 */
 #define SQLITE_SO_ASC       0  /* Sort in ascending order */

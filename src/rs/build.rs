@@ -33,6 +33,7 @@ fn main() {
                 "Colflag".into(),
                 "SqliteAff".into(),
                 "LogEst".into(),
+                "CollSeq".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
