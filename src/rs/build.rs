@@ -6,6 +6,7 @@ use std::path::PathBuf;
 const custom: &str = r#"
 typedef struct ExprList ExprList;
 typedef struct With With;
+typedef struct FKey FKey;
 "#;
 
 fn main() {
@@ -63,6 +64,7 @@ fn main() {
                 "Select".into(),
                 "Table".into(),
                 "IdList_item".into(),
+                "sColMap".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
