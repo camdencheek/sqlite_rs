@@ -1,4 +1,5 @@
 use cbindgen::{Config, EnumConfig, ExportConfig, FunctionConfig, ItemType, Language, RenameRule};
+use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
@@ -20,6 +21,11 @@ fn main() {
         include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
         after_includes: Some(custom.into()),
+        defines: {
+            let mut h = HashMap::new();
+            h.insert("debug".into(), "SQLITE_DEBUG".into());
+            h
+        },
         function: FunctionConfig {
             // TODO: figure out why this isn't working
             rename_args: RenameRule::CamelCase,
