@@ -2562,31 +2562,11 @@ struct ExprList {
 #define ENAME_SPAN  1       /* Complete text of the result set expression */
 #define ENAME_TAB   2       /* "DB.TABLE.NAME" for the result set */
 
-/*
-** An instance of this structure can hold a simple list of identifiers,
-** such as the list "a,b,c" in the following statements:
-**
-**      INSERT INTO t(a,b,c) VALUES ...;
-**      CREATE INDEX idx ON t(a,b,c);
-**      CREATE TRIGGER trig BEFORE UPDATE ON t(a,b,c) ...;
-**
-** The IdList.a.idx field is used when the IdList represents the list of
-** column names after a table name in an INSERT statement.  In the statement
-**
-**     INSERT INTO t(a,b,c) ...
-**
-** If "a" is the k-th column of table "t", then IdList.a[0].idx==k.
-*/
+// Definition retained here because cbindgen does not work with variable-length arrays
 struct IdList {
-  int nId;         /* Number of identifiers on the list */
-  u8 eU4;          /* Which element of a.u4 is valid */
-  struct IdList_item {
-    char *zName;      /* Name of the identifier */
-    union {
-      int idx;          /* Index in some Table.aCol[] of a column named zName */
-      Expr *pExpr;      /* Expr to implement a USING variable -- NOT USED */
-    } u4;
-  } a[1];
+  int nId;         
+  u8 eU4;          
+  IdList_item a[1];
 };
 
 /*

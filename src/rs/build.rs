@@ -62,6 +62,7 @@ fn main() {
                 "AggInfo".into(),
                 "Select".into(),
                 "Table".into(),
+                "IdList_item".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
