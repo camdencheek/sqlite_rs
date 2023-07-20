@@ -970,19 +970,6 @@ int sqlite3PutVarint(unsigned char *p, u64 v){
 }
 
 /*
-** Bitmasks used by sqlite3GetVarint().  These precomputed constants
-** are defined here rather than simply putting the constant expressions
-** inline in order to work around bugs in the RVT compiler.
-**
-** SLOT_2_0     A mask for  (0x7f<<14) | 0x7f
-**
-** SLOT_4_2_0   A mask for  (0x7f<<28) | SLOT_2_0
-*/
-#define SLOT_2_0     0x001fc07f
-#define SLOT_4_2_0   0xf01fc07f
-
-
-/*
 ** Read a 64-bit variable-length integer from memory starting at p[0].
 ** Return the number of bytes read.  The value is stored in *v.
 */
