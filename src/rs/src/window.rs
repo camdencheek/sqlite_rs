@@ -1,7 +1,6 @@
 use crate::expr::{Expr, ExprList};
+use crate::func::FuncDef;
 use libc::{c_char, c_int};
-
-struct FuncDef;
 
 /*
 ** This object is used in various ways, most (but not all) related to window
