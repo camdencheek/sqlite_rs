@@ -816,31 +816,6 @@ typedef INT8_TYPE i8;              /* 1-byte signed integer */
 typedef u64 tRowcnt;
 
 /*
-** Estimated quantities used for query planning are stored as 16-bit
-** logarithms.  For quantity X, the value stored is 10*log2(X).  This
-** gives a possible range of values of approximately 1.0e986 to 1e-986.
-** But the allowed values are "grainy".  Not every value is representable.
-** For example, quantities 16 and 17 are both represented by a LogEst
-** of 40.  However, since LogEst quantities are suppose to be estimates,
-** not exact values, this imprecision is not a problem.
-**
-** "LogEst" is short for "Logarithmic Estimate".
-**
-** Examples:
-**      1 -> 0              20 -> 43          10000 -> 132
-**      2 -> 10             25 -> 46          25000 -> 146
-**      3 -> 16            100 -> 66        1000000 -> 199
-**      4 -> 20           1000 -> 99        1048576 -> 200
-**     10 -> 33           1024 -> 100    4294967296 -> 320
-**
-** The LogEst can be negative to indicate fractional values.
-** Examples:
-**
-**    0.5 -> -10           0.1 -> -33        0.0625 -> -40
-*/
-typedef INT16_TYPE LogEst;
-
-/*
 ** Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer
 */
 #ifndef SQLITE_PTRSIZE

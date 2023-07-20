@@ -1511,35 +1511,6 @@ void sqlite3FileSuffix3(const char *zBaseFilename, char *z){
 }
 #endif
 
-/* 
-** Find (an approximate) sum of two LogEst values.  This computation is
-** not a simple "+" operator because LogEst is stored as a logarithmic
-** value.
-** 
-*/
-LogEst sqlite3LogEstAdd(LogEst a, LogEst b){
-  static const unsigned char x[] = {
-     10, 10,                         /* 0,1 */
-      9, 9,                          /* 2,3 */
-      8, 8,                          /* 4,5 */
-      7, 7, 7,                       /* 6,7,8 */
-      6, 6, 6,                       /* 9,10,11 */
-      5, 5, 5,                       /* 12-14 */
-      4, 4, 4, 4,                    /* 15-18 */
-      3, 3, 3, 3, 3, 3,              /* 19-24 */
-      2, 2, 2, 2, 2, 2, 2,           /* 25-31 */
-  };
-  if( a>=b ){
-    if( a>b+49 ) return a;
-    if( a>b+31 ) return a+1;
-    return a+x[a-b];
-  }else{
-    if( b>a+49 ) return b;
-    if( b>a+31 ) return b+1;
-    return b+x[b-a];
-  }
-}
-
 /*
 ** Convert an integer into a LogEst.  In other words, compute an
 ** approximation for 10*log2(x).
