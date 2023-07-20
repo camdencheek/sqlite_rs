@@ -429,35 +429,6 @@ int sqlite3Utf8CharLen(const char *zIn, int nByte){
   return r;
 }
 
-/* This test function is not currently used by the automated test-suite. 
-** Hence it is only available in debug builds.
-*/
-#if defined(SQLITE_TEST) && defined(SQLITE_DEBUG)
-/*
-** Translate UTF-8 to UTF-8.
-**
-** This has the effect of making sure that the string is well-formed
-** UTF-8.  Miscoded characters are removed.
-**
-** The translation is done in-place and aborted if the output
-** overruns the input.
-*/
-int sqlite3Utf8To8(unsigned char *zIn){
-  unsigned char *zOut = zIn;
-  unsigned char *zStart = zIn;
-  u32 c;
-
-  while( zIn[0] && zOut<=zIn ){
-    c = sqlite3Utf8Read((const u8**)&zIn);
-    if( c!=0xfffd ){
-      WRITE_UTF8(zOut, c);
-    }
-  }
-  *zOut = 0;
-  return (int)(zOut - zStart);
-}
-#endif
-
 #ifndef SQLITE_OMIT_UTF16
 /*
 ** Convert a UTF-16 string in the native encoding into a UTF-8 string.
