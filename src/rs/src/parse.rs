@@ -1,12 +1,16 @@
 use libc::{c_char, c_int, c_uint};
 
-use crate::expr::{Expr, ExprList};
+use crate::expr::ExprList;
+use crate::index::Index;
 use crate::sqlite3;
 use crate::table::Table;
 use crate::token::Token;
-use crate::trigger::TriggerPrg;
+use crate::trigger::{Trigger, TriggerPrg};
+use crate::with::With;
 
+// TODO: define these in rust
 struct Returning;
+struct RenameToken;
 struct Vdbe;
 struct IndexedExpr;
 struct AutoincInfo;
@@ -15,6 +19,10 @@ struct ParseCleanup;
 
 // TODO: do this properly
 type yDbMask = c_uint;
+// TODO: do this properly
+type ynVar = i16;
+// TODO: do this properly
+type VList = c_int;
 
 /*
 ** An SQL parser context.  A copy of this structure is passed through
@@ -32,6 +40,7 @@ type yDbMask = c_uint;
 ** compiled. Function sqlite3TableLock() is used to add entries to the
 ** list.
 */
+#[repr(C)]
 pub struct Parse {
     db: *mut sqlite3,     /* The main database structure */
     zErrMsg: *mut c_char, /* An error message */
@@ -60,18 +69,18 @@ pub struct Parse {
     szOpAlloc: c_int, /* Bytes of memory space allocated for Vdbe.aOp[] */
     iSelfTab: c_int,  /* Table associated with an index on expr, or negative
                        ** of the base register during check-constraint eval */
-    nLabel: c_int,              /* The *negative* of the number of labels used */
-    nLabelAlloc: c_int,         /* Number of slots in aLabel */
-    aLabel: *mut c_int,         /* Space to hold the labels */
-    pConstExpr: *mut ExprList,  /* Constant expressions */
-    pIdxExpr: *mut IndexedExpr, /* List of expressions used by active indexes */
-    constraintName: Token,      /* Name of the constraint currently being parsed */
-    writeMask: yDbMask,         /* Start a write transaction on these databases */
-    cookieMask: yDbMask,        /* Bitmask of schema verified databases */
-    regRowid: c_int,            /* Register holding rowid of CREATE TABLE entry */
-    regRoot: c_int,             /* Register holding root page number for new objects */
-    nMaxArg: c_int,             /* Max args passed to user function by sub-program */
-    nSelect: c_int,             /* Number of SELECT stmts. Counter for Select.selId */
+    nLabel: c_int,             /* The *negative* of the number of labels used */
+    nLabelAlloc: c_int,        /* Number of slots in aLabel */
+    aLabel: *mut c_int,        /* Space to hold the labels */
+    pConstExpr: *mut ExprList, /* Constant expressions */
+    pIdxEpr: *mut IndexedExpr, /* List of expressions used by active indexes */
+    constraintName: Token,     /* Name of the constraint currently being parsed */
+    writeMask: yDbMask,        /* Start a write transaction on these databases */
+    cookieMask: yDbMask,       /* Bitmask of schema verified databases */
+    regRowid: c_int,           /* Register holding rowid of CREATE TABLE entry */
+    regRoot: c_int,            /* Register holding root page number for new objects */
+    nMaxArg: c_int,            /* Max args passed to user function by sub-program */
+    nSelect: c_int,            /* Number of SELECT stmts. Counter for Select.selId */
 
     #[cfg(not(omit_shared_cache))]
     nTableLock: c_int, /* Number of locks in aTableLock */
@@ -79,7 +88,7 @@ pub struct Parse {
     aTableLock: *mut TableLock, /* Required table locks for shared-cache mode */
 
     pAinc: *mut AutoincInfo, /* Information about AUTOINCREMENT counters */
-    pTopLevel: *mut Parse,   /* Parse structure for main program (or NULL) */
+    pToplevel: *mut Parse,   /* Parse structure for main program (or NULL) */
     pTriggerTab: *mut Table, /* Table triggers are being coded for */
     pTriggerPrg: *mut TriggerPrg, /* Linked list of coded triggers */
     pCleanup: *mut ParseCleanup, /* List of cleanup operations to run after parse */
@@ -90,11 +99,60 @@ pub struct Parse {
 
     #[cfg(not(omit_progress_callback))]
     nProgressSteps: u32, /* xProgress steps taken during sqlite3_prepare() */
-    eTriggerOp: u8, /* TK_UPDATE, TK_INSERT or TK_DELETE */
-    bReturning: u8, /* Coding a RETURNING trigger */
-    eOrconf: u8,    /* Default ON CONFLICT policy for trigger steps */
+    eTriggerOp: u8,      /* TK_UPDATE, TK_INSERT or TK_DELETE */
+    bReturning: u8,      /* Coding a RETURNING trigger */
+    eOrconf: u8,         /* Default ON CONFLICT policy for trigger steps */
     disableTriggers: u8, /* True to disable triggers */
-    todo!("FINISH ADDING FIELDS")
+
+    /**************************************************************************
+     ** Fields above must be initialized to zero.  The fields that follow,
+     ** down to the beginning of the recursive section, do not need to be
+     ** initialized as they will be set before being used.  The boundary is
+     ** determined by offsetof(Parse,aTempReg).
+     **************************************************************************/
+    aTempReg: [c_int; 8],    /* Holding area for temporary registers */
+    pOuterParse: *mut Parse, /* Outer Parse object when nested */
+    sNameToken: Token,       /* Token with unqualified schema object name */
+
+    /************************************************************************
+     ** Above is constant between recursions.  Below is reset before and after
+     ** each recursion.  The boundary between these two regions is determined
+     ** using offsetof(Parse,sLastToken) so the sLastToken field must be the
+     ** first field in the recursive region.
+     ************************************************************************/
+    sLastToken: Token, /* The last token parsed */
+    nVar: ynVar,       /* Number of '?' variables seen in the SQL so far */
+    iPkSortOrder: u8,  /* ASC or DESC for INTEGER PRIMARY KEY */
+    explain: u8,       /* True if the EXPLAIN flag is found on the query */
+    eParseMode: u8,    /* PARSE_MODE_XXX constant */
+
+    #[cfg(not(omit_virtualtable))]
+    nVtabLock: c_int, /* Number of virtual tables to lock */
+
+    nHeight: c_int, /* Expression tree height of current sub-select */
+
+    #[cfg(not(omit_explain))]
+    addrExplain: c_int, /* Address of current OP_Explain opcode */
+
+    pVList: *mut VList,    /* Mapping between variable names and numbers */
+    pReprepare: *mut Vdbe, /* VM being reprepared (sqlite3Reprepare()) */
+    zTail: *const c_char,  /* All SQL text past the last semicolon parsed */
+    pNewTable: *mut Table, /* A table being constructed by CREATE TABLE */
+    pNewIndex: *mut Index, /* An index being constructed by CREATE INDEX.
+                            ** Also used to hold redundant UNIQUE constraints
+                            ** during a RENAME COLUMN */
+    pNewTrigger: *mut Trigger, /* Trigger under construct by a CREATE TRIGGER */
+    zAuthContext: *const c_char, /* The 6th parameter to db->xAuth callbacks */
+
+    #[cfg(not(omit_virtualtable))]
+    sArg: Token, /* Complete text of a module argument */
+    #[cfg(not(omit_virtualtable))]
+    apVtabLock: *mut *mut Table, /* Pointer to virtual tables needing locking */
+
+    pWith: *mut With, /* Current WITH clause, or NULL */
+
+    #[cfg(omit_altertable)]
+    pRename: *mut RenameToken, /* Tokens subject to renaming by ALTER TABLE */
 }
 
 #[repr(C)]

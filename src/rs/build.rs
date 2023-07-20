@@ -27,6 +27,15 @@ fn main() {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());
             h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
+            h.insert(
+                "omit_shared_cache".into(),
+                "SQLITE_OMIT_SHARED_CACHE".into(),
+            );
+            h.insert("coverage_test".into(), "SQLITE_COVERAGE_TEST".into());
+            h.insert(
+                "omit_progress_callback".into(),
+                "SQLITE_OMIT_PROGRESS_CALLBACK".into(),
+            );
             h
         },
         function: FunctionConfig {
@@ -65,6 +74,7 @@ fn main() {
                 "Table".into(),
                 "IdList_item".into(),
                 "sColMap".into(),
+                "Parse".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
