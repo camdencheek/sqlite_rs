@@ -35,6 +35,7 @@ fn main() {
                 "LogEst".into(),
                 "CollSeq".into(),
                 "CteUse".into(),
+                "FuncDestructor".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
