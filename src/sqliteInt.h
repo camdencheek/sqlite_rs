@@ -2731,22 +2731,6 @@ struct SelectDest {
 };
 
 /*
-** During code generation of statements that do inserts into AUTOINCREMENT
-** tables, the following information is attached to the Table.u.autoInc.p
-** pointer of each autoincrement table to record some side information that
-** the code generator needs.  We have to keep per-table autoincrement
-** information in case inserts are done within triggers.  Triggers do not
-** normally coordinate their activities, but we do need to coordinate the
-** loading and saving of autoincrement information.
-*/
-struct AutoincInfo {
-  AutoincInfo *pNext;   /* Next info block in a list of them all */
-  Table *pTab;          /* Table this info block refers to */
-  int iDb;              /* Index in sqlite3.aDb[] of database holding pTab */
-  int regCtr;           /* Memory register holding the rowid counter */
-};
-
-/*
 ** At least one instance of the following structure is created for each
 ** trigger that may be fired while parsing an INSERT, UPDATE or DELETE
 ** statement. All such objects are stored in the linked list headed at

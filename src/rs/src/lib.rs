@@ -1,4 +1,5 @@
 mod agg;
+mod autoinc;
 mod coll_seq;
 mod column;
 mod cte;

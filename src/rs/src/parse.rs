@@ -1,5 +1,6 @@
 use libc::{c_char, c_int, c_uint, c_void};
 
+use crate::autoinc::AutoincInfo;
 use crate::expr::{ExprList, IndexedExpr};
 use crate::index::Index;
 use crate::returning::Returning;
@@ -11,7 +12,6 @@ use crate::with::With;
 
 // TODO: define these in rust
 struct Vdbe;
-struct AutoincInfo;
 struct TableLock;
 
 // TODO: do this properly
