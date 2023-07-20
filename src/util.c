@@ -1512,21 +1512,6 @@ void sqlite3FileSuffix3(const char *zBaseFilename, char *z){
 #endif
 
 /*
-** Convert a double into a LogEst
-** In other words, compute an approximation for 10*log2(x).
-*/
-LogEst sqlite3LogEstFromDouble(double x){
-  u64 a;
-  LogEst e;
-  assert( sizeof(x)==8 && sizeof(a)==8 );
-  if( x<=1 ) return 0;
-  if( x<=2000000000 ) return sqlite3LogEst((u64)x);
-  memcpy(&a, &x, 8);
-  e = (a>>52) - 1022;
-  return e*10;
-}
-
-/*
 ** Convert a LogEst into an integer.
 */
 u64 sqlite3LogEstToInt(LogEst x){

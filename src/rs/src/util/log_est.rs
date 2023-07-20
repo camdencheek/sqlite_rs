@@ -1,3 +1,5 @@
+use libc::memcpy;
+
 /*
 ** Estimated quantities used for query planning are stored as 16-bit
 ** logarithms.  For quantity X, the value stored is 10*log2(X).  This
@@ -84,4 +86,21 @@ pub const extern "C" fn sqlite3LogEst(mut x: u64) -> LogEst {
         x >>= i
     }
     return A[(x & 7) as usize] + y - 10;
+}
+
+/*
+** Convert a double into a LogEst
+** In other words, compute an approximation for 10*log2(x).
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3LogEstFromDouble(x: f64) -> LogEst {
+    if x <= 1.0 {
+        return 0;
+    }
+    if x <= 2000000000.0 {
+        return sqlite3LogEst(x as u64);
+    };
+    let a: u64 = std::mem::transmute_copy(&x);
+    let e = ((a >> 52) - 1022) as i16;
+    return e * 10;
 }
