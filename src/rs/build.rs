@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 const custom: &str = r#"
 typedef struct ExprList ExprList;
+typedef struct With With;
 "#;
 
 fn main() {
@@ -24,6 +25,7 @@ fn main() {
         defines: {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());
+            h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
             h
         },
         function: FunctionConfig {
@@ -58,6 +60,7 @@ fn main() {
                 "Window".into(),
                 "SrcItem".into(),
                 "AggInfo".into(),
+                "Select".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

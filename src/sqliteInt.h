@@ -2824,46 +2824,6 @@ struct Upsert {
 };
 
 /*
-** An instance of the following structure contains all information
-** needed to generate code for a single SELECT statement.
-**
-** See the header comment on the computeLimitRegisters() routine for a
-** detailed description of the meaning of the iLimit and iOffset fields.
-**
-** addrOpenEphm[] entries contain the address of OP_OpenEphemeral opcodes.
-** These addresses must be stored so that we can go back and fill in
-** the P4_KEYINFO and P2 parameters later.  Neither the KeyInfo nor
-** the number of columns in P2 can be computed at the same time
-** as the OP_OpenEphm instruction is coded because not
-** enough information about the compound query is known at that point.
-** The KeyInfo for addrOpenTran[0] and [1] contains collating sequences
-** for the result set.  The KeyInfo for addrOpenEphm[2] contains collating
-** sequences for the ORDER BY clause.
-*/
-struct Select {
-  u8 op;                 /* One of: TK_UNION TK_ALL TK_INTERSECT TK_EXCEPT */
-  LogEst nSelectRow;     /* Estimated number of result rows */
-  u32 selFlags;          /* Various SF_* values */
-  int iLimit, iOffset;   /* Memory registers holding LIMIT & OFFSET counters */
-  u32 selId;             /* Unique identifier number for this SELECT */
-  int addrOpenEphm[2];   /* OP_OpenEphem opcodes related to this select */
-  ExprList *pEList;      /* The fields of the result */
-  SrcList *pSrc;         /* The FROM clause */
-  Expr *pWhere;          /* The WHERE clause */
-  ExprList *pGroupBy;    /* The GROUP BY clause */
-  Expr *pHaving;         /* The HAVING clause */
-  ExprList *pOrderBy;    /* The ORDER BY clause */
-  Select *pPrior;        /* Prior select in a compound select statement */
-  Select *pNext;         /* Next select to the left in a compound */
-  Expr *pLimit;          /* LIMIT expression. NULL means not used. */
-  With *pWith;           /* WITH clause attached to this select. Or NULL. */
-#ifndef SQLITE_OMIT_WINDOWFUNC
-  Window *pWin;          /* List of window functions */
-  Window *pWinDefn;      /* List of named window definitions */
-#endif
-};
-
-/*
 ** Allowed values for Select.selFlags.  The "SF" prefix stands for
 ** "Select Flag".
 **
