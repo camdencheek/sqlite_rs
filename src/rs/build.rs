@@ -41,6 +41,7 @@ fn main() {
                 "Savepoint".into(),
                 "Token".into(),
                 "Cte".into(),
+                "Expr".into(),
             ],
             item_types: vec![
                 ItemType::Constants,

@@ -1,6 +1,7 @@
 mod coll_seq;
 mod column;
 mod cte;
+mod expr;
 mod func;
 mod hash;
 mod index;
@@ -12,6 +13,7 @@ mod util;
 pub use coll_seq::*;
 pub use column::*;
 pub use cte::*;
+pub use expr::*;
 pub use func::*;
 pub use hash::*;
 pub use index::*;
