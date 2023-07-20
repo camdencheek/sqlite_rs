@@ -98,7 +98,7 @@ pub enum Colflag {
 ** Note also that the numeric types are grouped together so that testing
 ** for a numeric type is a single comparison.  And the BLOB type is first.
 */
-#[repr(C)]
+#[repr(u8)]
 pub enum SqliteAff {
     None = 0x40,    /* '@' */
     Blob = 0x41,    /* 'A' */
