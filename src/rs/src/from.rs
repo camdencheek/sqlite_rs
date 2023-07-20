@@ -1,16 +1,14 @@
 use crate::cte::CteUse;
 use crate::expr::{Expr, ExprList};
+use crate::select::Select;
+use crate::util::bitmask::Bitmask;
 
 use libc::{c_char, c_int};
 
 struct Schema;
 struct Table;
-struct Select;
 struct Index;
 struct IdList;
-
-// TODO: pull this type into rust
-type Bitmask = u64;
 
 /*
 ** The SrcItem object represents a single term in the FROM clause of a query.

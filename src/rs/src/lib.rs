@@ -27,6 +27,7 @@ pub use index::*;
 pub use savepoint::*;
 pub use select::*;
 pub use token::*;
+pub use util::bitmask::*;
 pub use util::log_est::*;
 pub use util::strings::*;
 pub use util::varint::*;

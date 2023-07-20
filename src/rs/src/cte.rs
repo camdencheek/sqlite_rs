@@ -1,9 +1,7 @@
 use crate::expr::ExprList;
+use crate::select::Select;
 use crate::util::log_est::LogEst;
 use libc::{c_char, c_int};
-
-// TODO: pull these into Rust
-struct Select;
 
 /*
 ** A single common table expression
