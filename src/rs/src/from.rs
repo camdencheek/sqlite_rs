@@ -1,14 +1,13 @@
-use crate::cte::CteUse;
-use crate::expr::{Expr, ExprList};
-use crate::select::Select;
-use crate::util::bitmask::Bitmask;
-
 use libc::{c_char, c_int};
 
-struct Schema;
-struct Table;
-struct Index;
-struct IdList;
+use crate::cte::CteUse;
+use crate::expr::{Expr, ExprList};
+use crate::id::IdList;
+use crate::index::Index;
+use crate::schema::Schema;
+use crate::select::Select;
+use crate::table::Table;
+use crate::util::bitmask::Bitmask;
 
 /*
 ** The SrcItem object represents a single term in the FROM clause of a query.

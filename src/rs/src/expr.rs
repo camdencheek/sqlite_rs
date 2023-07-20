@@ -1,12 +1,11 @@
 use crate::agg::AggInfo;
+use crate::select::Select;
+use crate::table::Table;
 use crate::window::Window;
 use libc::{c_char, c_int};
 
 // TODO: compiletime option to switch this data type as defined in sqliteInt.h
 type ynVar = i16;
-
-struct Table;
-struct Select;
 
 /*
 ** Each node of an expression in the parse tree is an instance

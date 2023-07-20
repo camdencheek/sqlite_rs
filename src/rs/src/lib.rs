@@ -54,6 +54,8 @@ pub use with::*;
 pub struct sqlite3;
 pub struct sqlite3_vtab;
 pub struct sqlite3_module;
+pub struct sqlite3_context;
+pub struct sqlite3_value;
 
 use mem::SQLiteAllocator;
 

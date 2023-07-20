@@ -1,7 +1,6 @@
 use libc::{c_char, c_int, c_void};
 
-struct sqlite3_context;
-struct sqlite3_value;
+use crate::{sqlite3_context, sqlite3_value};
 
 /*
 ** Each SQL function is defined by an instance of the following
