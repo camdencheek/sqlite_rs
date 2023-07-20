@@ -1,11 +1,10 @@
 use crate::expr::{Expr, ExprList};
+use crate::src::SrcList;
 use crate::util::log_est::LogEst;
 use crate::window::Window;
 use crate::with::With;
 
 use libc::c_int;
-
-struct SrcList;
 
 /*
 ** An instance of the following structure contains all information
