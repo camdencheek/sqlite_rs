@@ -33,11 +33,11 @@ pub struct Column {
     notNull: u8, /* An OE_ code for handling a NOT NULL constraint */
     eCType: u8,  /* One of the standard types */
 
-    affinity: c_char, /* One of the SQLITE_AFF_... values */
-    szEst: u8,        /* Est size of value in this column. sizeof(INT)==1 */
-    hName: u8,        /* Column name hash for faster lookup */
-    iDflt: u16,       /* 1-based index of DEFAULT.  0 means "none" */
-    colFlags: u16,    /* Boolean properties.  See COLFLAG_ defines below */
+    pub affinity: c_char, /* One of the SQLITE_AFF_... values */
+    szEst: u8,            /* Est size of value in this column. sizeof(INT)==1 */
+    hName: u8,            /* Column name hash for faster lookup */
+    iDflt: u16,           /* 1-based index of DEFAULT.  0 means "none" */
+    colFlags: u16,        /* Boolean properties.  See COLFLAG_ defines below */
 }
 
 /* Allowed values for Column.eCType.

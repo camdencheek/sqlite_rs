@@ -1,7 +1,8 @@
-use crate::agg::AggInfo;
+use crate::never;
 use crate::select::Select;
 use crate::table::Table;
 use crate::window::Window;
+use crate::{agg::AggInfo, column::SqliteAff};
 use libc::{c_char, c_int};
 
 // TODO: compiletime option to switch this data type as defined in sqliteInt.h
@@ -224,4 +225,16 @@ pub struct IndexedExpr {
 
     #[cfg(enable_explain_comments)]
     zIdxName: *const c_char, /* Name of index, used only for bytecode comments */
+}
+
+/*
+** Return the affinity character for a single column of a table.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3TableColumnAffinity(pTab: *const Table, iCol: c_int) -> c_char {
+    if iCol < 0 || never!(iCol >= (*pTab).nCol as c_int) {
+        return SqliteAff::Integer as c_char;
+    }
+
+    (*(*pTab).aCol.add(iCol as usize)).affinity
 }

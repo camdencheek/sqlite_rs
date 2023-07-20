@@ -19,7 +19,7 @@ type Pgno = u32;
 #[repr(C)]
 pub struct Table {
     zName: *mut c_char,    /* Name of the table or view */
-    aCol: *mut Column,     /* Information about each column */
+    pub aCol: *mut Column, /* Information about each column */
     pIndex: *mut Index,    /* List of SQL indexes on this table. */
     zColAff: *mut c_char,  /* String defining the affinity of each column */
     pCheck: *mut ExprList, /* All CHECK constraints */
@@ -28,7 +28,7 @@ pub struct Table {
     nTabRef: u32,       /* Number of pointers to this Table */
     tabFlags: u32,      /* Mask of TF_* values */
     iPKey: i16,         /* If not negative, use aCol[iPKey] as the rowid */
-    nCol: i16,          /* Number of columns in this table */
+    pub nCol: i16,      /* Number of columns in this table */
     nNVCol: i16,        /* Number of columns that are not VIRTUAL */
     nRowLogEst: LogEst, /* Estimated rows in table - from sqlite_stat1 table */
     szTabRow: LogEst,   /* Estimated size of each table row in bytes */

@@ -10,6 +10,7 @@ mod func;
 mod hash;
 mod id;
 mod index;
+mod macros;
 mod mem;
 mod module;
 mod parse;
