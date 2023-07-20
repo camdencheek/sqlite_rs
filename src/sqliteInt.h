@@ -2501,27 +2501,6 @@ struct Index {
 #define XN_EXPR      (-2)     /* Indexed column is an expression */
 
 /*
-** Possible values to use within the flags argument to sqlite3GetToken().
-*/
-#define SQLITE_TOKEN_QUOTED    0x1 /* Token is a quoted identifier. */
-#define SQLITE_TOKEN_KEYWORD   0x2 /* Token is a keyword. */
-
-/*
-** Each token coming out of the lexer is an instance of
-** this structure.  Tokens are also used as part of an expression.
-**
-** The memory that "z" points to is owned by other objects.  Take care
-** that the owner of the "z" string does not deallocate the string before
-** the Token goes out of scope!  Very often, the "z" points to some place
-** in the middle of the Parse.zSql text.  But it might also point to a
-** static string.
-*/
-struct Token {
-  const char *z;     /* Text of the token.  Not NULL-terminated! */
-  unsigned int n;    /* Number of characters in this token */
-};
-
-/*
 ** An instance of this structure contains information needed to generate
 ** code for a SELECT that contains aggregate functions.
 **

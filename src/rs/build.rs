@@ -39,6 +39,7 @@ fn main() {
                 "IndexSample".into(),
                 "tRowcnt".into(),
                 "Savepoint".into(),
+                "Token".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
