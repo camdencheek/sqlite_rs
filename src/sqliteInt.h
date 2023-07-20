@@ -2791,17 +2791,6 @@ struct TriggerPrg {
 # define DbMaskNonZero(M)   ((M)!=0)
 #endif
 
-/*
-** An instance of the ParseCleanup object specifies an operation that
-** should be performed after parsing to deallocation resources obtained
-** during the parse and which are no longer needed.
-*/
-struct ParseCleanup {
-  ParseCleanup *pNext;               /* Next cleanup task */
-  void *pPtr;                        /* Pointer to object to deallocate */
-  void (*xCleanup)(sqlite3*,void*);  /* Deallocation routine */
-};
-
 /* Allowed values for Parse.eParseMode
 */
 #define PARSE_MODE_NORMAL        0

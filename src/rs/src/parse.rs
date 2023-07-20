@@ -1,6 +1,6 @@
-use libc::{c_char, c_int, c_uint};
+use libc::{c_char, c_int, c_uint, c_void};
 
-use crate::expr::ExprList;
+use crate::expr::{ExprList, IndexedExpr};
 use crate::index::Index;
 use crate::returning::Returning;
 use crate::sqlite3;
@@ -11,10 +11,8 @@ use crate::with::With;
 
 // TODO: define these in rust
 struct Vdbe;
-struct IndexedExpr;
 struct AutoincInfo;
 struct TableLock;
-struct ParseCleanup;
 
 // TODO: do this properly
 type yDbMask = c_uint;
@@ -150,7 +148,7 @@ pub struct Parse {
 
     pWith: *mut With, /* Current WITH clause, or NULL */
 
-    #[cfg(omit_altertable)]
+    #[cfg(not(omit_altertable))]
     pRename: *mut RenameToken, /* Tokens subject to renaming by ALTER TABLE */
 }
 
@@ -158,4 +156,16 @@ pub struct Parse {
 pub union Parse_u1 {
     addrCrTab: c_int,           /* Address of OP_CreateBtree on CREATE TABLE */
     pReturning: *mut Returning, /* The RETURNING clause */
+}
+
+/*
+** An instance of the ParseCleanup object specifies an operation that
+** should be performed after parsing to deallocation resources obtained
+** during the parse and which are no longer needed.
+*/
+#[repr(C)]
+pub struct ParseCleanup {
+    pNext: *mut ParseCleanup, /* Next cleanup task */
+    pPtr: *mut c_void,        /* Pointer to object to deallocate */
+    xCleanup: unsafe extern "C" fn(*mut sqlite3, *mut c_void), /* Deallocation routine */
 }
