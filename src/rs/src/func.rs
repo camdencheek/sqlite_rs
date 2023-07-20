@@ -1,4 +1,37 @@
-use libc::{c_int, c_void};
+use libc::{c_char, c_int, c_void};
+
+struct sqlite3_context;
+struct sqlite3_value;
+
+/*
+** Each SQL function is defined by an instance of the following
+** structure.  For global built-in functions (ex: substr(), max(), count())
+** a pointer to this structure is held in the sqlite3BuiltinFunctions object.
+** For per-connection application-defined functions, a pointer to this
+** structure is held in the db->aHash hash table.
+**
+** The u.pHash field is used by the global built-ins.  The u.pDestructor
+** field is used by per-connection app-def functions.
+*/
+#[repr(C)]
+pub struct FuncDef {
+    nArg: i8,               /* Number of arguments.  -1 means unlimited */
+    funcFlags: u32,         /* Some combination of SQLITE_FUNC_* */
+    pUserData: *mut c_void, /* User data parameter */
+    pNext: *mut FuncDef,    /* Next function with same name */
+    xSFunc: unsafe extern "C" fn(*mut sqlite3_context, c_int, *mut *mut sqlite3_value), /* func or agg-step */
+    xFinalize: unsafe extern "C" fn(*mut sqlite3_context), /* Agg finalizer */
+    xValue: unsafe extern "C" fn(*mut sqlite3_context),    /* Current agg value */
+    xInverse: unsafe extern "C" fn(*mut sqlite3_context, c_int, *mut *mut sqlite3_value), /* inverse agg-step */
+    zName: *const c_char, /* SQL name of the function. */
+    u: FuncDef_u,         /* pHash if SQLITE_FUNC_BUILTIN, pDestructor otherwise */
+}
+
+#[repr(C)]
+pub union FuncDef_u {
+    pHash: *mut FuncDef,
+    pDestructor: *mut FuncDestructor,
+}
 
 /*
 ** This structure encapsulates a user-function destructor callback (as

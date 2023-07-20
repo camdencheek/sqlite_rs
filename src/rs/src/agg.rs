@@ -1,7 +1,7 @@
 use crate::expr::{Expr, ExprList};
+use crate::func::FuncDef;
 use libc::c_int;
 
-struct FuncDef;
 struct Table;
 
 /*
