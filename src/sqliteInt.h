@@ -2334,17 +2334,6 @@ typedef i16 ynVar;
 typedef int ynVar;
 #endif
 
-/* Macros used to ensure that the correct members of unions are accessed
-** in Expr.
-*/
-#define ExprUseUToken(E)    (((E)->flags&EP_IntValue)==0)
-#define ExprUseUValue(E)    (((E)->flags&EP_IntValue)!=0)
-#define ExprUseXList(E)     (((E)->flags&EP_xIsSelect)==0)
-#define ExprUseXSelect(E)   (((E)->flags&EP_xIsSelect)!=0)
-#define ExprUseYTab(E)      (((E)->flags&(EP_WinFunc|EP_Subrtn))==0)
-#define ExprUseYWin(E)      (((E)->flags&EP_WinFunc)!=0)
-#define ExprUseYSub(E)      (((E)->flags&EP_Subrtn)!=0)
-
 /* Flags for use with Expr.vvaFlags
 */
 #define EP_NoReduce   0x01  /* Cannot EXPRDUP_REDUCE this Expr */

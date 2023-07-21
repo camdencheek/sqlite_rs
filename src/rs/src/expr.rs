@@ -157,42 +157,99 @@ impl Expr {
     const fn always_false(&self) -> bool {
         (self.flags & (EP_OuterON | EP_IsFalse)) == EP_IsFalse
     }
+
+    const fn use_u_token(&self) -> bool {
+        self.flags & EP_IntValue == 0
+    }
+
+    const fn use_u_value(&self) -> bool {
+        self.flags & EP_IntValue != 0
+    }
+
+    const fn use_x_list(&self) -> bool {
+        self.flags & EP_xIsSelect == 0
+    }
+
+    const fn use_x_select(&self) -> bool {
+        self.flags & EP_xIsSelect != 0
+    }
+
+    const fn use_y_tab(&self) -> bool {
+        self.flags & (EP_WinFunc | EP_Subrtn) == 0
+    }
+
+    const fn use_y_win(&self) -> bool {
+        self.flags & EP_WinFunc != 0
+    }
+
+    const fn use_y_sub(&self) -> bool {
+        self.flags & EP_Subrtn != 0
+    }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprHasProperty(e: *const Expr, p: u32) -> c_int {
-    let e = e.as_ref().unwrap();
+pub unsafe extern "C" fn ExprHasProperty(e: &Expr, p: u32) -> c_int {
     e.has_property(p).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprHasAllProperty(e: *const Expr, p: u32) -> c_int {
-    let e = e.as_ref().unwrap();
+pub unsafe extern "C" fn ExprHasAllProperty(e: &Expr, p: u32) -> c_int {
     e.has_all_property(p).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprSetProperty(e: *mut Expr, p: u32) {
-    let e = e.as_mut().unwrap();
+pub unsafe extern "C" fn ExprSetProperty(e: &mut Expr, p: u32) {
     e.set_property(p)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprClearProperty(e: *mut Expr, p: u32) {
-    let e = e.as_mut().unwrap();
+pub unsafe extern "C" fn ExprClearProperty(e: &mut Expr, p: u32) {
     e.clear_property(p)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprAlwaysTrue(e: *const Expr) -> c_int {
-    let e = e.as_ref().unwrap();
+pub unsafe extern "C" fn ExprAlwaysTrue(e: &Expr) -> c_int {
     e.always_true().into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ExprAlwaysFalse(e: *const Expr) -> c_int {
-    let e = e.as_ref().unwrap();
+pub unsafe extern "C" fn ExprAlwaysFalse(e: &Expr) -> c_int {
     e.always_false().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseUToken(e: &Expr) -> c_int {
+    e.use_u_token().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseUValue(e: &Expr) -> c_int {
+    e.use_u_value().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseXList(e: &Expr) -> c_int {
+    e.use_x_list().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseXSelect(e: &Expr) -> c_int {
+    e.use_x_select().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseYTab(e: &Expr) -> c_int {
+    e.use_y_tab().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseYWin(e: &Expr) -> c_int {
+    e.use_y_win().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprUseYSub(e: &Expr) -> c_int {
+    e.use_y_sub().into()
 }
 
 #[repr(C)]
