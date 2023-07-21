@@ -2334,50 +2334,6 @@ typedef i16 ynVar;
 typedef int ynVar;
 #endif
 
-/* The following are the meanings of bits in the Expr.flags field.
-** Value restrictions:
-**
-**          EP_Agg == NC_HasAgg == SF_HasAgg
-**          EP_Win == NC_HasWin
-*/
-#define EP_OuterON    0x000001 /* Originates in ON/USING clause of outer join */
-#define EP_InnerON    0x000002 /* Originates in ON/USING of an inner join */
-#define EP_Distinct   0x000004 /* Aggregate function with DISTINCT keyword */
-#define EP_HasFunc    0x000008 /* Contains one or more functions of any kind */
-#define EP_Agg        0x000010 /* Contains one or more aggregate functions */
-#define EP_FixedCol   0x000020 /* TK_Column with a known fixed value */
-#define EP_VarSelect  0x000040 /* pSelect is correlated, not constant */
-#define EP_DblQuoted  0x000080 /* token.z was originally in "..." */
-#define EP_InfixFunc  0x000100 /* True for an infix function: LIKE, GLOB, etc */
-#define EP_Collate    0x000200 /* Tree contains a TK_COLLATE operator */
-#define EP_Commuted   0x000400 /* Comparison operator has been commuted */
-#define EP_IntValue   0x000800 /* Integer value contained in u.iValue */
-#define EP_xIsSelect  0x001000 /* x.pSelect is valid (otherwise x.pList is) */
-#define EP_Skip       0x002000 /* Operator does not contribute to affinity */
-#define EP_Reduced    0x004000 /* Expr struct EXPR_REDUCEDSIZE bytes only */
-#define EP_Win        0x008000 /* Contains window functions */
-#define EP_TokenOnly  0x010000 /* Expr struct EXPR_TOKENONLYSIZE bytes only */
-                   /* 0x020000 // Available for reuse */
-#define EP_IfNullRow  0x040000 /* The TK_IF_NULL_ROW opcode */
-#define EP_Unlikely   0x080000 /* unlikely() or likelihood() function */
-#define EP_ConstFunc  0x100000 /* A SQLITE_FUNC_CONSTANT or _SLOCHNG function */
-#define EP_CanBeNull  0x200000 /* Can be null despite NOT NULL constraint */
-#define EP_Subquery   0x400000 /* Tree contains a TK_SELECT operator */
-#define EP_Leaf       0x800000 /* Expr.pLeft, .pRight, .u.pSelect all NULL */
-#define EP_WinFunc   0x1000000 /* TK_FUNCTION with Expr.y.pWin set */
-#define EP_Subrtn    0x2000000 /* Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS */
-#define EP_Quoted    0x4000000 /* TK_ID was originally quoted */
-#define EP_Static    0x8000000 /* Held in memory not obtained from malloc() */
-#define EP_IsTrue   0x10000000 /* Always has boolean value of TRUE */
-#define EP_IsFalse  0x20000000 /* Always has boolean value of FALSE */
-#define EP_FromDDL  0x40000000 /* Originates from sqlite_schema */
-               /*   0x80000000 // Available */
-
-/* The EP_Propagate mask is a set of properties that automatically propagate
-** upwards into parent nodes.
-*/
-#define EP_Propagate (EP_Collate|EP_Subquery|EP_HasFunc)
-
 /* Macros can be used to test, set, or clear bits in the
 ** Expr.flags field.
 */

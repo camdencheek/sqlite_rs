@@ -238,3 +238,47 @@ pub unsafe extern "C" fn sqlite3TableColumnAffinity(pTab: *const Table, iCol: c_
 
     (*(*pTab).aCol.add(iCol as usize)).affinity
 }
+
+/* The following are the meanings of bits in the Expr.flags field.
+** Value restrictions:
+**
+**          EP_Agg == NC_HasAgg == SF_HasAgg
+**          EP_Win == NC_HasWin
+*/
+pub const EP_OuterON: u32 = 0x000001; /* Originates in ON/USING clause of outer join */
+pub const EP_InnerON: u32 = 0x000002; /* Originates in ON/USING of an inner join */
+pub const EP_Distinct: u32 = 0x000004; /* Aggregate function with DISTINCT keyword */
+pub const EP_HasFunc: u32 = 0x000008; /* Contains one or more functions of any kind */
+pub const EP_Agg: u32 = 0x000010; /* Contains one or more aggregate functions */
+pub const EP_FixedCol: u32 = 0x000020; /* TK_Column with a known fixed value */
+pub const EP_VarSelect: u32 = 0x000040; /* pSelect is correlated, not constant */
+pub const EP_DblQuoted: u32 = 0x000080; /* token.z was originally in "..." */
+pub const EP_InfixFunc: u32 = 0x000100; /* True for an infix function: LIKE, GLOB, etc */
+pub const EP_Collate: u32 = 0x000200; /* Tree contains a TK_COLLATE operator */
+pub const EP_Commuted: u32 = 0x000400; /* Comparison operator has been commuted */
+pub const EP_IntValue: u32 = 0x000800; /* Integer value contained in u.iValue */
+pub const EP_xIsSelect: u32 = 0x001000; /* x.pSelect is valid (otherwise x.pList is) */
+pub const EP_Skip: u32 = 0x002000; /* Operator does not contribute to affinity */
+pub const EP_Reduced: u32 = 0x004000; /* Expr struct EXPR_REDUCEDSIZE bytes only */
+pub const EP_Win: u32 = 0x008000; /* Contains window functions */
+pub const EP_TokenOnly: u32 = 0x010000; /* Expr struct EXPR_TOKENONLYSIZE bytes only */
+/* 0x020000 // Available for reuse */
+pub const EP_IfNullRow: u32 = 0x040000; /* The TK_IF_NULL_ROW opcode */
+pub const EP_Unlikely: u32 = 0x080000; /* unlikely() or likelihood() function */
+pub const EP_ConstFunc: u32 = 0x100000; /* A SQLITE_FUNC_CONSTANT or _SLOCHNG function */
+pub const EP_CanBeNull: u32 = 0x200000; /* Can be null despite NOT NULL constraint */
+pub const EP_Subquery: u32 = 0x400000; /* Tree contains a TK_SELECT operator */
+pub const EP_Leaf: u32 = 0x800000; /* Expr.pLeft, .pRight, .u.pSelect all NULL */
+pub const EP_WinFunc: u32 = 0x1000000; /* TK_FUNCTION with Expr.y.pWin set */
+pub const EP_Subrtn: u32 = 0x2000000; /* Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS */
+pub const EP_Quoted: u32 = 0x4000000; /* TK_ID was originally quoted */
+pub const EP_Static: u32 = 0x8000000; /* Held in memory not obtained from malloc() */
+pub const EP_IsTrue: u32 = 0x10000000; /* Always has boolean value of TRUE */
+pub const EP_IsFalse: u32 = 0x20000000; /* Always has boolean value of FALSE */
+pub const EP_FromDDL: u32 = 0x40000000; /* Originates from sqlite_schema */
+/*   0x80000000 // Available */
+
+/* The EP_Propagate mask is a set of properties that automatically propagate
+** upwards into parent nodes.
+*/
+pub const EP_Propagate: u32 = (EP_Collate | EP_Subquery | EP_HasFunc);
