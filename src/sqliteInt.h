@@ -2334,16 +2334,6 @@ typedef i16 ynVar;
 typedef int ynVar;
 #endif
 
-/* Macros can be used to test, set, or clear bits in the
-** Expr.flags field.
-*/
-#define ExprHasProperty(E,P)     (((E)->flags&(P))!=0)
-#define ExprHasAllProperty(E,P)  (((E)->flags&(P))==(P))
-#define ExprSetProperty(E,P)     (E)->flags|=(P)
-#define ExprClearProperty(E,P)   (E)->flags&=~(P)
-#define ExprAlwaysTrue(E)   (((E)->flags&(EP_OuterON|EP_IsTrue))==EP_IsTrue)
-#define ExprAlwaysFalse(E)  (((E)->flags&(EP_OuterON|EP_IsFalse))==EP_IsFalse)
-
 /* Macros used to ensure that the correct members of unions are accessed
 ** in Expr.
 */

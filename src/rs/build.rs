@@ -45,6 +45,7 @@ fn main() {
             prefix_with_name: true,
             ..Default::default()
         },
+        documentation: false,
         export: ExportConfig {
             include: vec![
                 "sqlite3UpperToLower".into(),

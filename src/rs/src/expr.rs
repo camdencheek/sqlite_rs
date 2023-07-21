@@ -105,22 +105,23 @@ pub struct Expr {
     // If the EP_Reduced flag is set in the Expr.flags mask, then no
     // space is allocated for the fields below this point. An attempt to
     // access them will result in a segfault or malfunction.
-
+    /// Height of the tree headed by this node
     // #if SQLITE_MAX_EXPR_DEPTH>0
-    nHeight: c_int, /* Height of the tree headed by this node */
-    // #endif
+    // TODO: implement SQLITE_MAX_EXPR_DEPTH
+    nHeight: c_int,
+
     /// TK_COLUMN: cursor number of table holding column
     /// TK_REGISTER: register number
     /// TK_TRIGGER: 1 -> new, 0 -> old
     /// EP_Unlikely:  134217728 times likelihood
     /// TK_IN: ephemerial table holding RHS
     /// TK_SELECT_COLUMN: Number of columns on the LHS
-    /// TK_SELECT: 1st register of result vector */
+    /// TK_SELECT: 1st register of result vector
     iTable: c_int,
 
     /// TK_COLUMN: column index.  -1 for rowid.
     /// TK_VARIABLE: variable number (always >= 1).
-    /// TK_SELECT_COLUMN: column of the result vector */
+    /// TK_SELECT_COLUMN: column of the result vector
     iColumn: ynVar,
 
     /// Which entry in pAggInfo->aCol[] or ->aFunc[]
@@ -130,6 +131,68 @@ pub struct Expr {
     /// Used by TK_AGG_COLUMN and TK_AGG_FUNCTION
     pAggInfo: *mut AggInfo,
     y: Expr_y,
+}
+
+impl Expr {
+    const fn has_property(&self, prop: u32) -> bool {
+        self.flags & prop != 0
+    }
+
+    const fn has_all_property(&self, props: u32) -> bool {
+        self.flags & props == props
+    }
+
+    fn set_property(&mut self, prop: u32) {
+        self.flags |= prop
+    }
+
+    fn clear_property(&mut self, prop: u32) {
+        self.flags &= !prop
+    }
+
+    const fn always_true(&self) -> bool {
+        (self.flags & (EP_OuterON | EP_IsTrue)) == EP_IsTrue
+    }
+
+    const fn always_false(&self) -> bool {
+        (self.flags & (EP_OuterON | EP_IsFalse)) == EP_IsFalse
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprHasProperty(e: *const Expr, p: u32) -> c_int {
+    let e = e.as_ref().unwrap();
+    e.has_property(p).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprHasAllProperty(e: *const Expr, p: u32) -> c_int {
+    let e = e.as_ref().unwrap();
+    e.has_all_property(p).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprSetProperty(e: *mut Expr, p: u32) {
+    let e = e.as_mut().unwrap();
+    e.set_property(p)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprClearProperty(e: *mut Expr, p: u32) {
+    let e = e.as_mut().unwrap();
+    e.clear_property(p)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprAlwaysTrue(e: *const Expr) -> c_int {
+    let e = e.as_ref().unwrap();
+    e.always_true().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprAlwaysFalse(e: *const Expr) -> c_int {
+    let e = e.as_ref().unwrap();
+    e.always_false().into()
 }
 
 #[repr(C)]
@@ -220,7 +283,7 @@ pub struct ExprList_item_fg {
     /// Term from the USING clause of a NestedFrom
     bUsingTerm: u8,
     /// Term is an auxiliary in NestedFrom and should
-    /// not be expanded by "*" in parent queries */
+    /// not be expanded by "*" in parent queries
     bNoExpand: u8,
 
     u: ExprList_item_u,
