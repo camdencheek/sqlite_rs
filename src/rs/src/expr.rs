@@ -185,6 +185,35 @@ impl Expr {
     const fn use_y_sub(&self) -> bool {
         self.flags & EP_Subrtn != 0
     }
+
+    #[allow(unused_variables, dead_code)]
+    fn set_vva_property(&mut self, p: u8) {
+        #[cfg(debug)]
+        {
+            self.vvaFlags |= p
+        }
+    }
+
+    #[allow(unused_variables, dead_code)]
+    fn clear_vva_properties(&mut self) {
+        #[cfg(debug)]
+        {
+            self.vvaFlags = 0
+        }
+    }
+
+    #[allow(unused_variables, dead_code)]
+    fn has_vva_property(&self, p: u8) -> bool {
+        #[cfg(debug)]
+        {
+            self.vvaFlags & p != 0
+        }
+
+        #[cfg(not(debug))]
+        {
+            false
+        }
+    }
 }
 
 #[no_mangle]
@@ -250,6 +279,25 @@ pub unsafe extern "C" fn ExprUseYWin(e: &Expr) -> c_int {
 #[no_mangle]
 pub unsafe extern "C" fn ExprUseYSub(e: &Expr) -> c_int {
     e.use_y_sub().into()
+}
+
+/* The ExprSetVVAProperty() macro is used for Verification, Validation,
+** and Accreditation only.  It works like ExprSetProperty() during VVA
+** processes but is a no-op for delivery.
+*/
+#[no_mangle]
+pub unsafe extern "C" fn ExprSetVVAProperty(e: &mut Expr, p: u8) {
+    e.set_vva_property(p)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprHasVVAProperty(e: &Expr, p: u8) -> c_int {
+    e.has_vva_property(p).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ExprClearVVAProperties(e: &mut Expr) {
+    e.clear_vva_properties()
 }
 
 #[repr(C)]
@@ -436,3 +484,8 @@ pub const EP_FromDDL: u32 = 0x40000000; /* Originates from sqlite_schema */
 ** upwards into parent nodes.
 */
 pub const EP_Propagate: u32 = (EP_Collate | EP_Subquery | EP_HasFunc);
+
+/* Flags for use with Expr.vvaFlags
+*/
+pub const EP_NoReduce: u8 = 0x01; /* Cannot EXPRDUP_REDUCE this Expr */
+pub const EP_Immutable: u8 = 0x02; /* Do not change this Expr node */

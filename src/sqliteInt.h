@@ -2334,25 +2334,6 @@ typedef i16 ynVar;
 typedef int ynVar;
 #endif
 
-/* Flags for use with Expr.vvaFlags
-*/
-#define EP_NoReduce   0x01  /* Cannot EXPRDUP_REDUCE this Expr */
-#define EP_Immutable  0x02  /* Do not change this Expr node */
-
-/* The ExprSetVVAProperty() macro is used for Verification, Validation,
-** and Accreditation only.  It works like ExprSetProperty() during VVA
-** processes but is a no-op for delivery.
-*/
-#ifdef SQLITE_DEBUG
-# define ExprSetVVAProperty(E,P)   (E)->vvaFlags|=(P)
-# define ExprHasVVAProperty(E,P)   (((E)->vvaFlags&(P))!=0)
-# define ExprClearVVAProperties(E) (E)->vvaFlags = 0
-#else
-# define ExprSetVVAProperty(E,P)
-# define ExprHasVVAProperty(E,P)   0
-# define ExprClearVVAProperties(E)
-#endif
-
 /*
 ** Macros to determine the number of bytes required by a normal Expr
 ** struct, an Expr struct with the EP_Reduced flag set in Expr.flags
