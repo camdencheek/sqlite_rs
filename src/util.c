@@ -18,6 +18,7 @@
 #include "sqliteInt.h"
 #include "sqlite3_rs.h"
 #include <stdarg.h>
+#include "sqlite3_rs.h"
 #ifndef SQLITE_OMIT_FLOATING_POINT
 #include <math.h>
 #endif
@@ -47,27 +48,6 @@ int sqlite3FaultSim(int iTest){
   return xCallback ? xCallback(iTest) : SQLITE_OK;
 }
 #endif
-
-#ifndef SQLITE_OMIT_FLOATING_POINT
-/*
-** Return true if the floating point value is Not a Number (NaN).
-**
-** Use the math library isnan() function if compiled with SQLITE_HAVE_ISNAN.
-** Otherwise, we have our own implementation that works on most systems.
-*/
-int sqlite3IsNaN(double x){
-  int rc;   /* The value return */
-#if !SQLITE_HAVE_ISNAN && !HAVE_ISNAN
-  u64 y;
-  memcpy(&y,&x,sizeof(y));
-  rc = IsNaN(y);
-#else
-  rc = isnan(x);
-#endif /* HAVE_ISNAN */
-  testcase( rc );
-  return rc;
-}
-#endif /* SQLITE_OMIT_FLOATING_POINT */
 
 /*
 ** Compute a string length that is limited to what can be stored in

@@ -33,6 +33,10 @@ fn main() {
                 "enable_explain_comments".into(),
                 "SQLITE_ENABLE_EXPLAIN_COMMENTS".into(),
             );
+            h.insert(
+                "omit_floating_point".into(),
+                "SQLITE_OMIT_FLOATING_POINT".into(),
+            );
             h
         },
         function: FunctionConfig {
