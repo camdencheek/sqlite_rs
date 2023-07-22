@@ -58,6 +58,10 @@ pub struct Column {
 }
 
 impl Column {
+    /// Return the declared type of the column, or None if the column has no declared type.
+    ///
+    /// The column type is an extra string stored after the zero-terminator on the column name if
+    /// and only if the COLFLAG_HASTYPE flag is set.
     pub unsafe fn std_type(&self) -> Option<*const c_char> {
         if self.colFlags & Colflag::Hastype as u16 != 0 {
             Some(self.zCnName.add(strlen(self.zCnName) + 1))
@@ -72,9 +76,6 @@ impl Column {
 
 /// Return the declared type of a column.  Or return zDflt if the column
 /// has no declared type.
-///
-/// The column type is an extra string stored after the zero-terminator on
-/// the column name if and only if the COLFLAG_HASTYPE flag is set.
 #[no_mangle]
 pub unsafe extern "C" fn sqlite3ColumnType(col: &mut Column, default: *mut c_char) -> *mut c_char {
     if let Some(z) = col.std_type() {
