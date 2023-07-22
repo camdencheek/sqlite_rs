@@ -37,7 +37,7 @@ pub struct Column {
     szEst: u8,            /* Est size of value in this column. sizeof(INT)==1 */
     hName: u8,            /* Column name hash for faster lookup */
     iDflt: u16,           /* 1-based index of DEFAULT.  0 means "none" */
-    colFlags: u16,        /* Boolean properties.  See COLFLAG_ defines below */
+    pub colFlags: u16,    /* Boolean properties.  See COLFLAG_ defines below */
 }
 
 /* Allowed values for Column.eCType.
@@ -82,31 +82,6 @@ pub enum Colflag {
     Noexpand = 0x0400,  /* Omit this column when expanding "*" */
     Generated = 0x0060, /* Combo: _STORED, _VIRTUAL */
     Noinsert = 0x0062,  /* Combo: _HIDDEN, _STORED, _VIRTUAL */
-}
-
-/*
-** Column affinity types.
-**
-** These used to have mnemonic name like 'i' for SQLITE_AFF_INTEGER and
-** 't' for SQLITE_AFF_TEXT.  But we can save a little space and improve
-** the speed a little by numbering the values consecutively.
-**
-** But rather than start with 0 or 1, we begin with 'A'.  That way,
-** when multiple affinity types are concatenated into a string and
-** used as the P4 operand, they will be more readable.
-**
-** Note also that the numeric types are grouped together so that testing
-** for a numeric type is a single comparison.  And the BLOB type is first.
-*/
-#[repr(u8)]
-pub enum SqliteAff {
-    None = 0x40,    /* '@' */
-    Blob = 0x41,    /* 'A' */
-    Text = 0x42,    /* 'B' */
-    Numeric = 0x43, /* 'C' */
-    Integer = 0x44, /* 'D' */
-    Real = 0x45,    /* 'E' */
-    Flexnum = 0x46, /* 'F' */
 }
 
 /*

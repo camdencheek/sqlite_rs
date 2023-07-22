@@ -2,7 +2,7 @@ use crate::never;
 use crate::select::Select;
 use crate::table::Table;
 use crate::window::Window;
-use crate::{agg::AggInfo, column::SqliteAff};
+use crate::{agg::AggInfo, global::SqliteAff};
 use libc::{c_char, c_int};
 
 // TODO: compiletime option to switch this data type as defined in sqliteInt.h

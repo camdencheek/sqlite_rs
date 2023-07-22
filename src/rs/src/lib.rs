@@ -7,6 +7,7 @@ mod expr;
 mod fkey;
 mod from;
 mod func;
+mod global;
 mod hash;
 mod id;
 mod index;

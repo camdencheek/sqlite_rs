@@ -2,6 +2,8 @@ use std::ffi::CStr;
 
 use libc::{c_char, c_int, strlen};
 
+use crate::column::{Colflag, Column, SQLITE_N_STDTYPE};
+
 /// Return true if the floating point value is Not a Number (NaN).
 #[cfg(not(omit_floating_point))]
 #[no_mangle]
