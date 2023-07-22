@@ -1,4 +1,7 @@
-use cbindgen::{Config, EnumConfig, ExportConfig, FunctionConfig, ItemType, Language, RenameRule};
+use cbindgen::{
+    Config, EnumConfig, ExportConfig, FunctionConfig, ItemType, Language, MacroExpansionConfig,
+    RenameRule,
+};
 use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
@@ -16,6 +19,7 @@ fn main() {
     let config = Config {
         include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
+        macro_expansion: MacroExpansionConfig { bitflags: true },
         defines: {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());

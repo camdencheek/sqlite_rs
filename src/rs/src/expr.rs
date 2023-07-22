@@ -1,12 +1,12 @@
 use std::ptr;
 
 use crate::build::sqlite3AffinityType;
-use crate::never;
 use crate::select::Select;
 use crate::table::Table;
 use crate::token_type::TK;
 use crate::window::Window;
 use crate::{agg::AggInfo, global::SqliteAff};
+use bitflags::bitflags;
 use libc::{c_char, c_int};
 
 // TODO: compiletime option to switch this data type as defined in sqliteInt.h
@@ -91,8 +91,8 @@ pub struct Expr {
     #[cfg(debug)]
     vvaFlags: u8,
 
-    /// Various flags.  EP_* See below
-    flags: u32,
+    /// Various flags. See ExprProps below
+    flags: EP,
 
     u: Expr_u,
 
@@ -138,56 +138,56 @@ pub struct Expr {
 }
 
 impl Expr {
-    const fn has_property(&self, prop: u32) -> bool {
-        self.flags & prop != 0
+    fn has_any_property(&self, prop: EP) -> bool {
+        !(self.flags & prop).is_empty()
     }
 
-    const fn has_all_property(&self, props: u32) -> bool {
-        self.flags & props == props
+    const fn has_all_properties(&self, props: EP) -> bool {
+        self.flags.contains(props)
     }
 
-    fn set_property(&mut self, prop: u32) {
+    fn set_property(&mut self, prop: EP) {
         self.flags |= prop
     }
 
-    fn clear_property(&mut self, prop: u32) {
+    fn clear_property(&mut self, prop: EP) {
         self.flags &= !prop
     }
 
     const fn always_true(&self) -> bool {
-        (self.flags & (EP_OuterON | EP_IsTrue)) == EP_IsTrue
+        self.flags.contains(EP::IsTrue) && !self.flags.contains(EP::OuterON)
     }
 
     const fn always_false(&self) -> bool {
-        (self.flags & (EP_OuterON | EP_IsFalse)) == EP_IsFalse
+        self.flags.contains(EP::IsFalse) && !self.flags.contains(EP::OuterON)
     }
 
     const fn use_u_token(&self) -> bool {
-        self.flags & EP_IntValue == 0
+        !self.flags.contains(EP::IntValue)
     }
 
     const fn use_u_value(&self) -> bool {
-        self.flags & EP_IntValue != 0
+        self.flags.contains(EP::IntValue)
     }
 
     const fn use_x_list(&self) -> bool {
-        self.flags & EP_xIsSelect == 0
+        !self.flags.contains(EP::xIsSelect)
     }
 
     const fn use_x_select(&self) -> bool {
-        self.flags & EP_xIsSelect != 0
+        self.flags.contains(EP::xIsSelect)
     }
 
-    const fn use_y_tab(&self) -> bool {
-        self.flags & (EP_WinFunc | EP_Subrtn) == 0
+    fn use_y_tab(&self) -> bool {
+        (self.flags & (EP::WinFunc | EP::Subrtn)).is_empty()
     }
 
     const fn use_y_win(&self) -> bool {
-        self.flags & EP_WinFunc != 0
+        self.flags.contains(EP::WinFunc)
     }
 
     const fn use_y_sub(&self) -> bool {
-        self.flags & EP_Subrtn != 0
+        self.flags.contains(EP::Subrtn)
     }
 
     #[allow(unused_variables, dead_code)]
@@ -259,7 +259,7 @@ impl Expr {
             }
             #[cfg(not(omit_cast))]
             if op == TK::CAST {
-                assert!(!expr.has_property(EP_IntValue));
+                assert!(!expr.has_any_property(EP::IntValue));
                 return sqlite3AffinityType(expr.u.zToken, ptr::null_mut());
             }
             if op == TK::SELECT_COLUMN {
@@ -283,7 +283,7 @@ impl Expr {
                     .unwrap()
                     .affinity();
             }
-            if expr.has_property(EP_Skip | EP_IfNullRow) {
+            if expr.has_any_property(EP::Skip | EP::IfNullRow) {
                 assert!(
                     expr.op == TK::COLLATE
                         || expr.op == TK::IF_NULL_ROW
@@ -386,22 +386,23 @@ pub unsafe extern "C" fn sqlite3ExprAffinity(expr: &Expr) -> c_char {
 
 #[no_mangle]
 pub unsafe extern "C" fn ExprHasProperty(e: &Expr, p: u32) -> c_int {
-    e.has_property(p).into()
+    // Using from_bits_retain in case there is any additional info encoded
+    e.has_any_property(EP::from_bits_retain(p)).into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ExprHasAllProperty(e: &Expr, p: u32) -> c_int {
-    e.has_all_property(p).into()
+    e.has_all_properties(EP::from_bits_retain(p)).into()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ExprSetProperty(e: &mut Expr, p: u32) {
-    e.set_property(p)
+    e.set_property(EP::from_bits_retain(p))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ExprClearProperty(e: &mut Expr, p: u32) {
-    e.clear_property(p)
+    e.clear_property(EP::from_bits_retain(p))
 }
 
 #[no_mangle]
@@ -616,47 +617,56 @@ pub unsafe extern "C" fn sqlite3TableColumnAffinity(table: &Table, col: c_int) -
     table.column_affinity(col)
 }
 
-/// The following are the meanings of bits in the Expr.flags field.
-/// Value restrictions:
-///    EP_Agg == NC_HasAgg == SF_HasAgg
-///    EP_Win == NC_HasWin
-pub const EP_OuterON: u32 = 0x000001; /* Originates in ON/USING clause of outer join */
-pub const EP_InnerON: u32 = 0x000002; /* Originates in ON/USING of an inner join */
-pub const EP_Distinct: u32 = 0x000004; /* Aggregate function with DISTINCT keyword */
-pub const EP_HasFunc: u32 = 0x000008; /* Contains one or more functions of any kind */
-pub const EP_Agg: u32 = 0x000010; /* Contains one or more aggregate functions */
-pub const EP_FixedCol: u32 = 0x000020; /* TK_Column with a known fixed value */
-pub const EP_VarSelect: u32 = 0x000040; /* pSelect is correlated, not constant */
-pub const EP_DblQuoted: u32 = 0x000080; /* token.z was originally in "..." */
-pub const EP_InfixFunc: u32 = 0x000100; /* True for an infix function: LIKE, GLOB, etc */
-pub const EP_Collate: u32 = 0x000200; /* Tree contains a TK_COLLATE operator */
-pub const EP_Commuted: u32 = 0x000400; /* Comparison operator has been commuted */
-pub const EP_IntValue: u32 = 0x000800; /* Integer value contained in u.iValue */
-pub const EP_xIsSelect: u32 = 0x001000; /* x.pSelect is valid (otherwise x.pList is) */
-pub const EP_Skip: u32 = 0x002000; /* Operator does not contribute to affinity */
-pub const EP_Reduced: u32 = 0x004000; /* Expr struct EXPR_REDUCEDSIZE bytes only */
-pub const EP_Win: u32 = 0x008000; /* Contains window functions */
-pub const EP_TokenOnly: u32 = 0x010000; /* Expr struct EXPR_TOKENONLYSIZE bytes only */
-/* 0x020000 // Available for reuse */
-pub const EP_IfNullRow: u32 = 0x040000; /* The TK_IF_NULL_ROW opcode */
-pub const EP_Unlikely: u32 = 0x080000; /* unlikely() or likelihood() function */
-pub const EP_ConstFunc: u32 = 0x100000; /* A SQLITE_FUNC_CONSTANT or _SLOCHNG function */
-pub const EP_CanBeNull: u32 = 0x200000; /* Can be null despite NOT NULL constraint */
-pub const EP_Subquery: u32 = 0x400000; /* Tree contains a TK_SELECT operator */
-pub const EP_Leaf: u32 = 0x800000; /* Expr.pLeft, .pRight, .u.pSelect all NULL */
-pub const EP_WinFunc: u32 = 0x1000000; /* TK_FUNCTION with Expr.y.pWin set */
-pub const EP_Subrtn: u32 = 0x2000000; /* Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS */
-pub const EP_Quoted: u32 = 0x4000000; /* TK_ID was originally quoted */
-pub const EP_Static: u32 = 0x8000000; /* Held in memory not obtained from malloc() */
-pub const EP_IsTrue: u32 = 0x10000000; /* Always has boolean value of TRUE */
-pub const EP_IsFalse: u32 = 0x20000000; /* Always has boolean value of FALSE */
-pub const EP_FromDDL: u32 = 0x40000000; /* Originates from sqlite_schema */
-/*   0x80000000 // Available */
+bitflags! {
+    /// The following are the meanings of bits in the Expr.flags field.
+    /// Value restrictions:
+    ///    EP_Agg == NC_HasAgg == SF_HasAgg
+    ///    EP_Win == NC_HasWin
+    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+    #[repr(transparent)]
+    struct EP: u32 {
+        const OuterON = 0x000001; /* Originates in ON/USING clause of outer join */
+        const InnerON = 0x000002; /* Originates in ON/USING of an inner join */
+        const Distinct = 0x000004; /* Aggregate function with DISTINCT keyword */
+        const HasFunc = 0x000008; /* Contains one or more functions of any kind */
+        const Agg = 0x000010; /* Contains one or more aggregate functions */
+        const FixedCol = 0x000020; /* TK_Column with a known fixed value */
+        const VarSelect = 0x000040; /* pSelect is correlated, not constant */
+        const DblQuoted = 0x000080; /* token.z was originally in "..." */
+        const InfixFunc = 0x000100; /* True for an infix function: LIKE, GLOB, etc */
+        const Collate = 0x000200; /* Tree contains a TK_COLLATE operator */
+        const Commuted = 0x000400; /* Comparison operator has been commuted */
+        const IntValue = 0x000800; /* Integer value contained in u.iValue */
+        const xIsSelect = 0x001000; /* x.pSelect is valid (otherwise x.pList is) */
+        const Skip = 0x002000; /* Operator does not contribute to affinity */
+        const Reduced = 0x004000; /* Expr struct EXPR_REDUCEDSIZE bytes only */
+        const Win = 0x008000; /* Contains window functions */
+        const TokenOnly = 0x010000; /* Expr struct EXPR_TOKENONLYSIZE bytes only */
+        /* 0x020000 // Available for reuse */
+        const IfNullRow = 0x040000; /* The TK_IF_NULL_ROW opcode */
+        const Unlikely = 0x080000; /* unlikely() or likelihood() function */
+        const ConstFunc = 0x100000; /* A SQLITE_FUNC_CONSTANT or _SLOCHNG function */
+        const CanBeNull = 0x200000; /* Can be null despite NOT NULL constraint */
+        const Subquery = 0x400000; /* Tree contains a TK_SELECT operator */
+        const Leaf = 0x800000; /* Expr.pLeft, .pRight, .u.pSelect all NULL */
+        const WinFunc = 0x1000000; /* TK_FUNCTION with Expr.y.pWin set */
+        const Subrtn = 0x2000000; /* Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS */
+        const Quoted = 0x4000000; /* TK_ID was originally quoted */
+        const Static = 0x8000000; /* Held in memory not obtained from malloc() */
+        const IsTrue = 0x10000000; /* Always has boolean value of TRUE */
+        const IsFalse = 0x20000000; /* Always has boolean value of FALSE */
+        const FromDDL = 0x40000000; /* Originates from sqlite_schema */
+        /*   0x80000000 // Available */
 
-/* The EP_Propagate mask is a set of properties that automatically propagate
-** upwards into parent nodes.
-*/
-pub const EP_Propagate: u32 = (EP_Collate | EP_Subquery | EP_HasFunc);
+        /* The Propagate mask is a set of properties that automatically propagate
+        ** upwards into parent nodes.
+        */
+        // TODO: define this more const-like
+        // const Propagate = Self::Collate.bits() | Self::Subquery.bits() | Self::HasFunc.bits();
+        const Propagate = 0x000200 | 0x400000 | 0x000008;
+    }
+
+}
 
 /* Flags for use with Expr.vvaFlags
 */
