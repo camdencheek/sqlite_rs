@@ -1,12 +1,13 @@
-use crate::column::Column;
 use crate::expr::ExprList;
 use crate::fkey::FKey;
+use crate::global::SqliteAff;
 use crate::index::Index;
 use crate::schema::Schema;
 use crate::select::Select;
 use crate::trigger::Trigger;
 use crate::util::log_est::LogEst;
 use crate::vtable::VTable;
+use crate::{column::Column, never};
 
 use libc::{c_char, c_int};
 
@@ -42,6 +43,16 @@ pub struct Table {
     u: Table_u,
     pTrigger: *mut Trigger, /* List of triggers on this object */
     pSchema: *mut Schema,   /* Schema that contains this table */
+}
+
+impl Table {
+    pub unsafe fn column_affinity(&self, col: c_int) -> c_char {
+        if col < 0 || never!(col >= self.nCol as c_int) {
+            return SqliteAff::Integer as c_char;
+        }
+
+        (*self.aCol.add(col as usize)).affinity
+    }
 }
 
 #[repr(C)]

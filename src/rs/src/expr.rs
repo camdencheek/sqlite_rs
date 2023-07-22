@@ -240,7 +240,12 @@ impl Expr {
             if op == TK::COLUMN || (op == TK::AGG_COLUMN && !expr.y.pTab.is_null()) {
                 assert!(expr.use_y_tab());
                 assert!(!expr.y.pTab.is_null());
-                return sqlite3TableColumnAffinity(expr.y.pTab, expr.iColumn as c_int);
+                return expr
+                    .y
+                    .pTab
+                    .as_ref()
+                    .unwrap()
+                    .column_affinity(expr.iColumn as c_int);
             }
             if op == TK::SELECT {
                 assert!(expr.use_x_select());
@@ -607,12 +612,8 @@ pub struct IndexedExpr {
 
 /// Return the affinity character for a single column of a table.
 #[no_mangle]
-pub unsafe extern "C" fn sqlite3TableColumnAffinity(pTab: *const Table, iCol: c_int) -> c_char {
-    if iCol < 0 || never!(iCol >= (*pTab).nCol as c_int) {
-        return SqliteAff::Integer as c_char;
-    }
-
-    (*(*pTab).aCol.add(iCol as usize)).affinity
+pub unsafe extern "C" fn sqlite3TableColumnAffinity(table: &Table, col: c_int) -> c_char {
+    table.column_affinity(col)
 }
 
 /// The following are the meanings of bits in the Expr.flags field.
