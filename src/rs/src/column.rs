@@ -34,16 +34,27 @@ pub struct Column {
     // terminator, so treating this as a normal c string is not safe.
     zCnName: *mut c_char,
 
+    /// An OE_ code for handling a NOT NULL constraint
     // TODO: merge notNull and eCType into a single 8-bit field
-    notNull: u8, /* An OE_ code for handling a NOT NULL constraint */
+    notNull: u8,
+
     /// One of the standard types. Or zero if not a standard type.
     eCType: u8,
 
-    pub affinity: c_char, /* One of the SQLITE_AFF_... values */
-    szEst: u8,            /* Est size of value in this column. sizeof(INT)==1 */
-    hName: u8,            /* Column name hash for faster lookup */
-    iDflt: u16,           /* 1-based index of DEFAULT.  0 means "none" */
-    pub colFlags: u16,    /* Boolean properties.  See COLFLAG_ defines below */
+    /// One of the SQLITE_AFF_... values
+    pub affinity: c_char,
+
+    /// Est size of value in this column. sizeof(INT)==1
+    szEst: u8,
+
+    /// Column name hash for faster lookup
+    hName: u8,
+
+    /// 1-based index of DEFAULT. 0 means "none"
+    iDflt: u16,
+
+    /// Boolean properties. See COLFLAG_ defines below
+    pub colFlags: u16,
 }
 
 impl Column {
