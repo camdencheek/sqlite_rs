@@ -20,6 +20,7 @@ fn main() {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());
             h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
+            h.insert("omit_cast".into(), "SQLITE_OMIT_CAST".into());
             h.insert(
                 "omit_shared_cache".into(),
                 "SQLITE_OMIT_SHARED_CACHE".into(),

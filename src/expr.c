@@ -18,68 +18,18 @@
 static void exprCodeBetween(Parse*,Expr*,int,void(*)(Parse*,Expr*,int,int),int);
 static int exprCodeVector(Parse *pParse, Expr *p, int *piToFree);
 
-/*
-** Return the 'affinity' of the expression pExpr if any.
-**
-** If pExpr is a column, a reference to a column via an 'AS' alias,
-** or a sub-select with a column as the return value, then the 
-** affinity of that column is returned. Otherwise, 0x00 is returned,
-** indicating no affinity for the expression.
-**
-** i.e. the WHERE clause expressions in the following statements all
-** have an affinity:
-**
-** CREATE TABLE t1(a);
-** SELECT * FROM t1 WHERE a;
-** SELECT a AS b FROM t1 WHERE b;
-** SELECT * FROM t1 WHERE (select a from t1);
-*/
-char sqlite3ExprAffinity(const Expr *pExpr){
-  int op;
-  op = pExpr->op;
-  while( 1 /* exit-by-break */ ){
-    if( op==TK_COLUMN || (op==TK_AGG_COLUMN && pExpr->y.pTab!=0) ){
-      assert( ExprUseYTab(pExpr) );
-      assert( pExpr->y.pTab!=0 );
-      return sqlite3TableColumnAffinity(pExpr->y.pTab, pExpr->iColumn);
-    }
-    if( op==TK_SELECT ){
-      assert( ExprUseXSelect(pExpr) );
-      assert( pExpr->x.pSelect!=0 );
-      assert( pExpr->x.pSelect->pEList!=0 );
-      assert( pExpr->x.pSelect->pEList->a[0].pExpr!=0 );
-      return sqlite3ExprAffinity(pExpr->x.pSelect->pEList->a[0].pExpr);
-    }
-#ifndef SQLITE_OMIT_CAST
-    if( op==TK_CAST ){
-      assert( !ExprHasProperty(pExpr, EP_IntValue) );
-      return sqlite3AffinityType(pExpr->u.zToken, 0);
-    }
-#endif
-    if( op==TK_SELECT_COLUMN ){
-      assert( pExpr->pLeft!=0 && ExprUseXSelect(pExpr->pLeft) );
-      assert( pExpr->iColumn < pExpr->iTable );
-      assert( pExpr->iTable==pExpr->pLeft->x.pSelect->pEList->nExpr );
-      return sqlite3ExprAffinity(
-          pExpr->pLeft->x.pSelect->pEList->a[pExpr->iColumn].pExpr
-      );
-    }
-    if( op==TK_VECTOR ){
-      assert( ExprUseXList(pExpr) );
-      return sqlite3ExprAffinity(pExpr->x.pList->a[0].pExpr);
-    }
-    if( ExprHasProperty(pExpr, EP_Skip|EP_IfNullRow) ){
-      assert( pExpr->op==TK_COLLATE
-           || pExpr->op==TK_IF_NULL_ROW
-           || (pExpr->op==TK_REGISTER && pExpr->op2==TK_IF_NULL_ROW) );
-      pExpr = pExpr->pLeft;
-      op = pExpr->op;
-      continue;
-    }
-    if( op!=TK_REGISTER || (op = pExpr->op2)==TK_REGISTER ) break;
-  }
-  return pExpr->affExpr;
+ExprList_item *sqlite3ExprListItems(ExprList *pEList) {
+    return &pEList->a[0];
 }
+
+int sqlite3ExprListNExpr(const ExprList *pEList) {
+    return pEList->nExpr;
+}
+
+int sqlite3ExprListNAlloc(const ExprList *pEList) {
+    return pEList->nAlloc;
+}
+
 
 /*
 ** Make a guess at all the possible datatypes of the result that could

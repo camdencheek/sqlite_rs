@@ -30,18 +30,18 @@ pub struct Select {
     selFlags: u32,      /* Various SF_* values */
     iLimit: c_int,      /* Memory registers holding LIMIT & OFFSET counters */
     iOffset: c_int,
-    selId: u32,               /* Unique identifier number for this SELECT */
-    addrOpenEphm: [c_int; 2], /* OP_OpenEphem opcodes related to this select */
-    pEList: *mut ExprList,    /* The fields of the result */
-    pSrc: *mut SrcList,       /* The FROM clause */
-    pWhere: *mut Expr,        /* The WHERE clause */
-    pGroupBy: *mut ExprList,  /* The GROUP BY clause */
-    pHaving: *mut Expr,       /* The HAVING clause */
-    pOrderBy: *mut ExprList,  /* The ORDER BY clause */
-    pPrior: *mut Select,      /* Prior select in a compound select statement */
-    pNext: *mut Select,       /* Next select to the left in a compound */
-    pLimit: *mut Expr,        /* LIMIT expression. NULL means not used. */
-    pWith: *mut With,         /* WITH clause attached to this select. Or NULL. */
+    selId: u32,                /* Unique identifier number for this SELECT */
+    addrOpenEphm: [c_int; 2],  /* OP_OpenEphem opcodes related to this select */
+    pub pEList: *mut ExprList, /* The fields of the result */
+    pSrc: *mut SrcList,        /* The FROM clause */
+    pWhere: *mut Expr,         /* The WHERE clause */
+    pGroupBy: *mut ExprList,   /* The GROUP BY clause */
+    pHaving: *mut Expr,        /* The HAVING clause */
+    pOrderBy: *mut ExprList,   /* The ORDER BY clause */
+    pPrior: *mut Select,       /* Prior select in a compound select statement */
+    pNext: *mut Select,        /* Next select to the left in a compound */
+    pLimit: *mut Expr,         /* LIMIT expression. NULL means not used. */
+    pWith: *mut With,          /* WITH clause attached to this select. Or NULL. */
 
     #[cfg(not(omit_windowfunc))]
     pWin: *mut Window, /* List of window functions */

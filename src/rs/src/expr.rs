@@ -1,6 +1,10 @@
+use std::ptr;
+
+use crate::build::sqlite3AffinityType;
 use crate::never;
 use crate::select::Select;
 use crate::table::Table;
+use crate::token_type::TK;
 use crate::window::Window;
 use crate::{agg::AggInfo, global::SqliteAff};
 use libc::{c_char, c_int};
@@ -214,6 +218,92 @@ impl Expr {
             false
         }
     }
+
+    /// Return the 'affinity' of the expression pExpr if any.
+    ///
+    /// If pExpr is a column, a reference to a column via an 'AS' alias,
+    /// or a sub-select with a column as the return value, then the
+    /// affinity of that column is returned. Otherwise, 0x00 is returned,
+    /// indicating no affinity for the expression.
+    ///
+    /// i.e. the WHERE clause expressions in the following statements all
+    /// have an affinity:
+    ///
+    /// CREATE TABLE t1(a);
+    /// SELECT * FROM t1 WHERE a;
+    /// SELECT a AS b FROM t1 WHERE b;
+    /// SELECT * FROM t1 WHERE (select a from t1);
+    unsafe fn affinity(&self) -> c_char {
+        let mut op = self.op;
+        let mut expr = self;
+        loop {
+            if op == TK::COLUMN as u8 || (op == TK::AGG_COLUMN as u8 && !expr.y.pTab.is_null()) {
+                assert!(expr.use_y_tab());
+                assert!(!expr.y.pTab.is_null());
+                return sqlite3TableColumnAffinity(expr.y.pTab, expr.iColumn as c_int);
+            }
+            if op == TK::SELECT as u8 {
+                assert!(expr.use_x_select());
+                assert!(!expr.x.pSelect.is_null());
+                assert!(!(*expr.x.pSelect).pEList.is_null());
+                let sub_expr = (*sqlite3ExprListItems((*expr.x.pSelect).pEList))
+                    .pExpr
+                    .as_ref()
+                    .unwrap();
+                return sub_expr.affinity();
+            }
+            #[cfg(not(omit_cast))]
+            if op == TK::CAST as u8 {
+                assert!(!expr.has_property(EP_IntValue));
+                return sqlite3AffinityType(expr.u.zToken, ptr::null_mut());
+            }
+            if op == TK::SELECT_COLUMN as u8 {
+                let left = expr.pLeft.as_ref().unwrap();
+                assert!(left.use_x_select());
+                assert!((expr.iColumn as i32) < expr.iTable);
+                let left_select = left.x.pSelect.as_ref().unwrap();
+                let left_elist = left_select.pEList;
+                assert!(expr.iTable == sqlite3ExprListNExpr(left_elist));
+                return (*sqlite3ExprListItems(left_elist).add(expr.iColumn as usize))
+                    .pExpr
+                    .as_ref()
+                    .unwrap()
+                    .affinity();
+            }
+            if op == TK::VECTOR as u8 {
+                assert!(expr.use_x_list());
+                return (*sqlite3ExprListItems(expr.x.pList))
+                    .pExpr
+                    .as_ref()
+                    .unwrap()
+                    .affinity();
+            }
+            if expr.has_property(EP_Skip | EP_IfNullRow) {
+                assert!(
+                    expr.op == TK::COLLATE as u8
+                        || expr.op == TK::IF_NULL_ROW as u8
+                        || (expr.op == TK::REGISTER as u8 && expr.op2 == TK::IF_NULL_ROW as u8)
+                );
+                expr = expr.pLeft.as_ref().unwrap();
+                op = expr.op;
+                continue;
+            }
+            if op != TK::REGISTER as u8 {
+                break;
+            } else {
+                op = expr.op2;
+                if op == TK::REGISTER as u8 {
+                    break;
+                }
+            }
+        }
+        expr.affExpr
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprAffinity(expr: &Expr) -> c_char {
+    expr.affinity()
 }
 
 #[no_mangle]
@@ -348,6 +438,15 @@ pub struct Expr_sub {
 pub struct ExprList {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+extern "C" {
+    // cbindgen:ignore
+    fn sqlite3ExprListItems(el: *mut ExprList) -> *mut ExprList_item;
+    // cbindgen:ignore
+    fn sqlite3ExprListNExpr(el: *const ExprList) -> c_int;
+    // cbindgen:ignore
+    fn sqlite3ExprListNAlloc(el: *const ExprList) -> c_int;
 }
 
 /// For each expression in the list
