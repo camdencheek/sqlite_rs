@@ -76,7 +76,7 @@ type ynVar = i16;
 #[repr(C)]
 pub struct Expr {
     /// Operation performed by this node
-    op: u8,
+    op: TK,
 
     /// affinity, or RAISE type
     affExpr: c_char,
@@ -85,7 +85,7 @@ pub struct Expr {
     /// TK_COLUMN: the value of p5 for OP_Column
     /// TK_AGG_FUNCTION: nesting depth
     /// TK_FUNCTION: NC_SelfRef flag if needs OP_PureFunc
-    op2: u8,
+    op2: TK,
 
     /// Verification flags.
     #[cfg(debug)]
@@ -237,12 +237,12 @@ impl Expr {
         let mut op = self.op;
         let mut expr = self;
         loop {
-            if op == TK::COLUMN as u8 || (op == TK::AGG_COLUMN as u8 && !expr.y.pTab.is_null()) {
+            if op == TK::COLUMN || (op == TK::AGG_COLUMN && !expr.y.pTab.is_null()) {
                 assert!(expr.use_y_tab());
                 assert!(!expr.y.pTab.is_null());
                 return sqlite3TableColumnAffinity(expr.y.pTab, expr.iColumn as c_int);
             }
-            if op == TK::SELECT as u8 {
+            if op == TK::SELECT {
                 assert!(expr.use_x_select());
                 assert!(!expr.x.pSelect.is_null());
                 assert!(!(*expr.x.pSelect).pEList.is_null());
@@ -253,11 +253,11 @@ impl Expr {
                 return sub_expr.affinity();
             }
             #[cfg(not(omit_cast))]
-            if op == TK::CAST as u8 {
+            if op == TK::CAST {
                 assert!(!expr.has_property(EP_IntValue));
                 return sqlite3AffinityType(expr.u.zToken, ptr::null_mut());
             }
-            if op == TK::SELECT_COLUMN as u8 {
+            if op == TK::SELECT_COLUMN {
                 let left = expr.pLeft.as_ref().unwrap();
                 assert!(left.use_x_select());
                 assert!((expr.iColumn as i32) < expr.iTable);
@@ -270,7 +270,7 @@ impl Expr {
                     .unwrap()
                     .affinity();
             }
-            if op == TK::VECTOR as u8 {
+            if op == TK::VECTOR {
                 assert!(expr.use_x_list());
                 return (*sqlite3ExprListItems(expr.x.pList))
                     .pExpr
@@ -280,25 +280,98 @@ impl Expr {
             }
             if expr.has_property(EP_Skip | EP_IfNullRow) {
                 assert!(
-                    expr.op == TK::COLLATE as u8
-                        || expr.op == TK::IF_NULL_ROW as u8
-                        || (expr.op == TK::REGISTER as u8 && expr.op2 == TK::IF_NULL_ROW as u8)
+                    expr.op == TK::COLLATE
+                        || expr.op == TK::IF_NULL_ROW
+                        || (expr.op == TK::REGISTER && expr.op2 == TK::IF_NULL_ROW)
                 );
                 expr = expr.pLeft.as_ref().unwrap();
                 op = expr.op;
                 continue;
             }
-            if op != TK::REGISTER as u8 {
+            if op != TK::REGISTER {
                 break;
             } else {
                 op = expr.op2;
-                if op == TK::REGISTER as u8 {
+                if op == TK::REGISTER {
                     break;
                 }
             }
         }
         expr.affExpr
     }
+
+    /// Make a guess at all the possible datatypes of the result that could
+    /// be returned by an expression.  Return a bitmask indicating the answer:
+    ///
+    ///     0x01         Numeric
+    ///     0x02         Text
+    ///     0x04         Blob
+    ///
+    /// If the expression must return NULL, then 0x00 is returned.
+    unsafe fn data_type(&self) -> c_int {
+        let mut expr: *const Expr = self;
+        while !expr.is_null() {
+            match (*expr).op {
+                TK::COLLATE | TK::IF_NULL_ROW | TK::UPLUS => expr = (*expr).pLeft,
+                TK::NULL => {
+                    expr = ptr::null_mut();
+                }
+                TK::STRING => return 0x02,
+                TK::BLOB => return 0x04,
+                TK::CONCAT => return 0x06,
+                TK::VARIABLE | TK::AGG_FUNCTION | TK::FUNCTION => return 0x07,
+                TK::COLUMN
+                | TK::AGG_COLUMN
+                | TK::SELECT
+                | TK::CAST
+                | TK::SELECT_COLUMN
+                | TK::VECTOR => {
+                    let aff = expr.as_ref().unwrap().affinity();
+                    if aff >= SqliteAff::Numeric as i8 {
+                        return 0x05;
+                    }
+                    if aff == SqliteAff::Text as i8 {
+                        return 0x06;
+                    }
+                    return 0x07;
+                }
+                TK::CASE => {
+                    let mut res: c_int = 0;
+                    let pList = (*expr).x.pList;
+                    assert!((*expr).use_x_list() && !pList.is_null());
+                    assert!(sqlite3ExprListNExpr(pList) > 0);
+                    let nExpr = sqlite3ExprListNExpr(pList);
+                    let mut i: usize = 1;
+                    loop {
+                        if i >= nExpr as usize {
+                            break;
+                        }
+                        res |= (*sqlite3ExprListItems(pList).add(i))
+                            .pExpr
+                            .as_ref()
+                            .unwrap()
+                            .data_type();
+                        i += 2;
+                    }
+                    if nExpr % 2 != 0 {
+                        res |= (*sqlite3ExprListItems(pList).add(nExpr as usize - 1))
+                            .pExpr
+                            .as_ref()
+                            .unwrap()
+                            .data_type();
+                    }
+                    return res;
+                }
+                _ => return 0x01,
+            }
+        }
+        return 0x00;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprDataType(expr: &Expr) -> c_int {
+    expr.data_type()
 }
 
 #[no_mangle]
