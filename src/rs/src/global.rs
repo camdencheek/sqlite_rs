@@ -2,12 +2,12 @@ use std::ffi::CStr;
 
 #[repr(u8)]
 pub enum StdType {
-    Any,
-    Blob,
-    Int,
-    Integer,
-    Real,
-    Text,
+    Any = 1,
+    Blob = 2,
+    Int = 3,
+    Integer = 4,
+    Real = 5,
+    Text = 6,
 }
 
 /// Standard typenames.  These names must match the COLTYPE_* definitions.
@@ -27,6 +27,18 @@ impl StdType {
     const INTEGER_LEN: usize = Self::INTEGER_NAME.to_bytes().len();
     const REAL_LEN: usize = Self::REAL_NAME.to_bytes().len();
     const TEXT_LEN: usize = Self::TEXT_NAME.to_bytes().len();
+
+    pub const fn from_u8(u: u8) -> Option<Self> {
+        match u {
+            1 => Some(Self::Any),
+            2 => Some(Self::Blob),
+            3 => Some(Self::Int),
+            4 => Some(Self::Integer),
+            5 => Some(Self::Real),
+            6 => Some(Self::Text),
+            _ => None,
+        }
+    }
 
     /// The name of the data type
     pub const fn name(&self) -> &'static CStr {

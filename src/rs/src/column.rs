@@ -1,4 +1,6 @@
-use libc::{c_char, c_int};
+use libc::{c_char, c_int, strlen};
+
+use crate::global::{StdType, SQLITE_N_STDTYPE};
 
 /*
 ** Information about each column of an SQL table is held in an instance
@@ -27,17 +29,51 @@ use libc::{c_char, c_int};
 */
 #[repr(C)]
 pub struct Column {
-    zCnName: *mut c_char, /* Name of this column */
+    /// Name of this column
+    // NOTE: this might have a type name stored after the null
+    // terminator, so treating this as a normal c string is not safe.
+    zCnName: *mut c_char,
 
     // TODO: merge notNull and eCType into a single 8-bit field
     notNull: u8, /* An OE_ code for handling a NOT NULL constraint */
-    eCType: u8,  /* One of the standard types */
+    /// One of the standard types. Or zero if not a standard type.
+    eCType: u8,
 
     pub affinity: c_char, /* One of the SQLITE_AFF_... values */
     szEst: u8,            /* Est size of value in this column. sizeof(INT)==1 */
     hName: u8,            /* Column name hash for faster lookup */
     iDflt: u16,           /* 1-based index of DEFAULT.  0 means "none" */
     pub colFlags: u16,    /* Boolean properties.  See COLFLAG_ defines below */
+}
+
+impl Column {
+    pub unsafe fn std_type(&self) -> Option<*const c_char> {
+        if self.colFlags & Colflag::Hastype as u16 != 0 {
+            Some(self.zCnName.add(strlen(self.zCnName) + 1))
+        } else if self.eCType != 0 {
+            debug_assert!(self.eCType <= SQLITE_N_STDTYPE);
+            Some(StdType::from_u8(self.eCType).unwrap().name().as_ptr())
+        } else {
+            None
+        }
+    }
+}
+
+/// Return the declared type of a column.  Or return zDflt if the column
+/// has no declared type.
+///
+/// The column type is an extra string stored after the zero-terminator on
+/// the column name if and only if the COLFLAG_HASTYPE flag is set.
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ColumnType(col: &mut Column, default: *mut c_char) -> *mut c_char {
+    if let Some(z) = col.std_type() {
+        // TODO: we are sometimes returning static strings from this,
+        // so it can't always be mut. Figure out whether it's safe
+        // to change the return value to a const
+        z as *mut i8
+    } else {
+        default
+    }
 }
 
 /* Allowed values for Column.eCType.
