@@ -22,6 +22,7 @@ mod select;
 mod src;
 mod table;
 mod token;
+mod token_type;
 mod trigger;
 mod upsert;
 mod util;
