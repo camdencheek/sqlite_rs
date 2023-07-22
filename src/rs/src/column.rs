@@ -58,8 +58,6 @@ pub enum Coltype {
     Text = 6,
 }
 
-pub const SQLITE_N_STDTYPE: u8 = 6; /* Number of standard types */
-
 /* Allowed values for Column.colFlags.
 **
 ** Constraints:

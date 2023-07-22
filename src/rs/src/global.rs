@@ -10,6 +10,8 @@ pub enum StdType {
     Text,
 }
 
+/// Standard typenames.  These names must match the COLTYPE_* definitions.
+/// Adjust the SQLITE_N_STDTYPE value if adding or removing entries.
 impl StdType {
     const ANY_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"ANY\0") };
     const BLOB_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"BLOB\0") };
@@ -26,6 +28,7 @@ impl StdType {
     const REAL_LEN: usize = Self::REAL_NAME.to_bytes().len();
     const TEXT_LEN: usize = Self::TEXT_NAME.to_bytes().len();
 
+    /// The name of the data type
     pub const fn name(&self) -> &'static CStr {
         match self {
             StdType::Any => Self::ANY_NAME,
@@ -37,6 +40,8 @@ impl StdType {
         }
     }
 
+    /// The length (in bytes) of the type name
+    // TODO: consider removing this and calculating it at runtime?
     pub const fn name_len(&self) -> usize {
         match self {
             StdType::Any => Self::ANY_LEN,
@@ -48,6 +53,7 @@ impl StdType {
         }
     }
 
+    /// The affinity associated the type
     pub const fn affinity(&self) -> SqliteAff {
         match self {
             StdType::Any => SqliteAff::Numeric,
@@ -59,6 +65,9 @@ impl StdType {
         }
     }
 }
+
+/// Number of standard types
+pub const SQLITE_N_STDTYPE: u8 = 6;
 
 /// Column affinity types.
 ///

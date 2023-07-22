@@ -296,6 +296,7 @@ const unsigned char sqlite3OpcodeProperty[] = OPFLG_INITIALIZER;
 */
 const char sqlite3StrBINARY[] = "BINARY";
 
+// TODO: remove this once there are no more uses in C
 const unsigned char sqlite3StdTypeLen[] = { 3, 4, 3, 7, 4, 4 };
 const char sqlite3StdTypeAffinity[] = {
   SQLITE_AFF_NUMERIC,
