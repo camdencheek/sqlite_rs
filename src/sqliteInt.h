@@ -3784,7 +3784,6 @@ void sqlite3Error(sqlite3*,int);
 void sqlite3ErrorClear(sqlite3*);
 void sqlite3SystemError(sqlite3*,int);
 void *sqlite3HexToBlob(sqlite3*, const char *z, int n);
-u8 sqlite3HexToInt(int h);
 int sqlite3TwoPartName(Parse *, Token *, Token *, Token **);
 
 #if defined(SQLITE_NEED_ERR_NAME)

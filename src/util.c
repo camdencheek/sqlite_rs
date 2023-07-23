@@ -1252,17 +1252,6 @@ void sqlite3Put4byte(unsigned char *p, u32 v){
 
 
 
-/*
-** Translate a single byte of Hex into an integer.
-** This routine only works if h really is a valid hexadecimal
-** character:  0..9a..fA..F
-*/
-u8 sqlite3HexToInt(int h){
-  assert( (h>='0' && h<='9') ||  (h>='a' && h<='f') ||  (h>='A' && h<='F') );
-  h += 9*(1&(h>>6));
-  return (u8)(h & 0xf);
-}
-
 #if !defined(SQLITE_OMIT_BLOB_LITERAL)
 /*
 ** Convert a BLOB literal of the form "x'hhhhhh'" into its binary
