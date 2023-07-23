@@ -32,11 +32,45 @@ mod vtable;
 mod window;
 mod with;
 
-pub struct sqlite3;
-pub struct sqlite3_vtab;
-pub struct sqlite3_module;
-pub struct sqlite3_context;
-pub struct sqlite3_value;
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3 {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3_vtab {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3_module {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3_context {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3_value {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
 
 use mem::SQLiteAllocator;
 
