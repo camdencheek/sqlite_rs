@@ -15,8 +15,9 @@
 
 #ifndef _PCACHE_H_
 
+#import "sqlite3_rs.h"
+
 typedef struct PgHdr PgHdr;
-typedef struct PCache PCache;
 
 /*
 ** Every page in the cache is controlled by an instance of the following
