@@ -1202,17 +1202,6 @@ u8 sqlite3GetVarint32(const unsigned char *p, u32 *v){
 }
 
 /*
-** Return the number of bytes that will be needed to store the given
-** 64-bit integer.
-*/
-int sqlite3VarintLen(u64 v){
-  int i;
-  for(i=1; (v >>= 7)!=0; i++){ assert( i<10 ); }
-  return i;
-}
-
-
-/*
 ** Read or write a four-byte big-endian integer value.
 */
 u32 sqlite3Get4byte(const u8 *p){
