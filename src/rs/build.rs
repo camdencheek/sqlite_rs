@@ -42,6 +42,7 @@ fn main() {
                 "omit_floating_point".into(),
                 "SQLITE_OMIT_FLOATING_POINT".into(),
             );
+            h.insert("check_pages".into(), "SQLITE_CHECK_PAGES".into());
             h
         },
         function: FunctionConfig {

@@ -1,13 +1,33 @@
 use libc::{c_int, c_void};
 
-use crate::sqlite3_pcache;
+use crate::global::Pgno;
+use crate::pager::Pager;
+use crate::{sqlite3_pcache, sqlite3_pcache_page};
 
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
+/// Every page in the cache is controlled by an instance of the following
+/// structure.
+#[repr(C)]
 pub struct PgHdr {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    pPage: *mut sqlite3_pcache_page, /* Pcache object page handle */
+    pData: *mut c_void,              /* Page data */
+    pExtra: *mut c_void,             /* Extra content */
+    pCache: *mut PCache,             /* PRIVATE: Cache that owns this page */
+    pDirty: *mut PgHdr,              /* Transient list of dirty sorted by pgno */
+    pPager: *mut Pager,              /* The pager this page is part of */
+    pgno: Pgno,                      /* Page number for this page */
+    #[cfg(check_pages)]
+    pageHash: u32, /* Hash of page content */
+    flags: u16,                      /* PGHDR flags defined below */
+    /**********************************************************************
+     ** Elements above, except pCache, are public.  All that follow are
+     ** private to pcache.c and should not be accessed by other modules.
+     ** pCache is grouped with the public elements for efficiency.
+     */
+    nRef: i16,              /* Number of users of this page */
+    pDirtyNext: *mut PgHdr, /* Next element in list of dirty pages */
+    pDirtyPrev: *mut PgHdr, /* Previous element in list of dirty pages */
+                            /* NB: pDirtyNext and pDirtyPrev are undefined if the
+                             ** PgHdr object is not dirty */
 }
 
 /// A complete page cache is an instance of this structure.  Every

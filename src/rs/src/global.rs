@@ -1,5 +1,7 @@
 use std::ffi::CStr;
 
+pub type Pgno = u32;
+
 #[repr(u8)]
 pub enum StdType {
     Any = 1,
