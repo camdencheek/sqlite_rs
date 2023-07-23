@@ -250,8 +250,7 @@ impl Expr {
             if op == TK::SELECT {
                 assert!(expr.use_x_select());
                 assert!(!expr.x.pSelect.is_null());
-                assert!(!(*expr.x.pSelect).pEList.is_null());
-                let sub_expr = (*sqlite3ExprListItems((*expr.x.pSelect).pEList))
+                let sub_expr = ((*expr.x.pSelect).pEList.as_mut().unwrap().items()[0])
                     .pExpr
                     .as_ref()
                     .unwrap();
@@ -267,9 +266,9 @@ impl Expr {
                 assert!(left.use_x_select());
                 assert!((expr.iColumn as i32) < expr.iTable);
                 let left_select = left.x.pSelect.as_ref().unwrap();
-                let left_elist = left_select.pEList;
-                assert!(expr.iTable == sqlite3ExprListNExpr(left_elist));
-                return (*sqlite3ExprListItems(left_elist).add(expr.iColumn as usize))
+                let left_elist = left_select.pEList.as_mut().unwrap();
+                assert!(expr.iTable as usize == left_elist.len());
+                return (left_elist.items()[expr.iColumn as usize])
                     .pExpr
                     .as_ref()
                     .unwrap()
@@ -277,7 +276,7 @@ impl Expr {
             }
             if op == TK::VECTOR {
                 assert!(expr.use_x_list());
-                return (*sqlite3ExprListItems(expr.x.pList))
+                return (expr.x.pList.as_mut().unwrap().items()[0])
                     .pExpr
                     .as_ref()
                     .unwrap()
@@ -342,24 +341,20 @@ impl Expr {
                 }
                 TK::CASE => {
                     let mut res: c_int = 0;
-                    let pList = (*expr).x.pList;
-                    assert!((*expr).use_x_list() && !pList.is_null());
-                    assert!(sqlite3ExprListNExpr(pList) > 0);
-                    let nExpr = sqlite3ExprListNExpr(pList);
+                    assert!((*expr).use_x_list());
+                    let pList = (*expr).x.pList.as_mut().unwrap();
+                    assert!(pList.len() > 0);
+                    let nExpr = pList.len();
                     let mut i: usize = 1;
                     loop {
                         if i >= nExpr as usize {
                             break;
                         }
-                        res |= (*sqlite3ExprListItems(pList).add(i))
-                            .pExpr
-                            .as_ref()
-                            .unwrap()
-                            .data_type();
+                        res |= (pList.items()[0]).pExpr.as_ref().unwrap().data_type();
                         i += 2;
                     }
                     if nExpr % 2 != 0 {
-                        res |= (*sqlite3ExprListItems(pList).add(nExpr as usize - 1))
+                        res |= (pList.items()[nExpr as usize - 1])
                             .pExpr
                             .as_ref()
                             .unwrap()
@@ -384,9 +379,10 @@ impl Expr {
             }
             if e.has_property(EP::Unlikely) {
                 assert!(e.use_x_list());
-                assert!(sqlite3ExprListNExpr(e.x.pList) > 0);
+                let pList = e.x.pList.as_mut().unwrap();
+                assert!(pList.len() > 0);
                 assert!(e.op == TK::FUNCTION);
-                expr = (*sqlite3ExprListItems(e.x.pList)).pExpr.as_mut();
+                expr = pList.items()[0].pExpr.as_mut();
             } else {
                 assert!(e.op == TK::COLLATE);
                 expr = e.pLeft.as_mut();
@@ -571,6 +567,23 @@ pub struct Expr_sub {
 pub struct ExprList {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+impl ExprList {
+    fn len(&self) -> usize {
+        unsafe { sqlite3ExprListNExpr(self) as usize }
+    }
+
+    fn capacity(&self) -> usize {
+        unsafe { sqlite3ExprListNAlloc(self) as usize }
+    }
+
+    fn items(&mut self) -> &mut [ExprList_item] {
+        unsafe {
+            let ptr = sqlite3ExprListItems(self);
+            std::slice::from_raw_parts_mut(ptr, self.len())
+        }
+    }
 }
 
 extern "C" {
