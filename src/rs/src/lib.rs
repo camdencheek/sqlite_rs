@@ -1,5 +1,6 @@
 mod agg;
 mod autoinc;
+mod btree;
 mod build;
 mod coll_seq;
 mod column;
