@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_int, c_void};
 
 use crate::global::Pgno;
@@ -17,7 +18,7 @@ pub struct PgHdr {
     pgno: Pgno,                      /* Page number for this page */
     #[cfg(check_pages)]
     pageHash: u32, /* Hash of page content */
-    flags: u16,                      /* PGHDR flags defined below */
+    flags: PGHDR,                    /* PGHDR flags defined below */
     /**********************************************************************
      ** Elements above, except pCache, are public.  All that follow are
      ** private to pcache.c and should not be accessed by other modules.
@@ -68,4 +69,20 @@ pub struct PCache {
     xStress: unsafe extern "C" fn(*mut c_void, *mut PgHdr) -> c_int, /* Argument to xStress */
     pStress: *mut c_void,   /* Pluggable cache module */
     pCache: *mut sqlite3_pcache,
+}
+
+bitflags! {
+    /// Bit values for PgHdr.flags
+    #[derive(Debug, Copy, Clone)]
+    #[repr(transparent)]
+    pub struct PGHDR: u16 {
+        const CLEAN = 0x001;        /* Page not on the PCache.pDirty list */
+        const DIRTY = 0x002;        /* Page is on the PCache.pDirty list */
+        const WRITEABLE = 0x004;    /* Journaled and ready to modify */
+        const NEED_SYNC = 0x008;   /* Fsync the rollback journal before
+                                   ** writing this page to the database */
+        const DONT_WRITE = 0x010; /* Do not write content to disk */
+        const MMAP = 0x020;       /* This is an mmap page object */
+        const WAL_APPEND = 0x040;  /* Appended to wal file */
+    }
 }

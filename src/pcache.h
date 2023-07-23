@@ -17,17 +17,6 @@
 
 #import "sqlite3_rs.h"
 
-/* Bit values for PgHdr.flags */
-#define PGHDR_CLEAN           0x001  /* Page not on the PCache.pDirty list */
-#define PGHDR_DIRTY           0x002  /* Page is on the PCache.pDirty list */
-#define PGHDR_WRITEABLE       0x004  /* Journaled and ready to modify */
-#define PGHDR_NEED_SYNC       0x008  /* Fsync the rollback journal before
-                                     ** writing this page to the database */
-#define PGHDR_DONT_WRITE      0x010  /* Do not write content to disk */
-#define PGHDR_MMAP            0x020  /* This is an mmap page object */
-
-#define PGHDR_WAL_APPEND      0x040  /* Appended to wal file */
-
 /* Initialize and shutdown the page cache subsystem */
 int sqlite3PcacheInitialize(void);
 void sqlite3PcacheShutdown(void);
