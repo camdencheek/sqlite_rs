@@ -16,6 +16,7 @@ mod index;
 mod macros;
 mod mem;
 mod module;
+mod pager;
 mod parse;
 mod pcache;
 mod returning;
@@ -77,6 +78,14 @@ pub struct sqlite3_value {
 /// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 // cbindgen:ignore
 pub struct sqlite3_pcache {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct sqlite3_pcache_page {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
