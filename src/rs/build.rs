@@ -62,6 +62,7 @@ fn main() {
                 "Colflag".into(),
                 "CollSeq".into(),
                 "Coltype".into(),
+                "CellInfo".into(),
                 "Column".into(),
                 "Cte".into(),
                 "CteUse".into(),

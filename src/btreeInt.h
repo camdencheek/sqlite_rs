@@ -231,7 +231,6 @@
 /* Forward declarations */
 typedef struct MemPage MemPage;
 typedef struct BtLock BtLock;
-typedef struct CellInfo CellInfo;
 
 /*
 ** This is a magic string that appears at the beginning of every
@@ -471,19 +470,6 @@ struct BtShared {
 #define BTS_NO_WAL           0x0020   /* Do not open write-ahead-log files */
 #define BTS_EXCLUSIVE        0x0040   /* pWriter has an exclusive lock */
 #define BTS_PENDING          0x0080   /* Waiting for read-locks to clear */
-
-/*
-** An instance of the following structure is used to hold information
-** about a cell.  The parseCellPtr() function fills in this structure
-** based on information extract from the raw disk page.
-*/
-struct CellInfo {
-  i64 nKey;      /* The key for INTKEY tables, or nPayload otherwise */
-  u8 *pPayload;  /* Pointer to the start of payload */
-  u32 nPayload;  /* Bytes of payload */
-  u16 nLocal;    /* Amount of payload held locally, not on overflow */
-  u16 nSize;     /* Size of the cell content on the main b-tree page */
-};
 
 /*
 ** Maximum depth of an SQLite B-Tree structure. Any B-Tree deeper than
