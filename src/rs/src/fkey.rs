@@ -9,7 +9,6 @@ pub struct FKey {
 }
 
 /* Mapping of columns in pFrom to columns in zTo */
-#[repr(C)]
 pub struct sColMap {
     iFrom: c_int,      /* Index of column in pFrom */
     zCol: *mut c_char, /* Name of column in zTo.  If NULL use PRIMARY KEY */
