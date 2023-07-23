@@ -17,6 +17,7 @@ mod macros;
 mod mem;
 mod module;
 mod parse;
+mod pcache;
 mod returning;
 mod savepoint;
 mod schema;

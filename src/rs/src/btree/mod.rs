@@ -1,3 +1,5 @@
+pub mod internal;
+
 /// Temporary opaque struct
 /// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 // cbindgen:ignore
