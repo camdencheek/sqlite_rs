@@ -66,37 +66,6 @@ Expr *sqlite3ExprAddCollateString(
 }
 
 /*
-** Skip over any TK_COLLATE operators.
-*/
-Expr *sqlite3ExprSkipCollate(Expr *pExpr){
-  while( pExpr && ExprHasProperty(pExpr, EP_Skip) ){
-    assert( pExpr->op==TK_COLLATE );
-    pExpr = pExpr->pLeft;
-  }   
-  return pExpr;
-}
-
-/*
-** Skip over any TK_COLLATE operators and/or any unlikely()
-** or likelihood() or likely() functions at the root of an
-** expression.
-*/
-Expr *sqlite3ExprSkipCollateAndLikely(Expr *pExpr){
-  while( pExpr && ExprHasProperty(pExpr, EP_Skip|EP_Unlikely) ){
-    if( ExprHasProperty(pExpr, EP_Unlikely) ){
-      assert( ExprUseXList(pExpr) );
-      assert( pExpr->x.pList->nExpr>0 );
-      assert( pExpr->op==TK_FUNCTION );
-      pExpr = pExpr->x.pList->a[0].pExpr;
-    }else{
-      assert( pExpr->op==TK_COLLATE );
-      pExpr = pExpr->pLeft;
-    }
-  }   
-  return pExpr;
-}
-
-/*
 ** Return the collation sequence for the expression pExpr. If
 ** there is no defined collating sequence, return NULL.
 **

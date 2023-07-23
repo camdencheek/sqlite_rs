@@ -138,7 +138,7 @@ pub struct Expr {
 }
 
 impl Expr {
-    fn has_any_property(&self, prop: EP) -> bool {
+    fn has_property(&self, prop: EP) -> bool {
         !(self.flags & prop).is_empty()
     }
 
@@ -259,7 +259,7 @@ impl Expr {
             }
             #[cfg(not(omit_cast))]
             if op == TK::CAST {
-                assert!(!expr.has_any_property(EP::IntValue));
+                assert!(!expr.has_property(EP::IntValue));
                 return sqlite3AffinityType(expr.u.zToken, ptr::null_mut());
             }
             if op == TK::SELECT_COLUMN {
@@ -283,7 +283,7 @@ impl Expr {
                     .unwrap()
                     .affinity();
             }
-            if expr.has_any_property(EP::Skip | EP::IfNullRow) {
+            if expr.has_property(EP::Skip | EP::IfNullRow) {
                 assert!(
                     expr.op == TK::COLLATE
                         || expr.op == TK::IF_NULL_ROW
@@ -372,6 +372,60 @@ impl Expr {
         }
         return 0x00;
     }
+
+    /// Skip over any TK_COLLATE operators and/or any unlikely()
+    /// or likelihood() or likely() functions at the root of an
+    /// expression.
+    unsafe fn skip_collate_and_likely(&mut self) -> Option<&mut Expr> {
+        let mut expr: Option<&mut Expr> = Some(self);
+        while let Some(e) = &expr {
+            if !e.has_property(EP::Skip | EP::Unlikely) {
+                break;
+            }
+            if e.has_property(EP::Unlikely) {
+                assert!(e.use_x_list());
+                assert!(sqlite3ExprListNExpr(e.x.pList) > 0);
+                assert!(e.op == TK::FUNCTION);
+                expr = (*sqlite3ExprListItems(e.x.pList)).pExpr.as_mut();
+            } else {
+                assert!(e.op == TK::COLLATE);
+                expr = e.pLeft.as_mut();
+            }
+        }
+        expr
+    }
+
+    /// Skip over any TK_COLLATE operators.
+    unsafe fn skip_collate(&mut self) -> Option<&mut Expr> {
+        let mut expr: Option<&mut Expr> = Some(self);
+        while let Some(e) = &expr {
+            if !e.has_property(EP::Skip) {
+                break;
+            }
+            expr = e.pLeft.as_mut();
+        }
+        expr
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprSkipCollateAndLikely(
+    expr: *mut Expr,
+) -> Option<&'static mut Expr> {
+    if let Some(e) = expr.as_mut() {
+        e.skip_collate_and_likely()
+    } else {
+        None
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprSkipCollate(expr: *mut Expr) -> Option<&'static mut Expr> {
+    if let Some(e) = expr.as_mut() {
+        e.skip_collate()
+    } else {
+        None
+    }
 }
 
 #[no_mangle]
@@ -387,7 +441,7 @@ pub unsafe extern "C" fn sqlite3ExprAffinity(expr: &Expr) -> c_char {
 #[no_mangle]
 pub unsafe extern "C" fn ExprHasProperty(e: &Expr, p: u32) -> c_int {
     // Using from_bits_retain in case there is any additional info encoded
-    e.has_any_property(EP::from_bits_retain(p)).into()
+    e.has_property(EP::from_bits_retain(p)).into()
 }
 
 #[no_mangle]
