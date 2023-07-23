@@ -1333,69 +1333,6 @@ int sqlite3SafetyCheckSickOrOk(sqlite3 *db){
 }
 
 /*
-** Attempt to add, substract, or multiply the 64-bit signed value iB against
-** the other 64-bit signed integer at *pA and store the result in *pA.
-** Return 0 on success.  Or if the operation would have resulted in an
-** overflow, leave *pA unchanged and return 1.
-*/
-int sqlite3AddInt64(i64 *pA, i64 iB){
-#if GCC_VERSION>=5004000 && !defined(__INTEL_COMPILER)
-  return __builtin_add_overflow(*pA, iB, pA);
-#else
-  i64 iA = *pA;
-  testcase( iA==0 ); testcase( iA==1 );
-  testcase( iB==-1 ); testcase( iB==0 );
-  if( iB>=0 ){
-    testcase( iA>0 && LARGEST_INT64 - iA == iB );
-    testcase( iA>0 && LARGEST_INT64 - iA == iB - 1 );
-    if( iA>0 && LARGEST_INT64 - iA < iB ) return 1;
-  }else{
-    testcase( iA<0 && -(iA + LARGEST_INT64) == iB + 1 );
-    testcase( iA<0 && -(iA + LARGEST_INT64) == iB + 2 );
-    if( iA<0 && -(iA + LARGEST_INT64) > iB + 1 ) return 1;
-  }
-  *pA += iB;
-  return 0; 
-#endif
-}
-int sqlite3SubInt64(i64 *pA, i64 iB){
-#if GCC_VERSION>=5004000 && !defined(__INTEL_COMPILER)
-  return __builtin_sub_overflow(*pA, iB, pA);
-#else
-  testcase( iB==SMALLEST_INT64+1 );
-  if( iB==SMALLEST_INT64 ){
-    testcase( (*pA)==(-1) ); testcase( (*pA)==0 );
-    if( (*pA)>=0 ) return 1;
-    *pA -= iB;
-    return 0;
-  }else{
-    return sqlite3AddInt64(pA, -iB);
-  }
-#endif
-}
-int sqlite3MulInt64(i64 *pA, i64 iB){
-#if GCC_VERSION>=5004000 && !defined(__INTEL_COMPILER)
-  return __builtin_mul_overflow(*pA, iB, pA);
-#else
-  i64 iA = *pA;
-  if( iB>0 ){
-    if( iA>LARGEST_INT64/iB ) return 1;
-    if( iA<SMALLEST_INT64/iB ) return 1;
-  }else if( iB<0 ){
-    if( iA>0 ){
-      if( iB<SMALLEST_INT64/iA ) return 1;
-    }else if( iA<0 ){
-      if( iB==SMALLEST_INT64 ) return 1;
-      if( iA==SMALLEST_INT64 ) return 1;
-      if( -iA>LARGEST_INT64/-iB ) return 1;
-    }
-  }
-  *pA = iA*iB;
-  return 0;
-#endif
-}
-
-/*
 ** Compute the absolute value of a 32-bit signed integer, of possible.  Or 
 ** if the integer has a value of -2147483648, return +2147483647
 */
