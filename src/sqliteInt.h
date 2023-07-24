@@ -4257,8 +4257,6 @@ int sqlite3DbpageRegister(sqlite3*);
 int sqlite3DbstatRegister(sqlite3*);
 #endif
 
-int sqlite3ExprVectorSize(const Expr *pExpr);
-int sqlite3ExprIsVector(const Expr *pExpr);
 Expr *sqlite3VectorFieldSubexpr(Expr*, int);
 Expr *sqlite3ExprForVectorField(Parse*,Expr*,int,int);
 void sqlite3VectorErrorMsg(Parse*, Expr*);

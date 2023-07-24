@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::ptr;
 
 use crate::build::sqlite3AffinityType;
@@ -417,6 +418,49 @@ impl Expr {
             sqlite3Dequote(self.u.zToken);
         }
     }
+
+    /// If the expression passed as the only argument is of type TK_VECTOR
+    /// return the number of expressions in the vector. Or, if the expression
+    /// is a sub-select, return the number of columns in the sub-select. For
+    /// any other type of expression, return 1.
+    pub fn vector_size(&self) -> usize {
+        let mut op = self.op;
+        if op == TK::REGISTER {
+            op = self.op2;
+        }
+        match op {
+            TK::VECTOR => {
+                assert!(self.use_x_list());
+                unsafe { self.x.pList.as_ref().unwrap().len() }
+            }
+            TK::SELECT => {
+                assert!(self.use_x_select());
+                unsafe { (*self.x.pSelect).pEList.as_ref().unwrap().len() }
+            }
+            _ => 1,
+        }
+    }
+
+    /// Return true if expression pExpr is a vector, or false otherwise.
+    ///
+    /// A vector is defined as any expression that results in two or more
+    /// columns of result.  Every TK_VECTOR node is an vector because the
+    /// parser will not generate a TK_VECTOR with fewer than two entries.
+    /// But a TK_SELECT might be either a vector or a scalar. It is only
+    /// considered a vector if it has two or more result columns.
+    pub fn is_vector(&self) -> bool {
+        self.vector_size() > 1
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprIsVector(expr: &Expr) -> c_int {
+    expr.is_vector().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ExprVectorSize(expr: &Expr) -> c_int {
+    expr.vector_size().try_into().unwrap()
 }
 
 #[no_mangle]

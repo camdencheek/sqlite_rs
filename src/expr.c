@@ -321,39 +321,6 @@ static int codeCompare(
 }
 
 /*
-** Return true if expression pExpr is a vector, or false otherwise.
-**
-** A vector is defined as any expression that results in two or more
-** columns of result.  Every TK_VECTOR node is an vector because the
-** parser will not generate a TK_VECTOR with fewer than two entries.
-** But a TK_SELECT might be either a vector or a scalar. It is only
-** considered a vector if it has two or more result columns.
-*/
-int sqlite3ExprIsVector(const Expr *pExpr){
-  return sqlite3ExprVectorSize(pExpr)>1;
-}
-
-/*
-** If the expression passed as the only argument is of type TK_VECTOR 
-** return the number of expressions in the vector. Or, if the expression
-** is a sub-select, return the number of columns in the sub-select. For
-** any other type of expression, return 1.
-*/
-int sqlite3ExprVectorSize(const Expr *pExpr){
-  u8 op = pExpr->op;
-  if( op==TK_REGISTER ) op = pExpr->op2;
-  if( op==TK_VECTOR ){
-    assert( ExprUseXList(pExpr) );
-    return pExpr->x.pList->nExpr;
-  }else if( op==TK_SELECT ){
-    assert( ExprUseXSelect(pExpr) );
-    return pExpr->x.pSelect->pEList->nExpr;
-  }else{
-    return 1;
-  }
-}
-
-/*
 ** Return a pointer to a subexpression of pVector that is the i-th
 ** column of the vector (numbered starting with 0).  The caller must
 ** ensure that i is within range.
