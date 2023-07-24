@@ -153,6 +153,17 @@ pub struct Parse {
 }
 
 impl Parse {
+    /// Allocate a single new register for use to hold some intermediate result.
+    fn get_temp_reg(&mut self) -> c_int {
+        if self.nTempReg == 0 {
+            self.nMem += 1;
+            self.nMem
+        } else {
+            self.nTempReg -= 1;
+            self.aTempReg[self.nTempReg as usize]
+        }
+    }
+
     /// Mark all temporary registers as being unavailable for reuse.
     ///
     /// Always invoke this procedure after coding a subroutine or co-routine
@@ -163,6 +174,11 @@ impl Parse {
         self.nTempReg = 0;
         self.nRangeReg = 0;
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3GetTempReg(pParse: *mut Parse) -> c_int {
+    pParse.as_mut().unwrap().get_temp_reg()
 }
 
 #[no_mangle]

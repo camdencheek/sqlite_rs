@@ -6373,16 +6373,6 @@ void sqlite3ExprAnalyzeAggList(NameContext *pNC, ExprList *pList){
 }
 
 /*
-** Allocate a single new register for use to hold some intermediate result.
-*/
-int sqlite3GetTempReg(Parse *pParse){
-  if( pParse->nTempReg==0 ){
-    return ++pParse->nMem;
-  }
-  return pParse->aTempReg[--pParse->nTempReg];
-}
-
-/*
 ** Deallocate a register, making available for reuse for some other
 ** purpose.
 */
