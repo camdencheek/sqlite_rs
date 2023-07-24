@@ -88,6 +88,7 @@ fn main() {
                 "tRowcnt".into(),
                 "BtLock".into(),
                 "BtreePayload".into(),
+                "sqlite3CtypeMap".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
