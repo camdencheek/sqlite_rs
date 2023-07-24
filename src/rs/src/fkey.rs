@@ -8,8 +8,11 @@ pub struct FKey {
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
 
-/* Mapping of columns in pFrom to columns in zTo */
+/// Mapping of columns in pFrom to columns in zTo
+#[repr(C)]
 pub struct sColMap {
-    iFrom: c_int,      /* Index of column in pFrom */
-    zCol: *mut c_char, /* Name of column in zTo.  If NULL use PRIMARY KEY */
+    /// Index of column in pFrom
+    iFrom: c_int,
+    /// Name of column in zTo.  If NULL use PRIMARY KEY
+    zCol: *mut c_char,
 }

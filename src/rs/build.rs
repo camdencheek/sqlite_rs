@@ -67,6 +67,8 @@ fn main() {
                 "Cte".into(),
                 "CteUse".into(),
                 "Expr".into(),
+                "MemPage".into(),
+                "sColMap".into(),
                 "ExprList_item".into(),
                 "FuncDestructor".into(),
                 "IdList_item".into(),
