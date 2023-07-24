@@ -1,3 +1,4 @@
+use libc::c_char;
 use std::ffi::CStr;
 
 use crate::util::strings::sqlite3UpperToLower;
@@ -181,41 +182,86 @@ pub static sqlite3CtypeMap: [u8; 256] = [
 // sqlite versions only work for ASCII characters, regardless of locale.
 
 #[no_mangle]
-pub extern "C" fn sqlite3Toupper(x: u8) -> u8 {
-    x & !(sqlite3CtypeMap[x as usize] & 0x20)
+pub extern "C" fn sqlite3Toupper(x: c_char) -> c_char {
+    x.to_upper()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isspace(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x01
+pub extern "C" fn sqlite3Tolower(x: c_char) -> c_char {
+    x.to_lower()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isalnum(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x06
+pub extern "C" fn sqlite3Isspace(x: c_char) -> u8 {
+    x.is_space().into()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isalpha(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x02
+pub extern "C" fn sqlite3Isalnum(x: c_char) -> u8 {
+    x.is_alnum().into()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isdigit(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x04
+pub extern "C" fn sqlite3Isalpha(x: c_char) -> u8 {
+    x.is_alpha().into()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isxdigit(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x08
+pub extern "C" fn sqlite3Isdigit(x: c_char) -> u8 {
+    x.is_digit().into()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Tolower(x: u8) -> u8 {
-    sqlite3UpperToLower[x as usize]
+pub extern "C" fn sqlite3Isxdigit(x: c_char) -> u8 {
+    x.is_hex_digit().into()
 }
 
 #[no_mangle]
-pub extern "C" fn sqlite3Isquote(x: u8) -> u8 {
-    sqlite3CtypeMap[x as usize] & 0x80
+pub extern "C" fn sqlite3Isquote(x: c_char) -> u8 {
+    x.is_quote().into()
+}
+
+pub trait SqliteChar {
+    fn to_upper(self) -> c_char;
+    fn to_lower(self) -> c_char;
+    fn is_space(self) -> bool;
+    fn is_alnum(self) -> bool;
+    fn is_alpha(self) -> bool;
+    fn is_digit(self) -> bool;
+    fn is_hex_digit(self) -> bool;
+    fn is_quote(self) -> bool;
+}
+
+impl SqliteChar for c_char {
+    fn to_upper(self) -> c_char {
+        self & !(sqlite3CtypeMap[self as u8 as usize] & 0x20) as i8
+    }
+
+    fn to_lower(self) -> c_char {
+        sqlite3UpperToLower[self as u8 as usize] as c_char
+    }
+
+    fn is_space(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x01) != 0
+    }
+
+    fn is_alnum(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x06) != 0
+    }
+
+    fn is_alpha(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x02) != 0
+    }
+
+    fn is_digit(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x04) != 0
+    }
+
+    fn is_hex_digit(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x08) != 0
+    }
+
+    fn is_quote(self) -> bool {
+        (sqlite3CtypeMap[self as u8 as usize] & 0x80) != 0
+    }
 }

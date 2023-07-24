@@ -195,52 +195,6 @@ int sqlite3ErrorToParser(sqlite3 *db, int errCode){
 }
 
 /*
-** Convert an SQL-style quoted string into a normal string by removing
-** the quote characters.  The conversion is done in-place.  If the
-** input does not begin with a quote character, then this routine
-** is a no-op.
-**
-** The input string must be zero-terminated.  A new zero-terminator
-** is added to the dequoted string.
-**
-** The return value is -1 if no dequoting occurs or the length of the
-** dequoted string, exclusive of the zero terminator, if dequoting does
-** occur.
-**
-** 2002-02-14: This routine is extended to remove MS-Access style
-** brackets from around identifiers.  For example:  "[a-b-c]" becomes
-** "a-b-c".
-*/
-void sqlite3Dequote(char *z){
-  char quote;
-  int i, j;
-  if( z==0 ) return;
-  quote = z[0];
-  if( !sqlite3Isquote(quote) ) return;
-  if( quote=='[' ) quote = ']';
-  for(i=1, j=0;; i++){
-    assert( z[i] );
-    if( z[i]==quote ){
-      if( z[i+1]==quote ){
-        z[j++] = quote;
-        i++;
-      }else{
-        break;
-      }
-    }else{
-      z[j++] = z[i];
-    }
-  }
-  z[j] = 0;
-}
-void sqlite3DequoteExpr(Expr *p){
-  assert( !ExprHasProperty(p, EP_IntValue) );
-  assert( sqlite3Isquote(p->u.zToken[0]) );
-  p->flags |= p->u.zToken[0]=='"' ? EP_Quoted|EP_DblQuoted : EP_Quoted;
-  sqlite3Dequote(p->u.zToken);
-}
-
-/*
 ** If the input token p is quoted, try to adjust the token to remove
 ** the quotes.  This is not always possible:
 **

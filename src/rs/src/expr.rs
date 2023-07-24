@@ -1,9 +1,11 @@
 use std::ptr;
 
 use crate::build::sqlite3AffinityType;
+use crate::global::SqliteChar;
 use crate::select::Select;
 use crate::table::Table;
 use crate::token_type::TK;
+use crate::util::strings::sqlite3Dequote;
 use crate::window::Window;
 use crate::{agg::AggInfo, global::SqliteAff};
 use bitflags::bitflags;
@@ -401,6 +403,19 @@ impl Expr {
             expr = e.pLeft.as_mut();
         }
         expr
+    }
+
+    pub fn dequote(&mut self) {
+        unsafe {
+            assert!(!self.has_property(EP::IntValue));
+            assert!((*self.u.zToken).is_quote());
+            self.flags |= if *self.u.zToken == b'"' as c_char {
+                EP::Quoted | EP::DblQuoted
+            } else {
+                EP::Quoted
+            };
+            sqlite3Dequote(self.u.zToken);
+        }
     }
 }
 

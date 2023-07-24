@@ -3338,8 +3338,6 @@ void sqlite3SetString(char **, sqlite3*, const char*);
 void sqlite3ProgressCheck(Parse*);
 void sqlite3ErrorMsg(Parse*, const char*, ...);
 int sqlite3ErrorToParser(sqlite3*,int);
-void sqlite3Dequote(char*);
-void sqlite3DequoteExpr(Expr*);
 void sqlite3DequoteToken(Token*);
 void sqlite3TokenInit(Token*,char*);
 int sqlite3KeywordCode(const unsigned char*, int);

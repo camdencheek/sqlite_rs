@@ -1,5 +1,8 @@
 use libc::{c_char, c_int, c_uchar};
 
+use crate::expr::Expr;
+use crate::global::SqliteChar;
+
 /* An array to map all upper-case characters into their corresponding
 ** lower-case character.
 **
@@ -109,4 +112,60 @@ pub unsafe extern "C" fn sqlite3_stricmp(left: *const c_char, right: *const c_ch
         return 1;
     }
     return sqlite3StrICmp(left, right);
+}
+
+/// Convert an SQL-style quoted string into a normal string by removing
+/// the quote characters.  The conversion is done in-place.  If the
+/// input does not begin with a quote character, then this routine
+/// is a no-op.
+///
+/// The input string must be zero-terminated.  A new zero-terminator
+/// is added to the dequoted string.
+///
+/// The return value is -1 if no dequoting occurs or the length of the
+/// dequoted string, exclusive of the zero terminator, if dequoting does
+/// occur.
+///
+/// 2002-02-14: This routine is extended to remove MS-Access style
+/// brackets from around identifiers.  For example:  "[a-b-c]" becomes
+/// "a-b-c".
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3Dequote(z: *mut c_char) {
+    if z.is_null() {
+        return;
+    }
+
+    let mut quote: c_char = *z;
+    if !quote.is_quote() {
+        return;
+    }
+
+    if quote == b'[' as c_char {
+        quote = b']' as c_char;
+    }
+
+    let mut i = 1;
+    let mut j = 0;
+    loop {
+        assert!(*z.add(i) != 0);
+        if *z.add(i) == quote {
+            if *z.add(i + 1) == quote {
+                *z.add(j) = quote;
+                j += 1;
+                i += 1;
+            } else {
+                break;
+            }
+        } else {
+            *z.add(j) = *z.add(i);
+            j += 1;
+        }
+        i += 1;
+    }
+    *z.add(j) = 0;
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3DequoteExpr(expr: &mut Expr) {
+    expr.dequote()
 }
