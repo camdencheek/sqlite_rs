@@ -1,5 +1,7 @@
 use libc::c_int;
 
+use crate::global::SqliteChar;
+
 /// Bitmasks used by sqlite3GetVarint().  These precomputed constants
 /// are defined here rather than simply putting the constant expressions
 /// inline in order to work around bugs in the RVT compiler.
