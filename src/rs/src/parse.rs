@@ -164,6 +164,23 @@ impl Parse {
         }
     }
 
+    /// Allocate or deallocate a block of n consecutive registers.
+    fn get_temp_range(&mut self, n_reg: c_int) -> c_int {
+        if n_reg == 1 {
+            return self.get_temp_reg();
+        }
+        let mut i: c_int = self.iRangeReg;
+        let n: c_int = self.nRangeReg;
+        if n_reg <= n {
+            self.iRangeReg += n_reg;
+            self.nRangeReg -= n_reg;
+        } else {
+            i = self.nMem + 1;
+            self.nMem += n_reg;
+        }
+        i
+    }
+
     /// Mark all temporary registers as being unavailable for reuse.
     ///
     /// Always invoke this procedure after coding a subroutine or co-routine
@@ -174,6 +191,11 @@ impl Parse {
         self.nTempReg = 0;
         self.nRangeReg = 0;
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3GetTempRange(pParse: *mut Parse, nReg: c_int) -> c_int {
+    pParse.as_mut().unwrap().get_temp_range(nReg)
 }
 
 #[no_mangle]

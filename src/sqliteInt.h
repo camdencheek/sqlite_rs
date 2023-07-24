@@ -3344,7 +3344,6 @@ int sqlite3KeywordCode(const unsigned char*, int);
 int sqlite3RunParser(Parse*, const char*);
 void sqlite3FinishCoding(Parse*);
 void sqlite3ReleaseTempReg(Parse*,int);
-int sqlite3GetTempRange(Parse*,int);
 void sqlite3ReleaseTempRange(Parse*,int,int);
 #ifdef SQLITE_DEBUG
 int sqlite3NoTempsInRange(Parse*,int,int);
