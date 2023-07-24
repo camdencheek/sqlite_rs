@@ -707,42 +707,74 @@ bitflags! {
     #[derive(Copy, Clone, PartialEq, Eq, Debug)]
     #[repr(transparent)]
     struct EP: u32 {
-        const OuterON = 0x000001; /* Originates in ON/USING clause of outer join */
-        const InnerON = 0x000002; /* Originates in ON/USING of an inner join */
-        const Distinct = 0x000004; /* Aggregate function with DISTINCT keyword */
-        const HasFunc = 0x000008; /* Contains one or more functions of any kind */
-        const Agg = 0x000010; /* Contains one or more aggregate functions */
-        const FixedCol = 0x000020; /* TK_Column with a known fixed value */
-        const VarSelect = 0x000040; /* pSelect is correlated, not constant */
-        const DblQuoted = 0x000080; /* token.z was originally in "..." */
-        const InfixFunc = 0x000100; /* True for an infix function: LIKE, GLOB, etc */
-        const Collate = 0x000200; /* Tree contains a TK_COLLATE operator */
-        const Commuted = 0x000400; /* Comparison operator has been commuted */
-        const IntValue = 0x000800; /* Integer value contained in u.iValue */
-        const xIsSelect = 0x001000; /* x.pSelect is valid (otherwise x.pList is) */
-        const Skip = 0x002000; /* Operator does not contribute to affinity */
-        const Reduced = 0x004000; /* Expr struct EXPR_REDUCEDSIZE bytes only */
-        const Win = 0x008000; /* Contains window functions */
-        const TokenOnly = 0x010000; /* Expr struct EXPR_TOKENONLYSIZE bytes only */
-        /* 0x020000 // Available for reuse */
-        const IfNullRow = 0x040000; /* The TK_IF_NULL_ROW opcode */
-        const Unlikely = 0x080000; /* unlikely() or likelihood() function */
-        const ConstFunc = 0x100000; /* A SQLITE_FUNC_CONSTANT or _SLOCHNG function */
-        const CanBeNull = 0x200000; /* Can be null despite NOT NULL constraint */
-        const Subquery = 0x400000; /* Tree contains a TK_SELECT operator */
-        const Leaf = 0x800000; /* Expr.pLeft, .pRight, .u.pSelect all NULL */
-        const WinFunc = 0x1000000; /* TK_FUNCTION with Expr.y.pWin set */
-        const Subrtn = 0x2000000; /* Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS */
-        const Quoted = 0x4000000; /* TK_ID was originally quoted */
-        const Static = 0x8000000; /* Held in memory not obtained from malloc() */
-        const IsTrue = 0x10000000; /* Always has boolean value of TRUE */
-        const IsFalse = 0x20000000; /* Always has boolean value of FALSE */
-        const FromDDL = 0x40000000; /* Originates from sqlite_schema */
-        /*   0x80000000 // Available */
+        /// Originates in ON/USING clause of outer join
+        const OuterON = 0x000001;
+        /// Originates in ON/USING of an inner join
+        const InnerON = 0x000002;
+        /// Aggregate function with DISTINCT keyword
+        const Distinct = 0x000004;
+        /// Contains one or more functions of any kind
+        const HasFunc = 0x000008;
+        /// Contains one or more aggregate functions
+        const Agg = 0x000010;
+        /// TK_Column with a known fixed value
+        const FixedCol = 0x000020;
+        /// pSelect is correlated, not constant
+        const VarSelect = 0x000040;
+        /// token.z was originally in "..."
+        const DblQuoted = 0x000080;
+        /// True for an infix function: LIKE, GLOB, etc
+        const InfixFunc = 0x000100;
+        /// Tree contains a TK_COLLATE operator
+        const Collate = 0x000200;
+        /// Comparison operator has been commuted
+        const Commuted = 0x000400;
+        /// Integer value contained in u.iValue
+        const IntValue = 0x000800;
+        /// x.pSelect is valid (otherwise x.pList is)
+        const xIsSelect = 0x001000;
+        /// Operator does not contribute to affinity
+        const Skip = 0x002000;
+        /// Expr struct EXPR_REDUCEDSIZE bytes only
+        const Reduced = 0x004000;
+        /// Contains window functions
+        const Win = 0x008000;
+        /// Expr struct EXPR_TOKENONLYSIZE bytes only
+        const TokenOnly = 0x010000;
 
-        /* The Propagate mask is a set of properties that automatically propagate
-        ** upwards into parent nodes.
-        */
+        // 0x020000 // Available for reuse
+
+        /// The TK_IF_NULL_ROW opcode
+        const IfNullRow = 0x040000;
+        /// unlikely() or likelihood() function
+        const Unlikely = 0x080000;
+        /// A SQLITE_FUNC_CONSTANT or _SLOCHNG function
+        const ConstFunc = 0x100000;
+        /// Can be null despite NOT NULL constraint
+        const CanBeNull = 0x200000;
+        /// Tree contains a TK_SELECT operator
+        const Subquery = 0x400000;
+        /// Expr.pLeft, .pRight, .u.pSelect all NULL
+        const Leaf = 0x800000;
+        /// TK_FUNCTION with Expr.y.pWin set
+        const WinFunc = 0x1000000;
+        /// Uses Expr.y.sub. TK_IN, _SELECT, or _EXISTS
+        const Subrtn = 0x2000000;
+        /// TK_ID was originally quoted
+        const Quoted = 0x4000000;
+        /// Held in memory not obtained from malloc()
+        const Static = 0x8000000;
+        /// Always has boolean value of TRUE
+        const IsTrue = 0x10000000;
+        /// Always has boolean value of FALSE
+        const IsFalse = 0x20000000;
+        /// Originates from sqlite_schema
+        const FromDDL = 0x40000000;
+
+        // 0x80000000 // Available
+
+        /// The Propagate mask is a set of properties that automatically propagate
+        /// upwards into parent nodes.
         // TODO: define this more const-like
         // const Propagate = Self::Collate.bits() | Self::Subquery.bits() | Self::HasFunc.bits();
         const Propagate = 0x000200 | 0x400000 | 0x000008;
