@@ -3,6 +3,8 @@ use libc::c_int;
 use crate::btree::BtShared;
 use crate::{global::Pgno, pcache::PgHdr};
 
+use super::Btree;
+
 pub type DbPage = PgHdr;
 
 /// An instance of this object stores information about each a single database
@@ -49,12 +51,17 @@ pub struct MemPage {
     xParseCell: unsafe extern "C" fn(*mut MemPage, *mut u8, *mut CellInfo), /* btreeParseCell method */
 }
 
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
+/// A linked list of the following structures is stored at BtShared.pLock.
+/// Locks are added (or upgraded from READ_LOCK to WRITE_LOCK) when a cursor
+/// is opened on the table with root page BtShared.iTable. Locks are removed
+/// from this list when a transaction is committed or rolled back, or when
+/// a btree handle is closed.
+#[repr(C)]
 pub struct BtLock {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    pBtree: *mut Btree, /* Btree handle holding this lock */
+    iTable: Pgno,       /* Root page of table */
+    eLock: u8,          /* READ_LOCK or WRITE_LOCK */
+    pNext: *mut BtLock, /* Next in BtShared.pLock list */
 }
 
 /// An instance of the following structure is used to hold information

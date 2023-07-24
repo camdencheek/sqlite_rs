@@ -257,20 +257,6 @@ typedef struct BtLock BtLock;
 #define PTF_LEAFDATA  0x04
 #define PTF_LEAF      0x08
 
-/*
-** A linked list of the following structures is stored at BtShared.pLock.
-** Locks are added (or upgraded from READ_LOCK to WRITE_LOCK) when a cursor 
-** is opened on the table with root page BtShared.iTable. Locks are removed
-** from this list when a transaction is committed or rolled back, or when
-** a btree handle is closed.
-*/
-struct BtLock {
-  Btree *pBtree;        /* Btree handle holding this lock */
-  Pgno iTable;          /* Root page of table */
-  u8 eLock;             /* READ_LOCK or WRITE_LOCK */
-  BtLock *pNext;        /* Next in BtShared.pLock list */
-};
-
 /* Candidate values for BtLock.eLock */
 #define READ_LOCK     1
 #define WRITE_LOCK    2

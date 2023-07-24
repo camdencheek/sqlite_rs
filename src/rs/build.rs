@@ -86,6 +86,7 @@ fn main() {
                 "sColMap".into(),
                 "sqlite3UpperToLower".into(),
                 "tRowcnt".into(),
+                "BtLock".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
