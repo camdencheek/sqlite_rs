@@ -9,6 +9,7 @@ use crate::util::log_est::LogEst;
 use crate::vtable::VTable;
 use crate::{column::Column, never};
 
+use bitflags::bitflags;
 use libc::{c_char, c_int};
 
 type Pgno = u32;
@@ -80,4 +81,60 @@ pub struct Table_u_vtab {
     nArg: c_int,             /* Number of arguments to the module */
     azArg: *mut *mut c_char, /* 0: module 1: schema 2: vtab name 3...: args */
     p: *mut VTable,          /* List of VTable objects. */
+}
+
+bitflags! {
+    /// Allowed values for Table.tabFlags.
+    ///
+    /// TF_OOOHidden applies to tables or view that have hidden columns that are
+    /// followed by non-hidden columns.  Example:  "CREATE VIRTUAL TABLE x USING
+    /// vtab1(a HIDDEN, b);".  Since "b" is a non-hidden column but "a" is hidden,
+    /// the TF_OOOHidden attribute would apply in this case.  Such tables require
+    /// special handling during INSERT processing. The "OOO" means "Out Of Order".
+    ///
+    /// Constraints:
+    ///
+    ///         TF_HasVirtual == COLFLAG_VIRTUAL
+    ///         TF_HasStored  == COLFLAG_STORED
+    ///         TF_HasHidden  == COLFLAG_HIDDEN
+    #[repr(transparent)]
+    pub struct TF: u32 {
+        /// Read-only system table
+        const Readonly = 0x00000001;
+        /// Has one or more hidden columns
+        const HasHidden = 0x00000002;
+        /// Table has a primary key
+        const HasPrimaryKey = 0x00000004;
+        /// Integer primary key is autoincrement
+        const Autoincrement = 0x00000008;
+        /// nRowLogEst set from sqlite_stat1
+        const HasStat1 = 0x00000010;
+        /// Has one or more VIRTUAL columns
+        const HasVirtual = 0x00000020;
+        /// Has one or more STORED columns
+        const HasStored = 0x00000040;
+        /// Combo: HasVirtual + HasStored
+        const HasGenerated = 0x00000060;
+        /// No rowid.  PRIMARY KEY is the key
+        const WithoutRowid = 0x00000080;
+        /// Query planner decisions affected by
+        /// Index.aiRowLogEst[] values
+        const StatsUsed = 0x00000100;
+        /// No user-visible "rowid" column
+        const NoVisibleRowid = 0x00000200;
+        /// Out-of-Order hidden columns
+        const OOOHidden = 0x00000400;
+        /// Contains NOT NULL constraints
+        const HasNotNull = 0x00000800;
+        /// True for a shadow table
+        const Shadow = 0x00001000;
+        /// STAT4 info available for this table
+        const HasStat4 = 0x00002000;
+        /// An ephemeral table
+        const Ephemeral = 0x00004000;
+        /// An eponymous virtual table
+        const Eponymous = 0x00008000;
+        /// STRICT mode
+        const Strict = 0x00010000;
+    }
 }

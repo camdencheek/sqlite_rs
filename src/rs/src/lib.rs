@@ -14,6 +14,7 @@ mod global;
 mod hash;
 mod id;
 mod index;
+mod lookaside;
 mod macros;
 mod mem;
 mod module;
