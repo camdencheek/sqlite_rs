@@ -5,6 +5,7 @@ mod build;
 mod coll_seq;
 mod column;
 mod cte;
+mod db;
 mod expr;
 mod fkey;
 mod from;
@@ -33,14 +34,6 @@ mod util;
 mod vtable;
 mod window;
 mod with;
-
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
-pub struct sqlite3 {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
-}
 
 /// Temporary opaque struct
 /// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs

@@ -1,10 +1,10 @@
 use libc::{c_char, c_int, c_uint, c_void};
 
 use crate::autoinc::AutoincInfo;
+use crate::db::sqlite3;
 use crate::expr::{ExprList, IndexedExpr};
 use crate::index::Index;
 use crate::returning::Returning;
-use crate::sqlite3;
 use crate::table::Table;
 use crate::token::{RenameToken, Token};
 use crate::trigger::{Trigger, TriggerPrg};

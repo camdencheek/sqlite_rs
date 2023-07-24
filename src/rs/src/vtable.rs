@@ -1,7 +1,8 @@
 use libc::c_int;
 
+use crate::db::sqlite3;
 use crate::module::Module;
-use crate::{sqlite3, sqlite3_vtab};
+use crate::sqlite3_vtab;
 
 /*
 ** An object of this type is created for each virtual table present in
