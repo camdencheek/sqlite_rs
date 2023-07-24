@@ -57,3 +57,11 @@ pub struct VTable {
     iSavepoint: c_int,        /* Depth of the SAVEPOINT stack */
     pNext: *mut VTable,       /* Next in linked list (see above) */
 }
+
+/// Temporary opaque struct
+/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+// cbindgen:ignore
+pub struct VtabCtx {
+    _data: [u8; 0],
+    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}

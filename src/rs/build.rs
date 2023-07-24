@@ -25,9 +25,35 @@ fn main() {
             h.insert("debug".into(), "SQLITE_DEBUG".into());
             h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
             h.insert("omit_cast".into(), "SQLITE_OMIT_CAST".into());
+            h.insert("omit_wal".into(), "SQLITE_OMIT_WAL".into());
+            h.insert(
+                "user_authentication".into(),
+                "SQLITE_USER_AUTHENTICATION".into(),
+            );
+            h.insert(
+                "enable_unlock_notify".into(),
+                "SQLITE_ENABLE_UNLOCK_NOTIFY".into(),
+            );
+            h.insert(
+                "omit_virtualtable".into(),
+                "SQLITE_OMIT_VIRTUALTABLE".into(),
+            );
+            h.insert(
+                "omit_progress_callback".into(),
+                "SQLITE_OMIT_PROGRESS_CALLBACK".into(),
+            );
+            h.insert(
+                "omit_authorization".into(),
+                "SQLITE_OMIT_AUTHORIZATION".into(),
+            );
             h.insert(
                 "omit_shared_cache".into(),
                 "SQLITE_OMIT_SHARED_CACHE".into(),
+            );
+            h.insert("omit_deprecated".into(), "SQLITE_OMITE_DEPRECATED".into());
+            h.insert(
+                "enable_preupdate_hook".into(),
+                "SQLITE_ENABLE_PREUPDATE_HOOK".into(),
             );
             h.insert("coverage_test".into(), "SQLITE_COVERAGE_TEST".into());
             h.insert(
