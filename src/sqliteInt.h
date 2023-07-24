@@ -3347,7 +3347,6 @@ int sqlite3GetTempReg(Parse*);
 void sqlite3ReleaseTempReg(Parse*,int);
 int sqlite3GetTempRange(Parse*,int);
 void sqlite3ReleaseTempRange(Parse*,int,int);
-void sqlite3ClearTempRegCache(Parse*);
 #ifdef SQLITE_DEBUG
 int sqlite3NoTempsInRange(Parse*,int,int);
 #endif

@@ -152,6 +152,24 @@ pub struct Parse {
     pRename: *mut RenameToken, /* Tokens subject to renaming by ALTER TABLE */
 }
 
+impl Parse {
+    /// Mark all temporary registers as being unavailable for reuse.
+    ///
+    /// Always invoke this procedure after coding a subroutine or co-routine
+    /// that might be invoked from other parts of the code, to ensure that
+    /// the sub/co-routine does not use registers in common with the code that
+    /// invokes the sub/co-routine.
+    fn clear_temp_reg_cache(&mut self) {
+        self.nTempReg = 0;
+        self.nRangeReg = 0;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ClearTempRegCache(pParse: *mut Parse) {
+    pParse.as_mut().unwrap().clear_temp_reg_cache()
+}
+
 #[repr(C)]
 pub union Parse_u1 {
     addrCrTab: c_int,           /* Address of OP_CreateBtree on CREATE TABLE */

@@ -6425,19 +6425,6 @@ void sqlite3ReleaseTempRange(Parse *pParse, int iReg, int nReg){
 }
 
 /*
-** Mark all temporary registers as being unavailable for reuse.
-**
-** Always invoke this procedure after coding a subroutine or co-routine
-** that might be invoked from other parts of the code, to ensure that
-** the sub/co-routine does not use registers in common with the code that
-** invokes the sub/co-routine.
-*/
-void sqlite3ClearTempRegCache(Parse *pParse){
-  pParse->nTempReg = 0;
-  pParse->nRangeReg = 0;
-}
-
-/*
 ** Validate that no temporary register falls within the range of
 ** iFirst..iLast, inclusive.  This routine is only call from within assert()
 ** statements.
