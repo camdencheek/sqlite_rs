@@ -77,3 +77,10 @@ pub unsafe extern "C" fn sqlite3GetUInt32(z: *const c_char, pI: *mut u32) -> c_i
     *pI = v as u32;
     return 1;
 }
+
+/// Compute the absolute value of a 32-bit signed integer, of possible.  Or
+/// if the integer has a value of -2147483648, return +2147483647
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3AbsInt32(x: c_int) -> c_int {
+    x.saturating_abs()
+}

@@ -1257,16 +1257,6 @@ int sqlite3SafetyCheckSickOrOk(sqlite3 *db){
   }
 }
 
-/*
-** Compute the absolute value of a 32-bit signed integer, of possible.  Or 
-** if the integer has a value of -2147483648, return +2147483647
-*/
-int sqlite3AbsInt32(int x){
-  if( x>=0 ) return x;
-  if( x==(int)0x80000000 ) return 0x7fffffff;
-  return -x;
-}
-
 #ifdef SQLITE_ENABLE_8_3_NAMES
 /*
 ** If SQLITE_ENABLE_8_3_NAMES is set at compile-time and if the database

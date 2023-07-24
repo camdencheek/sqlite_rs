@@ -3798,7 +3798,6 @@ int sqlite3CheckCollSeq(Parse *, CollSeq *);
 int sqlite3WritableSchema(sqlite3*);
 int sqlite3CheckObjectName(Parse*, const char*,const char*,const char*);
 void sqlite3VdbeSetChanges(sqlite3 *, i64);
-int sqlite3AbsInt32(int);
 #ifdef SQLITE_ENABLE_8_3_NAMES
 void sqlite3FileSuffix3(const char*, char*);
 #else
