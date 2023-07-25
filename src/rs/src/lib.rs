@@ -33,6 +33,7 @@ mod trigger;
 mod upsert;
 mod util;
 mod vtable;
+mod whereint;
 mod window;
 mod with;
 

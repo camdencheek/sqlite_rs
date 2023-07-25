@@ -118,6 +118,11 @@ fn main() {
                 "sqlite3CtypeMap".into(),
                 "VtabCtx".into(),
                 "TF".into(),
+                "WhereMemBlock".into(),
+                "WhereRightJoin".into(),
+                "WhereLevel".into(),
+                "InLoop".into(),
+                "WhereLoop".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
