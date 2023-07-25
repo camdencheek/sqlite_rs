@@ -1201,17 +1201,6 @@ typedef struct Walker Walker;
 typedef struct WhereInfo WhereInfo;
 typedef struct With With;
 
-
-/*
-** A bit in a Bitmask
-*/
-#define MASKBIT(n)    (((Bitmask)1)<<(n))
-#define MASKBIT64(n)  (((u64)1)<<(n))
-#define MASKBIT32(n)  (((unsigned int)1)<<(n))
-#define SMASKBIT32(n) ((n)<=31?((unsigned int)1)<<(n):0)
-#define ALLBITS       ((Bitmask)-1)
-#define TOPBIT        (((Bitmask)1)<<(BMS-1))
-
 /* A VList object records a mapping between parameters/variables/wildcards
 ** in the SQL statement (such as $abc, @pqr, or :xyz) and the integer
 ** variable number associated with that parameter.  See the format description
