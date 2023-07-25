@@ -20,10 +20,7 @@
 
 /* Forward references
 */
-typedef struct WhereClause WhereClause;
 typedef struct WhereMaskSet WhereMaskSet;
-typedef struct WhereOrInfo WhereOrInfo;
-typedef struct WhereAndInfo WhereAndInfo;
 typedef struct WherePath WherePath;
 typedef struct WhereLoopBuilder WhereLoopBuilder;
 typedef struct WhereScan WhereScan;
@@ -80,78 +77,6 @@ struct WherePath {
   WhereLoop **aLoop;    /* Array of WhereLoop objects implementing this path */
 };
 
-/*
-** The query generator uses an array of instances of this structure to
-** help it analyze the subexpressions of the WHERE clause.  Each WHERE
-** clause subexpression is separated from the others by AND operators,
-** usually, or sometimes subexpressions separated by OR.
-**
-** All WhereTerms are collected into a single WhereClause structure.  
-** The following identity holds:
-**
-**        WhereTerm.pWC->a[WhereTerm.idx] == WhereTerm
-**
-** When a term is of the form:
-**
-**              X <op> <expr>
-**
-** where X is a column name and <op> is one of certain operators,
-** then WhereTerm.leftCursor and WhereTerm.u.leftColumn record the
-** cursor number and column number for X.  WhereTerm.eOperator records
-** the <op> using a bitmask encoding defined by WO_xxx below.  The
-** use of a bitmask encoding for the operator allows us to search
-** quickly for terms that match any of several different operators.
-**
-** A WhereTerm might also be two or more subterms connected by OR:
-**
-**         (t1.X <op> <expr>) OR (t1.Y <op> <expr>) OR ....
-**
-** In this second case, wtFlag has the TERM_ORINFO bit set and eOperator==WO_OR
-** and the WhereTerm.u.pOrInfo field points to auxiliary information that
-** is collected about the OR clause.
-**
-** If a term in the WHERE clause does not match either of the two previous
-** categories, then eOperator==0.  The WhereTerm.pExpr field is still set
-** to the original subexpression content and wtFlags is set up appropriately
-** but no other fields in the WhereTerm object are meaningful.
-**
-** When eOperator!=0, prereqRight and prereqAll record sets of cursor numbers,
-** but they do so indirectly.  A single WhereMaskSet structure translates
-** cursor number into bits and the translated bit is stored in the prereq
-** fields.  The translation is used in order to maximize the number of
-** bits that will fit in a Bitmask.  The VDBE cursor numbers might be
-** spread out over the non-negative integers.  For example, the cursor
-** numbers might be 3, 8, 9, 10, 20, 23, 41, and 45.  The WhereMaskSet
-** translates these sparse cursor numbers into consecutive integers
-** beginning with 0 in order to make the best possible use of the available
-** bits in the Bitmask.  So, in the example above, the cursor numbers
-** would be mapped into integers 0 through 7.
-**
-** The number of terms in a join is limited by the number of bits
-** in prereqRight and prereqAll.  The default is 64 bits, hence SQLite
-** is only able to process joins with 64 or fewer tables.
-*/
-struct WhereTerm {
-  Expr *pExpr;            /* Pointer to the subexpression that is this term */
-  WhereClause *pWC;       /* The clause this term is part of */
-  LogEst truthProb;       /* Probability of truth for this expression */
-  u16 wtFlags;            /* TERM_xxx bit flags.  See below */
-  u16 eOperator;          /* A WO_xx value describing <op> */
-  u8 nChild;              /* Number of children that must disable us */
-  u8 eMatchOp;            /* Op for vtab MATCH/LIKE/GLOB/REGEXP terms */
-  int iParent;            /* Disable pWC->a[iParent] when this term disabled */
-  int leftCursor;         /* Cursor number of X in "X <op> <expr>" */
-  union {
-    struct {
-      int leftColumn;         /* Column number of X in "X <op> <expr>" */
-      int iField;             /* Field in (?,?,?) IN (SELECT...) vector */
-    } x;                    /* Opcode other than OP_OR or OP_AND */
-    WhereOrInfo *pOrInfo;   /* Extra information if (eOperator & WO_OR)!=0 */
-    WhereAndInfo *pAndInfo; /* Extra information if (eOperator& WO_AND)!=0 */
-  } u;
-  Bitmask prereqRight;    /* Bitmask of tables used by pExpr->pRight */
-  Bitmask prereqAll;      /* Bitmask of tables referenced by pExpr */
-};
 
 /*
 ** Allowed values of WhereTerm.wtFlags
@@ -193,51 +118,6 @@ struct WhereScan {
   unsigned char nEquiv;      /* Number of entries in aiCur[] and aiColumn[] */
   int aiCur[11];             /* Cursors in the equivalence class */
   i16 aiColumn[11];          /* Corresponding column number in the eq-class */
-};
-
-/*
-** An instance of the following structure holds all information about a
-** WHERE clause.  Mostly this is a container for one or more WhereTerms.
-**
-** Explanation of pOuter:  For a WHERE clause of the form
-**
-**           a AND ((b AND c) OR (d AND e)) AND f
-**
-** There are separate WhereClause objects for the whole clause and for
-** the subclauses "(b AND c)" and "(d AND e)".  The pOuter field of the
-** subclauses points to the WhereClause object for the whole clause.
-*/
-struct WhereClause {
-  WhereInfo *pWInfo;       /* WHERE clause processing context */
-  WhereClause *pOuter;     /* Outer conjunction */
-  u8 op;                   /* Split operator.  TK_AND or TK_OR */
-  u8 hasOr;                /* True if any a[].eOperator is WO_OR */
-  int nTerm;               /* Number of terms */
-  int nSlot;               /* Number of entries in a[] */
-  int nBase;               /* Number of terms through the last non-Virtual */
-  WhereTerm *a;            /* Each a[] describes a term of the WHERE cluase */
-#if defined(SQLITE_SMALL_STACK)
-  WhereTerm aStatic[1];    /* Initial static space for a[] */
-#else
-  WhereTerm aStatic[8];    /* Initial static space for a[] */
-#endif
-};
-
-/*
-** A WhereTerm with eOperator==WO_OR has its u.pOrInfo pointer set to
-** a dynamically allocated instance of the following structure.
-*/
-struct WhereOrInfo {
-  WhereClause wc;          /* Decomposition into subterms */
-  Bitmask indexable;       /* Bitmask of all indexable tables in the clause */
-};
-
-/*
-** A WhereTerm with eOperator==WO_AND has its u.pAndInfo pointer set to
-** a dynamically allocated instance of the following structure.
-*/
-struct WhereAndInfo {
-  WhereClause wc;          /* The subexpression broken out */
 };
 
 /*

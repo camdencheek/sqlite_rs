@@ -3,6 +3,7 @@ use std::mem::ManuallyDrop;
 use libc::{c_char, c_int};
 
 use crate::{
+    expr::Expr,
     index::Index,
     util::{bitmask::Bitmask, log_est::LogEst},
 };
@@ -232,10 +233,158 @@ pub struct WhereLoop_u_vtab {
     mHandleIn: u32,
 }
 
+/// An instance of the following structure holds all information about a
+/// WHERE clause.  Mostly this is a container for one or more WhereTerms.
+///
+/// Explanation of pOuter:  For a WHERE clause of the form
+///
+///           a AND ((b AND c) OR (d AND e)) AND f
+///
+/// There are separate WhereClause objects for the whole clause and for
+/// the subclauses "(b AND c)" and "(d AND e)".  The pOuter field of the
+/// subclauses points to the WhereClause object for the whole clause.
+#[repr(C)]
+pub struct WhereClause {
+    /// WHERE clause processing context
+    pWInfo: *mut WhereInfo,
+    /// Outer conjunction
+    pOuter: *mut WhereClause,
+    /// Split operator.  TK_AND or TK_OR
+    op: u8,
+    /// True if any a[].eOperator is WO_OR
+    hasOr: u8,
+    /// Number of terms
+    nTerm: c_int,
+    /// Number of entries in a[]
+    nSlot: c_int,
+    /// Number of terms through the last non-Virtual
+    nBase: c_int,
+    /// Each a[] describes a term of the WHERE clause
+    a: *mut WhereTerm,
+    /// Initial static space for a[]
+    #[cfg(small_stack)]
+    aStatic: [WhereTerm; 1],
+    /// Initial static space for a[]
+    #[cfg(not(small_stack))]
+    aStatic: [WhereTerm; 8],
+}
+
+/// The query generator uses an array of instances of this structure to
+/// help it analyze the subexpressions of the WHERE clause.  Each WHERE
+/// clause subexpression is separated from the others by AND operators,
+/// usually, or sometimes subexpressions separated by OR.
+///
+/// All WhereTerms are collected into a single WhereClause structure.  
+/// The following identity holds:
+///
+///        WhereTerm.pWC->a[WhereTerm.idx] == WhereTerm
+///
+/// When a term is of the form:
+///
+///              X <op> <expr>
+///
+/// where X is a column name and <op> is one of certain operators,
+/// then WhereTerm.leftCursor and WhereTerm.u.leftColumn record the
+/// cursor number and column number for X.  WhereTerm.eOperator records
+/// the <op> using a bitmask encoding defined by WO_xxx below.  The
+/// use of a bitmask encoding for the operator allows us to search
+/// quickly for terms that match any of several different operators.
+///
+/// A WhereTerm might also be two or more subterms connected by OR:
+///
+///         (t1.X <op> <expr>) OR (t1.Y <op> <expr>) OR ....
+///
+/// In this second case, wtFlag has the TERM_ORINFO bit set and eOperator==WO_OR
+/// and the WhereTerm.u.pOrInfo field points to auxiliary information that
+/// is collected about the OR clause.
+///
+/// If a term in the WHERE clause does not match either of the two previous
+/// categories, then eOperator==0.  The WhereTerm.pExpr field is still set
+/// to the original subexpression content and wtFlags is set up appropriately
+/// but no other fields in the WhereTerm object are meaningful.
+///
+/// When eOperator!=0, prereqRight and prereqAll record sets of cursor numbers,
+/// but they do so indirectly.  A single WhereMaskSet structure translates
+/// cursor number into bits and the translated bit is stored in the prereq
+/// fields.  The translation is used in order to maximize the number of
+/// bits that will fit in a Bitmask.  The VDBE cursor numbers might be
+/// spread out over the non-negative integers.  For example, the cursor
+/// numbers might be 3, 8, 9, 10, 20, 23, 41, and 45.  The WhereMaskSet
+/// translates these sparse cursor numbers into consecutive integers
+/// beginning with 0 in order to make the best possible use of the available
+/// bits in the Bitmask.  So, in the example above, the cursor numbers
+/// would be mapped into integers 0 through 7.
+///
+/// The number of terms in a join is limited by the number of bits
+/// in prereqRight and prereqAll.  The default is 64 bits, hence SQLite
+/// is only able to process joins with 64 or fewer tables.
+#[repr(C)]
+pub struct WhereTerm {
+    /// Pointer to the subexpression that is this term
+    pExpr: *mut Expr,
+    /// The clause this term is part of
+    pWC: *mut WhereClause,
+    /// Probability of truth for this expression
+    truthProb: LogEst,
+    /// TERM_xxx bit flags.  See below
+    wtFlags: u16,
+    /// A WO_xx value describing <op>
+    eOperator: u16,
+    /// Number of children that must disable us
+    nChild: u8,
+    /// Op for vtab MATCH/LIKE/GLOB/REGEXP terms
+    eMatchOp: u8,
+    /// Disable pWC->a[iParent] when this term disabled
+    iParent: c_int,
+    /// Cursor number of X in "X <op> <expr>"
+    leftCursor: c_int,
+    u: WhereTerm_u,
+    /// Bitmask of tables used by pExpr->pRight
+    prereqRight: Bitmask,
+    /// Bitmask of tables referenced by pExpr
+    prereqAll: Bitmask,
+}
+
+#[repr(C)]
+pub union WhereTerm_u {
+    /// Opcode other than OP_OR or OP_AND
+    x: ManuallyDrop<WhereTerm_u_x>,
+    /// Extra information if (eOperator & WO_OR)!=0
+    pOrInfo: *mut WhereOrInfo,
+    /// Extra information if (eOperator& WO_AND)!=0
+    pAndInfo: *mut WhereAndInfo,
+}
+
+#[repr(C)]
+pub struct WhereTerm_u_x {
+    /// Column number of X in "X <op> <expr>"
+    leftColumn: c_int,
+    /// Field in (?,?,?) IN (SELECT...) vector
+    iField: c_int,
+}
+
+/// A WhereTerm with eOperator==WO_OR has its u.pOrInfo pointer set to
+/// a dynamically allocated instance of the following structure.
+#[repr(C)]
+pub struct WhereOrInfo {
+    /// Decomposition into subterms
+    wc: WhereClause,
+    /// Bitmask of all indexable tables in the clause
+    indexable: Bitmask,
+}
+
+/// A WhereTerm with eOperator==WO_AND has its u.pAndInfo pointer set to
+/// a dynamically allocated instance of the following structure.
+#[repr(C)]
+pub struct WhereAndInfo {
+    /// The subexpression broken out
+    wc: WhereClause,
+}
+
 /// Temporary opaque struct
 /// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 // cbindgen:ignore
-pub struct WhereTerm {
+pub struct WhereInfo {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }

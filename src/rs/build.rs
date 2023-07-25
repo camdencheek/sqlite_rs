@@ -4,6 +4,8 @@ use cbindgen::{
 };
 use std::collections::HashMap;
 use std::env;
+use std::fs::File;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 
 fn main() {
@@ -20,6 +22,14 @@ fn main() {
         include_guard: Some("SQLITE3_RS".into()),
         language: Language::C,
         macro_expansion: MacroExpansionConfig { bitflags: true },
+        sort_by: cbindgen::SortKey::Name,
+        after_includes: Some(
+            r#"
+typedef struct WhereTerm WhereTerm;
+typedef struct WhereClause WhereClause;
+"#
+            .into(),
+        ),
         defines: {
             let mut h = HashMap::new();
             h.insert("debug".into(), "SQLITE_DEBUG".into());
@@ -68,6 +78,7 @@ fn main() {
                 "omit_floating_point".into(),
                 "SQLITE_OMIT_FLOATING_POINT".into(),
             );
+            h.insert("small_stack".into(), "SQLITE_SMALL_STACK".into());
             h.insert("check_pages".into(), "SQLITE_CHECK_PAGES".into());
             h
         },
@@ -123,6 +134,8 @@ fn main() {
                 "WhereLevel".into(),
                 "InLoop".into(),
                 "WhereLoop".into(),
+                "WhereTerm".into(),
+                "WhereClause".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
@@ -139,7 +152,65 @@ fn main() {
         ..Default::default()
     };
 
+    let mut buf = Vec::new();
     cbindgen::generate_with_config(&crate_dir, config)
         .unwrap()
-        .write_to_file(&output_file);
+        .write(&mut buf);
+    buf = reorder(buf);
+
+    let mut f = File::create(&output_file).unwrap();
+    f.write_all(&buf).unwrap();
+}
+
+// HACK: reorder the struct definitions along with some pre-declarations
+// so the header can actually build
+fn reorder(input: Vec<u8>) -> Vec<u8> {
+    use regex::bytes::Regex;
+    let (input, where_clause) = extract(input, "WhereClause");
+    let (input, where_term) = extract(input, "WhereTerm");
+    let (input, where_or_info) = extract(input, "WhereOrInfo");
+    let (input, where_and_info) = extract(input, "WhereAndInfo");
+    let (input, where_term_u_x) = extract(input, "WhereTerm_u_x");
+    let (mut input, where_term_u) = extract(input, "WhereTerm_u");
+
+    let dst = Regex::new(r"(?s)typedef union WhereLoop_u \{.*\} WhereLoop_u;\n")
+        .unwrap()
+        .find(&input)
+        .unwrap()
+        .end();
+
+    let where_clause_decl: Vec<u8> = b"typedef struct WhereClause WhereClause;\n".to_vec();
+    let where_or_info_decl: Vec<u8> = b"typedef struct WhereOrInfo WhereOrInfo;\n".to_vec();
+    let where_and_info_decl: Vec<u8> = b"typedef struct WhereAndInfo WhereAndInfo;\n".to_vec();
+
+    let _ = input
+        .splice(
+            dst..dst,
+            where_clause_decl
+                .into_iter()
+                .chain(where_or_info_decl)
+                .chain(where_and_info_decl)
+                .chain(where_term_u_x)
+                .chain(where_term_u)
+                .chain(where_term)
+                .chain(where_clause)
+                .chain(where_and_info)
+                .chain(where_or_info),
+        )
+        .collect::<Vec<_>>();
+    input
+}
+
+fn extract(mut input: Vec<u8>, target: &str) -> (Vec<u8>, Vec<u8>) {
+    use regex::bytes::Regex;
+    let restr = format!(
+        r"(?s)typedef (struct|union) {} \{{.*\}} {};\n",
+        &target, &target
+    );
+    dbg!(&restr);
+    let re = Regex::new(&restr).unwrap();
+    let m = re.find(&input).unwrap();
+    let copy = input[m.range()].to_owned();
+    input.splice(m.range(), []);
+    (input, copy)
 }
