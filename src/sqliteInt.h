@@ -1220,15 +1220,6 @@ typedef int VList;
 #endif
 
 
-/*
-** These macros can be used to test, set, or clear bits in the
-** Db.pSchema->flags field.
-*/
-#define DbHasProperty(D,I,P)     (((D)->aDb[I].pSchema->schemaFlags&(P))==(P))
-#define DbHasAnyProperty(D,I,P)  (((D)->aDb[I].pSchema->schemaFlags&(P))!=0)
-#define DbSetProperty(D,I,P)     (D)->aDb[I].pSchema->schemaFlags|=(P)
-#define DbClearProperty(D,I,P)   (D)->aDb[I].pSchema->schemaFlags&=~(P)
-
 #define DisableLookaside  db->lookaside.bDisable++;db->lookaside.sz=0
 #define EnableLookaside   db->lookaside.bDisable--;\
    db->lookaside.sz=db->lookaside.bDisable?0:db->lookaside.szTrue

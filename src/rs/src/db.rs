@@ -6,7 +6,7 @@ use crate::global::Pgno;
 use crate::hash::Hash;
 use crate::lookaside::Lookaside;
 use crate::savepoint::Savepoint;
-use crate::schema::Schema;
+use crate::schema::{Schema, DB};
 use crate::vtable::VtabCtx;
 use crate::{parse::Parse, sqlite3_value, vtable::VTable};
 
@@ -254,6 +254,56 @@ pub struct sqlite3 {
     /// User authentication information
     #[cfg(user_authentication)]
     auth: sqlite3_userauth,
+}
+
+/*
+** These methods can be used to test, set, or clear bits in the
+** Db.pSchema->flags field.
+*/
+impl sqlite3 {
+    unsafe fn db_has_property(&self, i: c_int, prop: DB) -> bool {
+        (*(*self.aDb.add(i as usize)).pSchema)
+            .schemaFlags
+            .contains(prop)
+    }
+
+    unsafe fn db_has_any_property(&self, i: c_int, prop: DB) -> bool {
+        (*(*self.aDb.add(i as usize)).pSchema)
+            .schemaFlags
+            .intersects(prop)
+    }
+
+    unsafe fn db_set_property(&mut self, i: c_int, prop: DB) {
+        (*(*self.aDb.add(i as usize)).pSchema)
+            .schemaFlags
+            .set(prop, true)
+    }
+
+    unsafe fn db_clear_property(&mut self, i: c_int, prop: DB) {
+        (*(*self.aDb.add(i as usize)).pSchema)
+            .schemaFlags
+            .set(prop, false)
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn DbHasProperty(db: *const sqlite3, i: c_int, prop: DB) -> c_int {
+    db.as_ref().unwrap().db_has_property(i, prop).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn DbHasAnyProperty(db: *const sqlite3, i: c_int, prop: DB) -> c_int {
+    db.as_ref().unwrap().db_has_any_property(i, prop).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn DbSetProperty(db: *mut sqlite3, i: c_int, prop: DB) {
+    db.as_mut().unwrap().db_set_property(i, prop)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn DbClearProperty(db: *mut sqlite3, i: c_int, prop: DB) {
+    db.as_mut().unwrap().db_clear_property(i, prop)
 }
 
 #[repr(C)]

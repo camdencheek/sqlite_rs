@@ -32,7 +32,7 @@ pub struct Schema {
     pSeqTab: *mut Table,  /* The sqlite_sequence table used by AUTOINCREMENT */
     file_format: u8,      /* Schema format version for this file */
     enc: u8,              /* Text encoding used by this database */
-    schemaFlags: DB,      /* Flags associated with this schema */
+    pub schemaFlags: DB,  /* Flags associated with this schema */
     cache_size: c_int,    /* Number of pages to use in the cache */
 }
 
