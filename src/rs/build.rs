@@ -105,6 +105,7 @@ fn main() {
                 "Savepoint".into(),
                 "Select".into(),
                 "SqliteAff".into(),
+                "VTable".into(),
                 "SrcItem".into(),
                 "Table".into(),
                 "Token".into(),
@@ -115,6 +116,7 @@ fn main() {
                 "BtLock".into(),
                 "BtreePayload".into(),
                 "sqlite3CtypeMap".into(),
+                "VtabCtx".into(),
                 "TF".into(),
             ],
             item_types: vec![

@@ -1197,11 +1197,8 @@ typedef struct TriggerPrg TriggerPrg;
 typedef struct TriggerStep TriggerStep;
 typedef struct UnpackedRecord UnpackedRecord;
 typedef struct Upsert Upsert;
-typedef struct VTable VTable;
-typedef struct VtabCtx VtabCtx;
 typedef struct Walker Walker;
 typedef struct WhereInfo WhereInfo;
-typedef struct Window Window;
 typedef struct With With;
 
 

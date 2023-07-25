@@ -28,7 +28,7 @@ pub struct Table {
     /*   ... also used as column name list in a VIEW */
     tnum: Pgno,         /* Root BTree page for this table */
     nTabRef: u32,       /* Number of pointers to this Table */
-    tabFlags: u32,      /* Mask of TF_* values */
+    tabFlags: TF,      /* Mask of TF_* values */
     iPKey: i16,         /* If not negative, use aCol[iPKey] as the rowid */
     pub nCol: i16,      /* Number of columns in this table */
     nNVCol: i16,        /* Number of columns that are not VIRTUAL */

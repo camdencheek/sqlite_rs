@@ -15,20 +15,6 @@
 #include "sqliteInt.h"
 
 /*
-** Before a virtual table xCreate() or xConnect() method is invoked, the
-** sqlite3.pVtabCtx member variable is set to point to an instance of
-** this struct allocated on the stack. It is used by the implementation of 
-** the sqlite3_declare_vtab() and sqlite3_vtab_config() APIs, both of which
-** are invoked only from within xCreate and xConnect methods.
-*/
-struct VtabCtx {
-  VTable *pVTable;    /* The virtual table being constructed */
-  Table *pTab;        /* The Table object to which the virtual table belongs */
-  VtabCtx *pPrior;    /* Parent context (if any) */
-  int bDeclared;      /* True after sqlite3_declare_vtab() is called */
-};
-
-/*
 ** Construct and install a Module object for a virtual table.  When this
 ** routine is called, it is guaranteed that all appropriate locks are held
 ** and the module is not already part of the connection.
