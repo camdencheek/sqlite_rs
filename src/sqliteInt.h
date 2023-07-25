@@ -1203,11 +1203,6 @@ typedef struct With With;
 
 
 /*
-** The number of bits in a Bitmask.  "BMS" means "BitMask Size".
-*/
-#define BMS  ((int)(sizeof(Bitmask)*8))
-
-/*
 ** A bit in a Bitmask
 */
 #define MASKBIT(n)    (((Bitmask)1)<<(n))

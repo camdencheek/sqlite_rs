@@ -25,8 +25,7 @@ fn main() {
         sort_by: cbindgen::SortKey::Name,
         after_includes: Some(
             r#"
-typedef struct WhereTerm WhereTerm;
-typedef struct WhereClause WhereClause;
+typedef uint16_t TERM;
 "#
             .into(),
         ),
@@ -36,6 +35,7 @@ typedef struct WhereClause WhereClause;
             h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
             h.insert("omit_cast".into(), "SQLITE_OMIT_CAST".into());
             h.insert("omit_wal".into(), "SQLITE_OMIT_WAL".into());
+            h.insert("enable_stat4".into(), "SQLITE_ENABLE_STAT4".into());
             h.insert(
                 "user_authentication".into(),
                 "SQLITE_USER_AUTHENTICATION".into(),
@@ -96,6 +96,11 @@ typedef struct WhereClause WhereClause;
         export: ExportConfig {
             include: vec![
                 "AggInfo".into(),
+                "WhereOrSet".into(),
+                "WhereMaskSet".into(),
+                "WherePath".into(),
+                "WhereScan".into(),
+                "WhereLoopBuilder".into(),
                 "Colflag".into(),
                 "CollSeq".into(),
                 "Coltype".into(),
@@ -136,6 +141,8 @@ typedef struct WhereClause WhereClause;
                 "WhereLoop".into(),
                 "WhereTerm".into(),
                 "WhereClause".into(),
+                "WhereMaskSet".into(),
+                "TERM".into(),
             ],
             item_types: vec![
                 ItemType::Constants,
