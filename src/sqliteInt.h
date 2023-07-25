@@ -1229,21 +1229,6 @@ typedef int VList;
 #define DbSetProperty(D,I,P)     (D)->aDb[I].pSchema->schemaFlags|=(P)
 #define DbClearProperty(D,I,P)   (D)->aDb[I].pSchema->schemaFlags&=~(P)
 
-/*
-** Allowed values for the DB.pSchema->flags field.
-**
-** The DB_SchemaLoaded flag is set after the database schema has been
-** read into internal hash tables.
-**
-** DB_UnresetViews means that one or more views have column names that
-** have been filled out.  If the schema changes, these column names might
-** changes and so the view will need to be reset.
-*/
-#define DB_SchemaLoaded    0x0001  /* The schema has been loaded */
-#define DB_UnresetViews    0x0002  /* Some views have defined column names */
-#define DB_ResetWanted     0x0008  /* Reset the schema when nSchemaLock==0 */
-
-
 #define DisableLookaside  db->lookaside.bDisable++;db->lookaside.sz=0
 #define EnableLookaside   db->lookaside.bDisable--;\
    db->lookaside.sz=db->lookaside.bDisable?0:db->lookaside.szTrue

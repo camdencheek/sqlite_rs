@@ -128,6 +128,7 @@ typedef uint16_t WO;
                 "SrcItem".into(),
                 "Table".into(),
                 "Token".into(),
+                "DB".into(),
                 "Window".into(),
                 "sColMap".into(),
                 "sqlite3UpperToLower".into(),

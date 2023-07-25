@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::c_int;
 
 use crate::hash::Hash;
@@ -31,6 +32,26 @@ pub struct Schema {
     pSeqTab: *mut Table,  /* The sqlite_sequence table used by AUTOINCREMENT */
     file_format: u8,      /* Schema format version for this file */
     enc: u8,              /* Text encoding used by this database */
-    schemaFlags: u16,     /* Flags associated with this schema */
+    schemaFlags: DB,      /* Flags associated with this schema */
     cache_size: c_int,    /* Number of pages to use in the cache */
+}
+
+bitflags! {
+    /// Allowed values for the DB.pSchema->flags field.
+    ///
+    /// The DB_SchemaLoaded flag is set after the database schema has been
+    /// read into internal hash tables.
+    ///
+    /// DB_UnresetViews means that one or more views have column names that
+    /// have been filled out.  If the schema changes, these column names might
+    /// changes and so the view will need to be reset.
+    #[repr(transparent)]
+    pub struct DB: u16 {
+        /// The schema has been loaded
+        const SchemaLoaded = 0x0001;
+        /// Some views have defined column names
+        const UnresetViews = 0x0002;
+        /// Reset the schema when nSchemaLock==0
+        const ResetWanted = 0x0008;
+    }
 }

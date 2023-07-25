@@ -721,6 +721,7 @@ int sqlite3VdbeExec(
   u8 iCompareIsInit = 0;     /* iCompare is initialized */
 #endif
   int rc = SQLITE_OK;        /* Value to return */
+
   sqlite3 *db = p->db;       /* The database */
   u8 resetSchemaOnFault = 0; /* Reset schema after an error if positive */
   u8 encoding = ENC(db);     /* The database encoding */
