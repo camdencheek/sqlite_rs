@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_char, c_int, c_schar, c_uint, c_void};
 
 use crate::btree::Btree;
@@ -34,7 +35,7 @@ pub struct sqlite3 {
     /// flags recording internal state
     mDbFlags: u32,
     /// flags settable by pragmas. See below
-    flags: u64,
+    flags: SQLITE,
     /// ROWID of most recent insert (see above)
     lastRowid: i64,
     /// Default mmap_size setting
@@ -283,6 +284,109 @@ impl sqlite3 {
         (*(*self.aDb.add(i as usize)).pSchema)
             .schemaFlags
             .set(prop, false)
+    }
+}
+
+bitflags! {
+
+    /// Possible values for the sqlite3.flags.
+    ///
+    /// Value constraints (enforced via assert()):
+    ///      SQLITE_FullFSync     == PAGER_FULLFSYNC
+    ///      SQLITE_CkptFullFSync == PAGER_CKPT_FULLFSYNC
+    ///      SQLITE_CacheSpill    == PAGER_CACHE_SPILL
+    #[repr(transparent)]
+    pub struct SQLITE: u64 {
+        /// OK to update SQLITE_SCHEMA
+        const WriteSchema =    0x00000001;
+        /// Create new databases in format 1
+        const LegacyFileFmt =  0x00000002;
+        /// Show full column names on SELECT
+        const FullColNames =   0x00000004;
+        /// Use full fsync on the backend
+        const FullFSync =      0x00000008;
+        /// Use full fsync for checkpoint
+        const CkptFullFSync =  0x00000010;
+        /// OK to spill pager cache
+        const CacheSpill =     0x00000020;
+        /// Show short columns names
+        const ShortColNames =  0x00000040;
+        /// Allow unsafe functions vtabs in the schema definition
+        const TrustedSchema =  0x00000080;
+        /// Invoke the callback once if the result set is empty
+        const NullCallback =   0x00000100;
+        /// Do not enforce check constraints
+        const IgnoreChecks =   0x00000200;
+        /// Enable stmt_scanstats() counters
+        const StmtScanStatus = 0x00000400;
+        /// No checkpoint on close()/DETACH
+        const NoCkptOnClose =  0x00000800;
+        /// Reverse unordered SELECTs
+        const ReverseOrder =   0x00001000;
+        /// Enable recursive triggers
+        const RecTriggers =    0x00002000;
+        /// Enforce foreign key constraints
+        const ForeignKeys =    0x00004000;
+        /// Enable automatic indexes
+        const AutoIndex =      0x00008000;
+        /// Enable load_extension
+        const LoadExtension =  0x00010000;
+        /// Enable load_extension() SQL func
+        const LoadExtFunc =    0x00020000;
+        /// True to enable triggers
+        const EnableTrigger =  0x00040000;
+        /// Defer all FK constraints
+        const DeferFKs =       0x00080000;
+        /// Disable database changes
+        const QueryOnly =      0x00100000;
+        /// Check btree cell sizes on load
+        const CellSizeCk =     0x00200000;
+        /// Enable fts3_tokenizer(2)
+        const Fts3Tokenizer =  0x00400000;
+        /// Query Planner Stability Guarante
+        const EnableQPSG =     0x00800000;
+        /// Show trigger EXPLAIN QUERY PLAN
+        const TriggerEQP =     0x01000000;
+        /// Reset the database
+        const ResetDatabase =  0x02000000;
+        /// Legacy ALTER TABLE behaviour
+        const LegacyAlter =    0x04000000;
+        /// Do not report schema parse error
+        const NoSchemaError =  0x08000000;
+        /// Input SQL is likely hostile
+        const Defensive =      0x10000000;
+        /// dbl-quoted strings allowed in DD
+        const DqsDDL =         0x20000000;
+        /// dbl-quoted strings allowed in DM
+        const DqsDML =         0x40000000;
+        /// Enable the use of views
+        const EnableView =     0x80000000;
+        /// Count rows changed by INSERT, DELETE, or UPDATE
+        /// and return the count using a callback.
+        const CountRows     =  0x00000001u64 << 32;
+        /// Prohibit writes due to error
+        const CorruptRdOnly  = 0x00000002u64 << 32;
+        /// READ UNCOMMITTED in shared-cache
+        const ReadUncommit  = 0x00004u64 << 32;
+
+        /// Debug print SQL as it executes
+        #[cfg(debug)]
+        const SqlTrace       = 0x0100000u64 << 32;
+        /// Debug listings of VDBE progs
+        #[cfg(debug)]
+        const VdbeListing    = 0x0200000u64  << 32;
+        /// True to trace VDBE execution
+        #[cfg(debug)]
+        const VdbeTrace      = 0x0400000u64  << 32;
+        /// Trace sqlite3VdbeAddOp() calls
+        #[cfg(debug)]
+        const VdbeAddopTrace = 0x0800000u64  << 32;
+        /// Debug EXPLAIN QUERY PLAN
+        #[cfg(debug)]
+        const VdbeEQP        = 0x1000000u64  << 32;
+        /// PRAGMA parser_trace=ON
+        #[cfg(debug)]
+        const ParserTrace    = 0x2000000u64  << 32;
     }
 }
 
