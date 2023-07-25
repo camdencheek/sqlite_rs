@@ -6,6 +6,7 @@ use libc::{c_char, c_int, c_uchar, c_uint};
 use crate::{
     expr::Expr,
     index::Index,
+    token_type::TK,
     util::{
         bitmask::{self, Bitmask, BMS},
         log_est::LogEst,
@@ -175,7 +176,7 @@ pub struct WhereLoop {
     nOut: LogEst,
     u: WhereLoop_u,
     /// WHERE_* flags describing the plan
-    wsFlags: u32,
+    wsFlags: WHERE,
     /// Number of entries in aLTerm[]
     nLTerm: u16,
     /// Number of NULL aLTerm[] entries
@@ -333,7 +334,7 @@ pub struct WhereTerm {
     /// TERM_xxx bit flags.  See below
     wtFlags: TERM,
     /// A WO_xx value describing <op>
-    eOperator: u16,
+    eOperator: WO,
     /// Number of children that must disable us
     nChild: u8,
     /// Op for vtab MATCH/LIKE/GLOB/REGEXP terms
@@ -589,4 +590,111 @@ pub struct WhereMaskSet {
 pub struct WhereInfo {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+}
+
+bitflags! {
+    /// These are definitions of bits in the WhereLoop.wsFlags field.
+    /// The particular combination of bits in each WhereLoop help to
+    /// determine the algorithm that WhereLoop represents.
+    #[repr(transparent)]
+    pub struct WHERE: u32 {
+        /// x=EXPR
+        const COLUMN_EQ =    0x00000001  ;
+        /// x<EXPR and/or x>EXPR
+        const COLUMN_RANGE = 0x00000002  ;
+        /// x IN (...)
+        const COLUMN_IN =    0x00000004  ;
+        /// x IS NULL
+        const COLUMN_NULL =  0x00000008  ;
+        /// Any of the WHERE_COLUMN_xxx values
+        const CONSTRAINT =   0x0000000f  ;
+        /// x<EXPR or x<=EXPR constraint
+        const TOP_LIMIT =    0x00000010  ;
+        /// x>EXPR or x>=EXPR constraint
+        const BTM_LIMIT =    0x00000020  ;
+        /// Both x>EXPR and x<EXPR
+        const BOTH_LIMIT =   0x00000030  ;
+        /// Use index only - omit table
+        const IDX_ONLY =     0x00000040  ;
+        /// x is the INTEGER PRIMARY KEY
+        const IPK =          0x00000100  ;
+        /// WhereLoop.u.btree.pIndex is valid
+        const INDEXED =      0x00000200  ;
+        /// WhereLoop.u.vtab is valid
+        const VIRTUALTABLE = 0x00000400  ;
+        /// Able to support an IN operator
+        const IN_ABLE =      0x00000800  ;
+        /// Selects no more than one row
+        const ONEROW =       0x00001000  ;
+        /// OR using multiple indices
+        const MULTI_OR =     0x00002000  ;
+        /// Uses an ephemeral index
+        const AUTO_INDEX =   0x00004000  ;
+        /// Uses the skip-scan algorithm
+        const SKIPSCAN =     0x00008000  ;
+        /// WHERE_ONEROW would have been helpfu
+        const UNQ_WANTED =   0x00010000  ;
+        /// The automatic index is partial
+        const PARTIALIDX =   0x00020000  ;
+        /// Perhaps quit IN loops early
+        const IN_EARLYOUT =  0x00040000  ;
+        /// Column nEq of index is BIGNULL
+        const BIGNULL_SORT = 0x00080000  ;
+        /// Seek-scan optimization for IN
+        const IN_SEEKSCAN =  0x00100000  ;
+        /// Uses a transitive constraint
+        const TRANSCONS =    0x00200000  ;
+        /// Consider using a Bloom-filter
+        const BLOOMFILTER =  0x00400000  ;
+        /// nOut reduced by extra WHERE terms
+        const SELFCULL =     0x00800000  ;
+        /// Set offset counter to zero
+        const OMIT_OFFSET =  0x01000000  ;
+        /// A full-scan of a VIEW or subquery
+        const VIEWSCAN =     0x02000000  ;
+        /// Uses an index-on-expressions
+        const EXPRIDX =      0x04000000  ;
+    }
+}
+
+bitflags! {
+
+    /// Bitmasks for the operators on WhereTerm objects.  These are all
+    /// operators that are of interest to the query planner.  An
+    /// OR-ed combination of these values can be used when searching for
+    /// particular WhereTerms within a WhereClause.
+    ///
+    /// Value constraints:
+    ///     WO_EQ    == SQLITE_INDEX_CONSTRAINT_EQ
+    ///     WO_LT    == SQLITE_INDEX_CONSTRAINT_LT
+    ///     WO_LE    == SQLITE_INDEX_CONSTRAINT_LE
+    ///     WO_GT    == SQLITE_INDEX_CONSTRAINT_GT
+    ///     WO_GE    == SQLITE_INDEX_CONSTRAINT_GE
+    #[repr(transparent)]
+    pub struct WO: u16 {
+        const IN     = 0x0001;
+        const EQ     = 0x0002;
+        // TODO: define these dynamically
+        // const LT     = (Self::EQ.bits()<<(TK::LT as u8 -TK::EQ as u8));
+        // const LE     = (Self::EQ.bits()<<(TK::LE as u8-TK::EQ as u8));
+        // const GT     = (Self::EQ.bits()<<(TK::GT as u8-TK::EQ as u8));
+        // const GE     = (Self::EQ.bits()<<(TK::GE as u8-TK::EQ as u8));
+        const LT     = 0x0002<<3;
+        const LE     = 0x0002<<2;
+        const GT     = 0x0002<<1;
+        const GE     = 0x0002<<4;
+        const AUX    = 0x0040;       /* Op useful to virtual tables only */
+        const IS     = 0x0080;
+        const ISNULL = 0x0100;
+        const OR     = 0x0200;       /* Two or more OR-connected terms */
+        const AND    = 0x0400;       /* Two or more AND-connected terms */
+        const EQUIV  = 0x0800;       /* Of the form A==B, both columns */
+        const NOOP   = 0x1000;       /* This term does not restrict search space */
+        const ROWVAL = 0x2000;       /* A row-value term */
+
+        /// Mask of all possible WO_* values
+        const ALL    = 0x3fff;
+        /// Mask of all non-compound WO_* values
+        const SINGLE = 0x01ff;
+    }
 }

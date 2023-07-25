@@ -168,69 +168,6 @@ void sqlite3WhereTabFuncArgs(Parse*, SrcItem*, WhereClause*);
 
 
 
-/*
-** Bitmasks for the operators on WhereTerm objects.  These are all
-** operators that are of interest to the query planner.  An
-** OR-ed combination of these values can be used when searching for
-** particular WhereTerms within a WhereClause.
-**
-** Value constraints:
-**     WO_EQ    == SQLITE_INDEX_CONSTRAINT_EQ
-**     WO_LT    == SQLITE_INDEX_CONSTRAINT_LT
-**     WO_LE    == SQLITE_INDEX_CONSTRAINT_LE
-**     WO_GT    == SQLITE_INDEX_CONSTRAINT_GT
-**     WO_GE    == SQLITE_INDEX_CONSTRAINT_GE
-*/
-#define WO_IN     0x0001
-#define WO_EQ     0x0002
-#define WO_LT     (WO_EQ<<(TK_LT-TK_EQ))
-#define WO_LE     (WO_EQ<<(TK_LE-TK_EQ))
-#define WO_GT     (WO_EQ<<(TK_GT-TK_EQ))
-#define WO_GE     (WO_EQ<<(TK_GE-TK_EQ))
-#define WO_AUX    0x0040       /* Op useful to virtual tables only */
-#define WO_IS     0x0080
-#define WO_ISNULL 0x0100
-#define WO_OR     0x0200       /* Two or more OR-connected terms */
-#define WO_AND    0x0400       /* Two or more AND-connected terms */
-#define WO_EQUIV  0x0800       /* Of the form A==B, both columns */
-#define WO_NOOP   0x1000       /* This term does not restrict search space */
-#define WO_ROWVAL 0x2000       /* A row-value term */
 
-#define WO_ALL    0x3fff       /* Mask of all possible WO_* values */
-#define WO_SINGLE 0x01ff       /* Mask of all non-compound WO_* values */
-
-/*
-** These are definitions of bits in the WhereLoop.wsFlags field.
-** The particular combination of bits in each WhereLoop help to
-** determine the algorithm that WhereLoop represents.
-*/
-#define WHERE_COLUMN_EQ    0x00000001  /* x=EXPR */
-#define WHERE_COLUMN_RANGE 0x00000002  /* x<EXPR and/or x>EXPR */
-#define WHERE_COLUMN_IN    0x00000004  /* x IN (...) */
-#define WHERE_COLUMN_NULL  0x00000008  /* x IS NULL */
-#define WHERE_CONSTRAINT   0x0000000f  /* Any of the WHERE_COLUMN_xxx values */
-#define WHERE_TOP_LIMIT    0x00000010  /* x<EXPR or x<=EXPR constraint */
-#define WHERE_BTM_LIMIT    0x00000020  /* x>EXPR or x>=EXPR constraint */
-#define WHERE_BOTH_LIMIT   0x00000030  /* Both x>EXPR and x<EXPR */
-#define WHERE_IDX_ONLY     0x00000040  /* Use index only - omit table */
-#define WHERE_IPK          0x00000100  /* x is the INTEGER PRIMARY KEY */
-#define WHERE_INDEXED      0x00000200  /* WhereLoop.u.btree.pIndex is valid */
-#define WHERE_VIRTUALTABLE 0x00000400  /* WhereLoop.u.vtab is valid */
-#define WHERE_IN_ABLE      0x00000800  /* Able to support an IN operator */
-#define WHERE_ONEROW       0x00001000  /* Selects no more than one row */
-#define WHERE_MULTI_OR     0x00002000  /* OR using multiple indices */
-#define WHERE_AUTO_INDEX   0x00004000  /* Uses an ephemeral index */
-#define WHERE_SKIPSCAN     0x00008000  /* Uses the skip-scan algorithm */
-#define WHERE_UNQ_WANTED   0x00010000  /* WHERE_ONEROW would have been helpful*/
-#define WHERE_PARTIALIDX   0x00020000  /* The automatic index is partial */
-#define WHERE_IN_EARLYOUT  0x00040000  /* Perhaps quit IN loops early */
-#define WHERE_BIGNULL_SORT 0x00080000  /* Column nEq of index is BIGNULL */
-#define WHERE_IN_SEEKSCAN  0x00100000  /* Seek-scan optimization for IN */
-#define WHERE_TRANSCONS    0x00200000  /* Uses a transitive constraint */
-#define WHERE_BLOOMFILTER  0x00400000  /* Consider using a Bloom-filter */
-#define WHERE_SELFCULL     0x00800000  /* nOut reduced by extra WHERE terms */
-#define WHERE_OMIT_OFFSET  0x01000000  /* Set offset counter to zero */
-#define WHERE_VIEWSCAN     0x02000000  /* A full-scan of a VIEW or subquery */
-#define WHERE_EXPRIDX      0x04000000  /* Uses an index-on-expressions */
 
 #endif /* !defined(SQLITE_WHEREINT_H) */

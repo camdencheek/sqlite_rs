@@ -26,6 +26,7 @@ fn main() {
         after_includes: Some(
             r#"
 typedef uint16_t TERM;
+typedef uint16_t WO;
 "#
             .into(),
         ),
@@ -106,6 +107,8 @@ typedef uint16_t TERM;
                 "Coltype".into(),
                 "CellInfo".into(),
                 "Column".into(),
+                "WHERE".into(),
+                "WO".into(),
                 "Cte".into(),
                 "CteUse".into(),
                 "Expr".into(),
