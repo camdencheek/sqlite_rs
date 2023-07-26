@@ -18,18 +18,6 @@
 static void exprCodeBetween(Parse*,Expr*,int,void(*)(Parse*,Expr*,int,int),int);
 static int exprCodeVector(Parse *pParse, Expr *p, int *piToFree);
 
-ExprList_item *sqlite3ExprListItems(ExprList *pEList) {
-    return &pEList->a[0];
-}
-
-int sqlite3ExprListNExpr(const ExprList *pEList) {
-    return pEList->nExpr;
-}
-
-int sqlite3ExprListNAlloc(const ExprList *pEList) {
-    return pEList->nAlloc;
-}
-
 /*
 ** Set the collating sequence for expression pExpr to be the collating
 ** sequence named by pToken.   Return a pointer to a new Expr node that

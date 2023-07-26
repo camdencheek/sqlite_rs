@@ -1951,34 +1951,6 @@ typedef int ynVar;
 #endif
 
 /*
-** A list of expressions.  Each expression may optionally have a
-** name.  An expr/name combination can be used in several ways, such
-** as the list of "expr AS ID" fields following a "SELECT" or in the
-** list of "ID = expr" items in an UPDATE.  A list of expressions can
-** also be used as the argument to a function, in which case the a.zName
-** field is not used.
-**
-** In order to try to keep memory usage down, the Expr.a.zEName field
-** is used for multiple purposes:
-**
-**     eEName          Usage
-**    ----------       -------------------------
-**    ENAME_NAME       (1) the AS of result set column
-**                     (2) COLUMN= of an UPDATE
-**
-**    ENAME_TAB        DB.TABLE.NAME used to resolve names
-**                     of subqueries
-**
-**    ENAME_SPAN       Text of the original result set
-**                     expression.
-*/
-struct ExprList {
-    int nExpr;
-    int nAlloc;
-    ExprList_item a[1];
-};
-
-/*
 ** Allowed values for Expr.a.eEName
 */
 #define ENAME_NAME  0       /* The AS clause of a result set */

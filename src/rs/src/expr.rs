@@ -1,4 +1,5 @@
 use std::convert::TryInto;
+use std::mem::ManuallyDrop;
 use std::ptr;
 
 use crate::build::sqlite3AffinityType;
@@ -620,38 +621,47 @@ pub struct Expr_sub {
     regReturn: c_int,
 }
 
-/// Opaque struct because we do not want Rust to know
-/// it's a dynamically sized type.
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+/// A list of expressions.  Each expression may optionally have a
+/// name.  An expr/name combination can be used in several ways, such
+/// as the list of "expr AS ID" fields following a "SELECT" or in the
+/// list of "ID = expr" items in an UPDATE.  A list of expressions can
+/// also be used as the argument to a function, in which case the a.zName
+/// field is not used.
+///
+/// In order to try to keep memory usage down, the Expr.a.zEName field
+/// is used for multiple purposes:
+///
+///     eEName          Usage
+///    ----------       -------------------------
+///    ENAME_NAME       (1) the AS of result set column
+///                     (2) COLUMN= of an UPDATE
+///
+///    ENAME_TAB        DB.TABLE.NAME used to resolve names
+///                     of subqueries
+///
+///    ENAME_SPAN       Text of the original result set
+///                     expression.
+#[repr(C)]
 pub struct ExprList {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    nExpr: c_int,
+    nAlloc: c_int,
+    // HACK: Dynamically-sized, but not using rust DST because
+    // we don't want to change the size of a pointer to ExprList.
+    a: ManuallyDrop<[ExprList_item; 1]>,
 }
 
 impl ExprList {
     fn len(&self) -> usize {
-        unsafe { sqlite3ExprListNExpr(self) as usize }
+        self.nExpr as usize
     }
 
     fn capacity(&self) -> usize {
-        unsafe { sqlite3ExprListNAlloc(self) as usize }
+        self.nAlloc as usize
     }
 
     fn items(&mut self) -> &mut [ExprList_item] {
-        unsafe {
-            let ptr = sqlite3ExprListItems(self);
-            std::slice::from_raw_parts_mut(ptr, self.len())
-        }
+        unsafe { std::slice::from_raw_parts_mut(&mut self.a as *mut ExprList_item, self.len()) }
     }
-}
-
-extern "C" {
-    // cbindgen:ignore
-    fn sqlite3ExprListItems(el: *mut ExprList) -> *mut ExprList_item;
-    // cbindgen:ignore
-    fn sqlite3ExprListNExpr(el: *const ExprList) -> c_int;
-    // cbindgen:ignore
-    fn sqlite3ExprListNAlloc(el: *const ExprList) -> c_int;
 }
 
 /// For each expression in the list
