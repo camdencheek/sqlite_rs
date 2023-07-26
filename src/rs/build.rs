@@ -106,6 +106,8 @@ typedef uint16_t WO;
                 "CollSeq".into(),
                 "Coltype".into(),
                 "CellInfo".into(),
+                "Bitvec".into(),
+                "Bitvec_u".into(),
                 "Column".into(),
                 "WHERE".into(),
                 "WO".into(),
