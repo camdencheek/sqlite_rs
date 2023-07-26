@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+
 /// Size of the Bitvec structure in bytes.
 pub const BITVEC_SZ: usize = 512;
 
@@ -81,6 +83,27 @@ pub struct Bitvec {
     iDivisor: u32,
 
     u: Bitvec_u,
+}
+
+impl Bitvec {
+    /// Create a new bitmap object able to handle bits between 0 and size,
+    /// inclusive.  Return a pointer to the new object.  Return NULL if
+    /// malloc fails.
+    pub fn new(size: u32) -> Option<Box<Bitvec>> {
+        match Box::try_new_zeroed() {
+            Ok(b) => {
+                let mut b: Box<Bitvec> = unsafe { b.assume_init() };
+                b.iSize = size;
+                Some(b)
+            }
+            Err(_) => None,
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3BitvecCreate(iSize: u32) -> Option<Box<Bitvec>> {
+    Bitvec::new(iSize)
 }
 
 #[repr(C)]

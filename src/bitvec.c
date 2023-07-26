@@ -36,22 +36,6 @@
 */
 #include "sqliteInt.h"
 
-
-/*
-** Create a new bitmap object able to handle bits between 0 and iSize,
-** inclusive.  Return a pointer to the new object.  Return NULL if 
-** malloc fails.
-*/
-Bitvec *sqlite3BitvecCreate(u32 iSize){
-  Bitvec *p;
-  assert( sizeof(*p)==BITVEC_SZ );
-  p = sqlite3MallocZero( sizeof(*p) );
-  if( p ){
-    p->iSize = iSize;
-  }
-  return p;
-}
-
 /*
 ** Check to see if the i-th bit is set.  Return true or false.
 ** If p is NULL (if the bitmap has not been created) or if
