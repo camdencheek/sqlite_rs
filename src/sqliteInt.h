@@ -790,14 +790,6 @@ typedef UINT8_TYPE u8;             /* 1-byte unsigned integer */
 typedef INT8_TYPE i8;              /* 1-byte signed integer */
 
 /*
-** SQLITE_MAX_U32 is a u64 constant that is the maximum u64 value
-** that can be stored in a u32 without loss of data.  The value
-** is 0x00000000ffffffff.  But because of quirks of some compilers, we
-** have to specify the value in the less intuitive manner shown:
-*/
-#define SQLITE_MAX_U32  ((((u64)1)<<32)-1)
-
-/*
 ** Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer
 */
 #ifndef SQLITE_PTRSIZE

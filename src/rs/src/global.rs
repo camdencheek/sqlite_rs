@@ -3,6 +3,12 @@ use std::ffi::CStr;
 
 use crate::util::strings::sqlite3UpperToLower;
 
+/// SQLITE_MAX_U32 is a u64 constant that is the maximum u64 value
+/// that can be stored in a u32 without loss of data.  The value
+/// is 0x00000000ffffffff.  But because of quirks of some compilers, we
+/// have to specify the value in the less intuitive manner shown:
+pub const SQLITE_MAX_U32: u64 = 0x00000000ffffffff;
+
 pub type Pgno = u32;
 
 #[repr(u8)]
