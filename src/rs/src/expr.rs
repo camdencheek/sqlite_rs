@@ -647,7 +647,7 @@ pub struct ExprList {
     nAlloc: c_int,
     // HACK: Dynamically-sized, but not using rust DST because
     // we don't want to change the size of a pointer to ExprList.
-    a: ManuallyDrop<[ExprList_item; 1]>,
+    a: [ExprList_item; 1],
 }
 
 impl ExprList {

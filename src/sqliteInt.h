@@ -2612,17 +2612,6 @@ void sqlite3SelectPopWith(Walker*, Select*);
 #define WRC_Prune       1   /* Omit children but continue walking siblings */
 #define WRC_Abort       2   /* Abandon the tree walk */
 
-/*
-** An instance of the With object represents a WITH clause containing
-** one or more CTEs (common table expressions).
-*/
-struct With {
-  int nCte;      /* Number of CTEs in the WITH clause */
-  int bView;     /* Belongs to the outermost Select of a view */
-  With *pOuter;  /* Containing WITH clause, or NULL */
-  Cte a[1];      /* For each CTE in the WITH clause.... */
-};
-
 #ifdef SQLITE_DEBUG
 /*
 ** An instance of the TreeView object is used for printing the content of
