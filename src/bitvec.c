@@ -185,14 +185,6 @@ void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
   }
 }
 
-/*
-** Return the value of the iSize parameter specified when Bitvec *p
-** was created.
-*/
-u32 sqlite3BitvecSize(Bitvec *p){
-  return p->iSize;
-}
-
 #ifndef SQLITE_UNTESTABLE
 /*
 ** Let V[] be an array of unsigned characters sufficient to hold

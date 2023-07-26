@@ -87,8 +87,8 @@ pub struct Bitvec {
 
 impl Bitvec {
     /// Create a new bitmap object able to handle bits between 0 and size,
-    /// inclusive.  Return a pointer to the new object.  Return NULL if
-    /// malloc fails.
+    /// inclusive. Return a pointer to the new object. Return None if
+    /// allocation fails.
     pub fn new(size: u32) -> Option<Box<Bitvec>> {
         match Box::try_new_zeroed() {
             Ok(b) => {
@@ -120,6 +120,13 @@ pub extern "C" fn sqlite3BitvecDestroy(p: *mut Bitvec) {
         return;
     }
     unsafe { std::mem::drop(Box::from_raw(p)) };
+}
+
+/// Return the value of the iSize parameter specified when Bitvec *p
+/// was created.
+#[no_mangle]
+pub extern "C" fn sqlite3BitvecSize(bv: &Bitvec) -> u32 {
+    bv.iSize
 }
 
 #[repr(C)]
