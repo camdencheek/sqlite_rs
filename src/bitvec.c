@@ -37,38 +37,6 @@
 #include "sqliteInt.h"
 
 /*
-** Check to see if the i-th bit is set.  Return true or false.
-** If p is NULL (if the bitmap has not been created) or if
-** i is out of range, then return false.
-*/
-int sqlite3BitvecTestNotNull(Bitvec *p, u32 i){
-  assert( p!=0 );
-  i--;
-  if( i>=p->iSize ) return 0;
-  while( p->iDivisor ){
-    u32 bin = i/p->iDivisor;
-    i = i%p->iDivisor;
-    p = p->u.apSub[bin];
-    if (!p) {
-      return 0;
-    }
-  }
-  if( p->iSize<=BITVEC_NBIT ){
-    return (p->u.aBitmap[i/BITVEC_SZELEM] & (1<<(i&(BITVEC_SZELEM-1))))!=0;
-  } else{
-    u32 h = BITVEC_HASH(i++);
-    while( p->u.aHash[h] ){
-      if( p->u.aHash[h]==i ) return 1;
-      h = (h+1) % BITVEC_NINT;
-    }
-    return 0;
-  }
-}
-int sqlite3BitvecTest(Bitvec *p, u32 i){
-  return p!=0 && sqlite3BitvecTestNotNull(p,i);
-}
-
-/*
 ** Set the i-th bit.  Return 0 on success and an error code if
 ** anything goes wrong.
 **

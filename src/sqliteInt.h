@@ -2927,8 +2927,6 @@ Btree *sqlite3DbNameToBtree(sqlite3*,const char*);
 #endif
 
 Bitvec *sqlite3BitvecCreate(u32);
-int sqlite3BitvecTest(Bitvec*, u32);
-int sqlite3BitvecTestNotNull(Bitvec*, u32);
 int sqlite3BitvecSet(Bitvec*, u32);
 void sqlite3BitvecClear(Bitvec*, u32, void*);
 void sqlite3BitvecDestroy(Bitvec*);

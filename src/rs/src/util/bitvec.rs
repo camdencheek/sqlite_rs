@@ -1,3 +1,5 @@
+use libc::c_int;
+
 use std::mem::{ManuallyDrop, MaybeUninit};
 
 /// Size of the Bitvec structure in bytes.
@@ -99,6 +101,44 @@ impl Bitvec {
             Err(_) => None,
         }
     }
+
+    /// Check to see if the i-th bit is set. Return true or false.
+    /// If i is out of range, then return false.
+    pub fn test(&self, mut i: u32) -> bool {
+        i -= 1;
+        if i >= self.iSize {
+            return false;
+        }
+        let mut p = self;
+        while p.iDivisor != 0 {
+            let bin = i / p.iDivisor;
+            i = i % p.iDivisor;
+            unsafe {
+                p = match &p.u.apSub[bin as usize] {
+                    Some(sub) => sub,
+                    None => return false,
+                }
+            }
+        }
+        if p.iSize as usize <= BITVEC_NBIT {
+            return unsafe {
+                (p.u.aBitmap[i as usize / BITVEC_SZELEM] & (1 << (i & (BITVEC_SZELEM as u32 - 1))))
+                    != 0
+            };
+        } else {
+            let mut h = BITVEC_HASH(i);
+            i += 1;
+            unsafe {
+                while p.u.aHash[h as usize] != 0 {
+                    if p.u.aHash[h as usize] == i {
+                        return true;
+                    }
+                    h = (h + 1) % BITVEC_NINT as u32;
+                }
+            }
+            return false;
+        }
+    }
 }
 
 impl Drop for Bitvec {
@@ -106,6 +146,19 @@ impl Drop for Bitvec {
         if self.iDivisor != 0 {
             unsafe { ManuallyDrop::drop(&mut self.u.apSub) }
         }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3BitvecTestNotNull(p: &Bitvec, i: u32) -> c_int {
+    p.test(i).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3BitvecTest(p: *mut Bitvec, i: u32) -> c_int {
+    match p.as_ref() {
+        Some(bv) => bv.test(i).into(),
+        None => false.into(),
     }
 }
 
