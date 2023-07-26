@@ -186,20 +186,6 @@ void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
 }
 
 /*
-** Destroy a bitmap object.  Reclaim all memory used.
-*/
-void sqlite3BitvecDestroy(Bitvec *p){
-  if( p==0 ) return;
-  if( p->iDivisor ){
-    unsigned int i;
-    for(i=0; i<BITVEC_NPTR; i++){
-      sqlite3BitvecDestroy(p->u.apSub[i]);
-    }
-  }
-  sqlite3_free(p);
-}
-
-/*
 ** Return the value of the iSize parameter specified when Bitvec *p
 ** was created.
 */

@@ -1,4 +1,4 @@
-use std::mem::MaybeUninit;
+use std::mem::{ManuallyDrop, MaybeUninit};
 
 /// Size of the Bitvec structure in bytes.
 pub const BITVEC_SZ: usize = 512;
@@ -101,9 +101,25 @@ impl Bitvec {
     }
 }
 
+impl Drop for Bitvec {
+    fn drop(&mut self) {
+        if self.iDivisor != 0 {
+            unsafe { ManuallyDrop::drop(&mut self.u.apSub) }
+        }
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn sqlite3BitvecCreate(iSize: u32) -> Option<Box<Bitvec>> {
     Bitvec::new(iSize)
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3BitvecDestroy(p: *mut Bitvec) {
+    if p.is_null() {
+        return;
+    }
+    unsafe { std::mem::drop(Box::from_raw(p)) };
 }
 
 #[repr(C)]
@@ -113,5 +129,5 @@ pub union Bitvec_u {
     /// Hash table representation
     aHash: [u32; BITVEC_NINT],
     /// Recursive representation
-    apSub: [*mut Bitvec; BITVEC_NPTR],
+    apSub: ManuallyDrop<[Option<Box<Bitvec>>; BITVEC_NPTR]>,
 }
