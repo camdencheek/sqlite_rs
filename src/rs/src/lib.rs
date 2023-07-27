@@ -8,6 +8,7 @@ mod coll_seq;
 mod column;
 mod cte;
 mod db;
+mod errors;
 mod expr;
 mod fkey;
 mod from;
