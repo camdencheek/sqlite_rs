@@ -113,46 +113,6 @@ bitvec_set_end:
   return SQLITE_OK;
 }
 
-/*
-** Clear the i-th bit.
-**
-** pBuf must be a pointer to at least BITVEC_SZ bytes of temporary storage
-** that BitvecClear can use to rebuilt its hash table.
-*/
-void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
-  if( p==0 ) return;
-  assert( i>0 );
-  i--;
-  while( p->iDivisor ){
-    u32 bin = i/p->iDivisor;
-    i = i%p->iDivisor;
-    p = p->u.apSub[bin];
-    if (!p) {
-      return;
-    }
-  }
-  if( p->iSize<=BITVEC_NBIT ){
-    p->u.aBitmap[i/BITVEC_SZELEM] &= ~(1 << (i&(BITVEC_SZELEM-1)));
-  }else{
-    unsigned int j;
-    u32 *aiValues = pBuf;
-    memcpy(aiValues, p->u.aHash, sizeof(p->u.aHash));
-    memset(p->u.aHash, 0, sizeof(p->u.aHash));
-    p->nSet = 0;
-    for(j=0; j<BITVEC_NINT; j++){
-      if( aiValues[j] && aiValues[j]!=(i+1) ){
-        u32 h = BITVEC_HASH(aiValues[j]-1);
-        p->nSet++;
-        while( p->u.aHash[h] ){
-          h++;
-          if( h>=BITVEC_NINT ) h = 0;
-        }
-        p->u.aHash[h] = aiValues[j];
-      }
-    }
-  }
-}
-
 #ifndef SQLITE_UNTESTABLE
 /*
 ** Let V[] be an array of unsigned characters sufficient to hold

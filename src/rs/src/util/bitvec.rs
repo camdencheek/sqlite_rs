@@ -1,4 +1,4 @@
-use libc::c_int;
+use libc::{c_int, c_void};
 
 use std::mem::{ManuallyDrop, MaybeUninit};
 
@@ -139,6 +139,52 @@ impl Bitvec {
             return false;
         }
     }
+
+    /// Clear the i-th bit.
+    ///
+    /// buf must be a pointer to at least BITVEC_SZ bytes of temporary storage
+    /// that BitvecClear can use to rebuilt its hash table.
+    pub fn clear(&mut self, mut i: u32, buf: &mut [u32]) {
+        assert!(i > 0);
+        i -= 1;
+
+        unsafe {
+            let mut p = self;
+            while p.iDivisor != 0 {
+                let bin = i / p.iDivisor;
+                i = i % p.iDivisor;
+                unsafe {
+                    // TODO: this deref doesn't feel right
+                    p = match (*p.u.apSub)[bin as usize].as_mut() {
+                        Some(sub) => sub,
+                        None => return,
+                    }
+                }
+            }
+
+            if p.iSize as usize <= BITVEC_NBIT {
+                p.u.aBitmap[i as usize / BITVEC_SZELEM] &= !(1 << (i & (BITVEC_SZELEM as u32 - 1)))
+            } else {
+                let aiValues = &mut buf[..BITVEC_NINT];
+                aiValues.clone_from_slice(&p.u.aHash);
+                p.u.aHash.fill(0);
+                p.nSet = 0;
+                for j in 0..BITVEC_NINT {
+                    if aiValues[j] != 0 && aiValues[j] != (i + 1) {
+                        let mut h = BITVEC_HASH(aiValues[j] - 1);
+                        p.nSet += 1;
+                        while p.u.aHash[h as usize] != 0 {
+                            h += 1;
+                            if h as usize >= BITVEC_NINT {
+                                h = 0;
+                            }
+                        }
+                        p.u.aHash[h as usize] = aiValues[j]
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl Drop for Bitvec {
@@ -146,6 +192,14 @@ impl Drop for Bitvec {
         if self.iDivisor != 0 {
             unsafe { ManuallyDrop::drop(&mut self.u.apSub) }
         }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3BitvecClear(p: *mut Bitvec, i: u32, buf: *mut c_void) {
+    let buf = unsafe { std::slice::from_raw_parts_mut(buf as *mut u32, BITVEC_NINT) };
+    if let Some(bv) = p.as_mut() {
+        bv.clear(i, buf);
     }
 }
 
