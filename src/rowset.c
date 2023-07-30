@@ -65,28 +65,6 @@
 
 
 /*
-** Target size for allocation chunks.
-*/
-#define ROWSET_ALLOCATION_SIZE 1024
-
-/*
-** The number of rowset entries per allocation chunk.
-*/
-#define ROWSET_ENTRY_PER_CHUNK  \
-                       ((ROWSET_ALLOCATION_SIZE-8)/sizeof(struct RowSetEntry))
-
-/*
-** RowSetEntry objects are allocated in large chunks (instances of the
-** following structure) to reduce memory allocation overhead.  The
-** chunks are kept on a linked list so that they can be deallocated
-** when the RowSet is destroyed.
-*/
-struct RowSetChunk {
-  struct RowSetChunk *pNextChunk;        /* Next chunk on list of them all */
-  struct RowSetEntry aEntry[ROWSET_ENTRY_PER_CHUNK]; /* Allocated entries */
-};
-
-/*
 ** A RowSet in an instance of the following structure.
 **
 ** A typedef of this structure if found in sqliteInt.h.
