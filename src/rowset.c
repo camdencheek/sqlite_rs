@@ -65,23 +65,6 @@
 
 
 /*
-** A RowSet in an instance of the following structure.
-**
-** A typedef of this structure if found in sqliteInt.h.
-*/
-struct RowSet {
-  struct RowSetChunk *pChunk;    /* List of all chunk allocations */
-  sqlite3 *db;                   /* The database connection */
-  struct RowSetEntry *pEntry;    /* List of entries using pRight */
-  struct RowSetEntry *pLast;     /* Last entry on the pEntry list */
-  struct RowSetEntry *pFresh;    /* Source of new entry objects */
-  struct RowSetEntry *pForest;   /* List of binary trees of entries */
-  u16 nFresh;                    /* Number of objects on pFresh */
-  u16 rsFlags;                   /* Various flags */
-  int iBatch;                    /* Current insert batch */
-};
-
-/*
 ** Allowed values for RowSet.rsFlags
 */
 #define ROWSET_SORTED  0x01   /* True if RowSet.pEntry is sorted */

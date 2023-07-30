@@ -1,3 +1,7 @@
+use libc::c_int;
+
+use crate::db::sqlite3;
+
 /// Target size for allocation chunks.
 pub const ROWSET_ALLOCATION_SIZE: usize = 1024;
 
@@ -32,4 +36,29 @@ pub struct RowSetChunk {
     pNextChunk: *mut RowSetChunk,
     /// Allocated entries
     aEntry: [RowSetEntry; ROWSET_ENTRY_PER_CHUNK],
+}
+
+/// A RowSet in an instance of the following structure.
+///
+/// A typedef of this structure if found in sqliteInt.h.
+#[repr(C)]
+pub struct RowSet {
+    /// List of all chunk allocations
+    pChunk: *mut RowSetChunk,
+    /// The database connection
+    db: *mut sqlite3,
+    /// List of entries using pRight
+    pEntry: *mut RowSetEntry,
+    /// Last entry on the pEntry list
+    pLast: *mut RowSetEntry,
+    /// Source of new entry objects
+    pFresh: *mut RowSetEntry,
+    /// List of binary trees of entries
+    pForest: *mut RowSetEntry,
+    /// Number of objects on pFresh
+    nFresh: u16,
+    /// Various flags
+    rsFlags: u16,
+    /// Current insert batch
+    iBatch: c_int,
 }
