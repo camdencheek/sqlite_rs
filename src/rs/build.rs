@@ -49,6 +49,7 @@ typedef uint16_t WO;
                 "omit_virtualtable".into(),
                 "SQLITE_OMIT_VIRTUALTABLE".into(),
             );
+            h.insert("memdebug".into(), "SQLITE_MEMDEBUG".into());
             h.insert(
                 "omit_progress_callback".into(),
                 "SQLITE_OMIT_PROGRESS_CALLBACK".into(),

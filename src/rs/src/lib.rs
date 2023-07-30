@@ -20,6 +20,7 @@ mod index;
 mod lookaside;
 mod macros;
 mod mem;
+mod mem2;
 mod module;
 mod pager;
 mod parse;
