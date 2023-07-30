@@ -170,7 +170,7 @@ AMALGAMATION_LINE_MACROS = @AMALGAMATION_LINE_MACROS@
 # Object files for the SQLite library (non-amalgamation).
 #
 LIBOBJS0 = alter.lo analyze.lo attach.lo auth.lo \
-         backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
+         backup.lo btmutex.lo btree.lo build.lo \
          callback.lo complete.lo ctime.lo \
          date.lo dbpage.lo dbstat.lo delete.lo \
          expr.lo fault.lo fkey.lo \
@@ -212,7 +212,6 @@ SRC = \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/backup.c \
-  $(TOP)/src/bitvec.c \
   $(TOP)/src/btmutex.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \
@@ -461,7 +460,6 @@ TESTSRC += \
 TESTSRC2 = \
   $(TOP)/src/attach.c \
   $(TOP)/src/backup.c \
-  $(TOP)/src/bitvec.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/build.c \
   $(TOP)/src/ctime.c \
@@ -856,9 +854,6 @@ auth.lo:	$(TOP)/src/auth.c $(HDR)
 
 backup.lo:	$(TOP)/src/backup.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/backup.c
-
-bitvec.lo:	$(TOP)/src/bitvec.c $(HDR)
-	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/bitvec.c
 
 btmutex.lo:	$(TOP)/src/btmutex.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/btmutex.c

@@ -2929,9 +2929,6 @@ Btree *sqlite3DbNameToBtree(sqlite3*,const char*);
 Bitvec *sqlite3BitvecCreate(u32);
 int sqlite3BitvecSet(Bitvec*, u32);
 void sqlite3BitvecDestroy(Bitvec*);
-#ifndef SQLITE_UNTESTABLE
-int sqlite3BitvecBuiltinTest(int,int*);
-#endif
 
 RowSet *sqlite3RowSetInit(sqlite3*);
 void sqlite3RowSetDelete(void*);

@@ -303,7 +303,6 @@ foreach file {
    os_unix.c
    os_win.c
 
-   bitvec.c
    pcache.c
    pcache1.c
    rowset.c

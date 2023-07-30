@@ -11,6 +11,8 @@ crate-type = ["staticlib"]
 [dependencies]
 bitflags = "2.3.3"
 libc = "0.2.147"
+# TODO: move this to test dependencies
+rand = "0.8.5"
 
 [build-dependencies]
 cbindgen = "0.24.3"

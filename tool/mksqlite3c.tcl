@@ -364,7 +364,6 @@ set flist {
    os_win.c
    memdb.c
 
-   bitvec.c
    pcache.c
    pcache1.c
    rowset.c

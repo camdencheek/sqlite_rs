@@ -89,7 +89,6 @@ SRC = \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/backup.c \
-  $(TOP)/src/bitvec.c \
   $(TOP)/src/btmutex.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \

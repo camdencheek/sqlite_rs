@@ -1,8 +1,10 @@
 use bitflags::bitflags;
-use libc::c_int;
 
+pub type SQLiteResult<T> = Result<T, SQLiteErr>;
+
+#[derive(Copy, Clone, Debug)]
 #[repr(i32)]
-pub enum Error {
+pub enum SQLiteErr {
     /// Generic error
     Error = 1,
     /// Internal logic error in SQLite
