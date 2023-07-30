@@ -76,20 +76,6 @@
                        ((ROWSET_ALLOCATION_SIZE-8)/sizeof(struct RowSetEntry))
 
 /*
-** Each entry in a RowSet is an instance of the following object.
-**
-** This same object is reused to store a linked list of trees of RowSetEntry
-** objects.  In that alternative use, pRight points to the next entry
-** in the list, pLeft points to the tree, and v is unused.  The
-** RowSet.pForest value points to the head of this forest list.
-*/
-struct RowSetEntry {            
-  i64 v;                        /* ROWID value for this entry */
-  struct RowSetEntry *pRight;   /* Right subtree (larger entries) or list */
-  struct RowSetEntry *pLeft;    /* Left subtree (smaller entries) */
-};
-
-/*
 ** RowSetEntry objects are allocated in large chunks (instances of the
 ** following structure) to reduce memory allocation overhead.  The
 ** chunks are kept on a linked list so that they can be deallocated

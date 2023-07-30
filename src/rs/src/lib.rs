@@ -25,6 +25,7 @@ mod pager;
 mod parse;
 mod pcache;
 mod returning;
+mod rowset;
 mod savepoint;
 mod schema;
 mod select;
