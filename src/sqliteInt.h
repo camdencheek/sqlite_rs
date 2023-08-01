@@ -2082,20 +2082,6 @@ struct NameContext {
 #define SRT_Upfrom      15  /* Store result as data with rowid */
 
 /*
-** An instance of this object describes where to put of the results of
-** a SELECT statement.
-*/
-struct SelectDest {
-  u8 eDest;            /* How to dispose of the results.  One of SRT_* above. */
-  int iSDParm;         /* A parameter used by the eDest disposal method */
-  int iSDParm2;        /* A second parameter for the eDest disposal method */
-  int iSdst;           /* Base register where results are written */
-  int nSdst;           /* Number of registers allocated */
-  char *zAffSdst;      /* Affinity used for SRT_Set */
-  ExprList *pOrderBy;  /* Key columns for SRT_Queue and SRT_DistQueue */
-};
-
-/*
 ** At least one instance of the following structure is created for each
 ** trigger that may be fired while parsing an INSERT, UPDATE or DELETE
 ** statement. All such objects are stored in the linked list headed at

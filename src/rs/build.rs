@@ -148,6 +148,7 @@ typedef uint16_t WO;
                 "WhereRightJoin".into(),
                 "WhereLevel".into(),
                 "InLoop".into(),
+                "SelectDest".into(),
                 "WhereLoop".into(),
                 "WhereTerm".into(),
                 "WhereClause".into(),

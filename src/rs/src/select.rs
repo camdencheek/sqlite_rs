@@ -4,7 +4,7 @@ use crate::util::log_est::LogEst;
 use crate::window::Window;
 use crate::with::With;
 
-use libc::c_int;
+use libc::{c_char, c_int};
 
 /*
 ** An instance of the following structure contains all information
@@ -47,4 +47,24 @@ pub struct Select {
     pWin: *mut Window, /* List of window functions */
     #[cfg(not(omit_windowfunc))]
     pWinDefn: *mut Window, /* List of named window definitions */
+}
+
+/// An instance of this object describes where to put of the results of
+/// a SELECT statement.
+#[repr(C)]
+pub struct SelectDest {
+    /// How to dispose of the results.  One of SRT_* above.
+    eDest: u8,
+    /// A parameter used by the eDest disposal method
+    iSDParm: c_int,
+    /// A second parameter for the eDest disposal method
+    iSDParm2: c_int,
+    /// Base register where results are written
+    iSdst: c_int,
+    /// Number of registers allocated
+    nSdst: c_int,
+    /// Affinity used for SRT_Set
+    zAffSdst: *mut c_char,
+    /// Key columns for SRT_Queue and SRT_DistQueue
+    pOrderBy: *mut ExprList,
 }
