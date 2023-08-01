@@ -1901,21 +1901,6 @@ typedef int ynVar;
 #endif
 
 /*
-** Allowed values for Expr.a.eEName
-*/
-#define ENAME_NAME  0       /* The AS clause of a result set */
-#define ENAME_SPAN  1       /* Complete text of the result set expression */
-#define ENAME_TAB   2       /* "DB.TABLE.NAME" for the result set */
-
-/*
-** Allowed values for IdList.eType, which determines which value of the a.u4
-** is valid.
-*/
-#define EU4_NONE   0   /* Does not use IdList.a.u4 */
-#define EU4_IDX    1   /* Uses IdList.a.u4.idx */
-#define EU4_EXPR   2   /* Uses IdList.a.u4.pExpr -- NOT CURRENTLY USED */
-
-/*
 ** The OnOrUsing object represents either an ON clause or a USING clause.
 ** It can never be both at the same time, but it can be neither.
 */

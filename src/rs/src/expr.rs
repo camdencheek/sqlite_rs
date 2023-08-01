@@ -688,7 +688,7 @@ pub struct ExprList_item_fg {
     // unsigned bUsingTerm:1;
     // unsigned bNoExpand: 1;
     /// Meaning of zEName
-    eEName: u8,
+    eEName: ENAME,
     /// Indicates when processing is finished
     done: u8,
     /// Constant expression is reusable
@@ -840,3 +840,14 @@ bitflags! {
 */
 pub const EP_NoReduce: u8 = 0x01; /* Cannot EXPRDUP_REDUCE this Expr */
 pub const EP_Immutable: u8 = 0x02; /* Do not change this Expr node */
+
+/// Allowed values for Expr.a.eEName
+#[repr(u8)]
+pub enum ENAME {
+    /// The AS clause of a result set
+    NAME = 0,
+    /// Complete text of the result set expression
+    SPAN = 1,
+    /// "DB.TABLE.NAME" for the result set
+    TAB = 2,
+}

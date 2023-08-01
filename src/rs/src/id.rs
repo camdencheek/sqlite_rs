@@ -20,7 +20,7 @@ use crate::expr::Expr;
 #[repr(C)]
 pub struct IdList {
     nId: c_int, /* Number of identifiers on the list */
-    eU4: u8,    /* Which element of a.u4 is valid */
+    eU4: EU4,   /* Which element of a.u4 is valid */
     // Not actually a single element, but we don't want the pointer to be
     // double-wide for the unsized type.
     a: [IdList_item; 1],
@@ -36,4 +36,16 @@ pub struct IdList_item {
 pub union IdList_item_u {
     idx: c_int,       /* Index in some Table.aCol[] of a column named zName */
     pExpr: *mut Expr, /* Expr to implement a USING variable -- NOT USED */
+}
+
+/// Allowed values for IdList.eType, which determines which value of the a.u4
+/// is valid.
+#[repr(u8)]
+pub enum EU4 {
+    /// Does not use IdList.a.u4
+    NONE = 0,
+    /// Uses IdList.a.u4.idx
+    IDX = 1,
+    /// Uses IdList.a.u4.pExpr -- NOT CURRENTLY USED
+    EXPR = 2,
 }
