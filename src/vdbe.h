@@ -31,7 +31,6 @@ typedef struct Vdbe Vdbe;
 ** for the VdbeOp definition.
 */
 typedef struct sqlite3_value Mem;
-typedef struct SubProgram SubProgram;
 
 /*
 ** A single instruction of the virtual machine has an opcode
@@ -78,19 +77,6 @@ struct VdbeOp {
 };
 typedef struct VdbeOp VdbeOp;
 
-
-/*
-** A sub-routine used to implement a trigger program.
-*/
-struct SubProgram {
-  VdbeOp *aOp;                  /* Array of opcodes for sub-program */
-  int nOp;                      /* Elements in aOp[] */
-  int nMem;                     /* Number of memory cells required */
-  int nCsr;                     /* Number of cursors required */
-  u8 *aOnce;                    /* Array of OP_Once flags */
-  void *token;                  /* id that may be used to recursive triggers */
-  SubProgram *pNext;            /* Next sub-program already visited */
-};
 
 /*
 ** A smaller version of VdbeOp used for the VdbeAddOpList() function because
