@@ -21,7 +21,9 @@ use crate::expr::Expr;
 pub struct IdList {
     nId: c_int, /* Number of identifiers on the list */
     eU4: u8,    /* Which element of a.u4 is valid */
-    a: [IdList_item],
+    // Not actually a single element, but we don't want the pointer to be
+    // double-wide for the unsized type.
+    a: [IdList_item; 1],
 }
 
 #[repr(C)]

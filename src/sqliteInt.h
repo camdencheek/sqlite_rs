@@ -1907,13 +1907,6 @@ typedef int ynVar;
 #define ENAME_SPAN  1       /* Complete text of the result set expression */
 #define ENAME_TAB   2       /* "DB.TABLE.NAME" for the result set */
 
-// Definition retained here because cbindgen does not work with variable-length arrays
-struct IdList {
-  int nId;         
-  u8 eU4;          
-  IdList_item a[1];
-};
-
 /*
 ** Allowed values for IdList.eType, which determines which value of the a.u4
 ** is valid.
