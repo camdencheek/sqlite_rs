@@ -4689,19 +4689,6 @@ IdList *sqlite3IdListAppend(Parse *pParse, IdList *pList, Token *pToken){
 }
 
 /*
-** Return the index in pList of the identifier named zId.  Return -1
-** if not found.
-*/
-int sqlite3IdListIndex(IdList *pList, const char *zName){
-  int i;
-  assert( pList!=0 );
-  for(i=0; i<pList->nId; i++){
-    if( sqlite3StrICmp(pList->a[i].zName, zName)==0 ) return i;
-  }
-  return -1;
-}
-
-/*
 ** Maximum size of a SrcList object.
 ** The SrcList object is used to represent the FROM clause of a
 ** SELECT statement, and the query planner cannot deal with more

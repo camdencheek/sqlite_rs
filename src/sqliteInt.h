@@ -2930,7 +2930,6 @@ void sqlite3Insert(Parse*, SrcList*, Select*, IdList*, int, Upsert*);
 #endif
 void *sqlite3ArrayAllocate(sqlite3*,void*,int,int*,int*);
 IdList *sqlite3IdListAppend(Parse*, IdList*, Token*);
-int sqlite3IdListIndex(IdList*,const char*);
 SrcList *sqlite3SrcListEnlarge(Parse*, SrcList*, int, int);
 SrcList *sqlite3SrcListAppendList(Parse *pParse, SrcList *p1, SrcList *p2);
 SrcList *sqlite3SrcListAppend(Parse*, SrcList*, Token*, Token*);

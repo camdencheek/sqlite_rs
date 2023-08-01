@@ -1,9 +1,10 @@
 use libc::{c_char, c_int, c_void};
-use std::mem::size_of;
+use std::{mem::size_of, ptr::NonNull};
 
 use crate::{
     db::{sqlite3, sqlite3DbFree, sqlite3DbMallocRawNN, sqlite3DbNNFreeNN, sqlite3DbStrDup},
     expr::Expr,
+    util::strings::sqlite3StrICmp,
 };
 
 /*
@@ -37,6 +38,16 @@ impl IdList {
 
     fn items_mut(&mut self) -> &mut [IdList_item] {
         unsafe { std::slice::from_raw_parts_mut(self.a.as_mut_ptr(), self.nId as usize) }
+    }
+
+    /// Return the index in pList of the identifier named zId or None if not found
+    fn find(&self, target: *const c_char) -> Option<usize> {
+        for (i, item) in self.items().iter().enumerate() {
+            if unsafe { sqlite3StrICmp(item.zName, target) } == 0 {
+                return Some(i);
+            }
+        }
+        None
     }
 }
 
@@ -82,7 +93,7 @@ pub unsafe extern "C" fn sqlite3IdListDelete(db: &mut sqlite3, pList: *mut IdLis
 pub unsafe extern "C" fn sqlite3IdListDup(
     db: &mut sqlite3,
     p: Option<&IdList>,
-) -> Option<&mut IdList> {
+) -> Option<NonNull<IdList>> {
     let old = p?;
     debug_assert!(old.eU4 != EU4::EXPR);
     let pNew = sqlite3DbMallocRawNN(
@@ -96,5 +107,10 @@ pub unsafe extern "C" fn sqlite3IdListDup(
         newItem.zName = sqlite3DbStrDup(db, oldItem.zName);
         newItem.u4 = (*oldItem).u4;
     }
-    Some(new)
+    Some(NonNull::from(new))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3IdListIndex(list: &IdList, target: *const c_char) -> c_int {
+    list.find(target).map(|u| u as c_int).unwrap_or(-1)
 }
