@@ -2884,7 +2884,6 @@ void sqlite3CommitInternalChanges(sqlite3*);
 void sqlite3ColumnSetExpr(Parse*,Table*,Column*,Expr*);
 Expr *sqlite3ColumnExpr(Table*,Column*);
 void sqlite3ColumnSetColl(sqlite3*,Column*,const char*zColl);
-const char *sqlite3ColumnColl(Column*);
 void sqlite3DeleteColumnNames(sqlite3*,Table*);
 void sqlite3GenerateColumnNames(Parse *pParse, Select *pSelect);
 int sqlite3ColumnsFromExprList(Parse*,ExprList*,i16*,Column**);

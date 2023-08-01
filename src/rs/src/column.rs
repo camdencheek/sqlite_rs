@@ -33,6 +33,10 @@ pub struct Column {
     /// Name of this column
     // NOTE: this might have a type name stored after the null
     // terminator, so treating this as a normal c string is not safe.
+    // I think what's going on here is this is:
+    // - a null-terminated column name
+    // - followed by a null-terminated type name if HASTYPE
+    // - followed by a null-terminated collation name if HASCOLL
     zCnName: *mut c_char,
 
     /// An OE_ code for handling a NOT NULL constraint
@@ -40,6 +44,8 @@ pub struct Column {
     notNull: u8,
 
     /// One of the standard types. Or zero if not a standard type.
+    // TODO: convert this to use an Option<Stdtype> once this struct
+    // no longer needs to be repr(C)
     eCType: u8,
 
     /// One of the SQLITE_AFF_... values
@@ -73,6 +79,26 @@ impl Column {
             None
         }
     }
+
+    // TODO: make this return an option
+    unsafe fn collation(&self) -> *const c_char {
+        if !self.colFlags.contains(COLFLAG::HASCOLL) {
+            return std::ptr::null();
+        }
+        let mut z = self.zCnName;
+        while *z != 0 {
+            z = z.add(1);
+        }
+        if self.colFlags.contains(COLFLAG::HASTYPE) {
+            loop {
+                z = z.add(1);
+                if *z == 0 {
+                    break;
+                }
+            }
+        }
+        return z.add(1);
+    }
 }
 
 /// Return the declared type of a column.  Or return zDflt if the column
@@ -87,6 +113,12 @@ pub unsafe extern "C" fn sqlite3ColumnType(col: &mut Column, default: *mut c_cha
     } else {
         default
     }
+}
+
+/// Return the collating sequence name for a column
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3ColumnColl(col: &Column) -> *const c_char {
+    col.collation()
 }
 
 /* Allowed values for Column.eCType.

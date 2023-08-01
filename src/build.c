@@ -755,20 +755,6 @@ void sqlite3ColumnSetColl(
 }
 
 /*
-** Return the collating squence name for a column
-*/
-const char *sqlite3ColumnColl(Column *pCol){
-  const char *z;
-  if( (pCol->colFlags & COLFLAG_HASCOLL)==0 ) return 0;
-  z = pCol->zCnName;
-  while( *z ){ z++; }
-  if( pCol->colFlags & COLFLAG_HASTYPE ){
-    do{ z++; }while( *z );
-  }
-  return z+1;
-}
-
-/*
 ** Delete memory allocated for the column names of a table or view (the
 ** Table.aCol[] array).
 */
