@@ -1,6 +1,9 @@
-use libc::{c_char, c_int};
+use libc::{c_char, c_int, c_void};
 
-use crate::expr::Expr;
+use crate::{
+    db::{sqlite3, sqlite3DbFree, sqlite3DbNNFreeNN},
+    expr::Expr,
+};
 
 /*
 ** An instance of this structure can hold a simple list of identifiers,
@@ -40,6 +43,7 @@ pub union IdList_item_u {
 
 /// Allowed values for IdList.eType, which determines which value of the a.u4
 /// is valid.
+#[derive(PartialEq, Eq)]
 #[repr(u8)]
 pub enum EU4 {
     /// Does not use IdList.a.u4
@@ -48,4 +52,19 @@ pub enum EU4 {
     IDX = 1,
     /// Uses IdList.a.u4.pExpr -- NOT CURRENTLY USED
     EXPR = 2,
+}
+
+/// Delete an IdList.
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3IdListDelete(db: &mut sqlite3, pList: *mut IdList) {
+    if let Some(list) = pList.as_mut() {
+        debug_assert!(list.eU4 != EU4::EXPR); // EU4_EXPR mode is not currently used
+        for i in 0..list.nId as usize {
+            sqlite3DbFree(
+                db as *mut sqlite3,
+                (*list.a.as_mut_ptr().add(i)).zName as *mut c_void,
+            );
+        }
+        sqlite3DbNNFreeNN(db, (list as *mut IdList).cast());
+    }
 }

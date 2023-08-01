@@ -4689,20 +4689,6 @@ IdList *sqlite3IdListAppend(Parse *pParse, IdList *pList, Token *pToken){
 }
 
 /*
-** Delete an IdList.
-*/
-void sqlite3IdListDelete(sqlite3 *db, IdList *pList){
-  int i;
-  assert( db!=0 );
-  if( pList==0 ) return;
-  assert( pList->eU4!=EU4_EXPR ); /* EU4_EXPR mode is not currently used */
-  for(i=0; i<pList->nId; i++){
-    sqlite3DbFree(db, pList->a[i].zName);
-  }
-  sqlite3DbNNFreeNN(db, pList);
-}
-
-/*
 ** Return the index in pList of the identifier named zId.  Return -1
 ** if not found.
 */
