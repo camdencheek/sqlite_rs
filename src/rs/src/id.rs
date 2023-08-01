@@ -79,28 +79,22 @@ pub unsafe extern "C" fn sqlite3IdListDelete(db: &mut sqlite3, pList: *mut IdLis
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sqlite3IdListDup(db: &mut sqlite3, p: *const IdList) -> *mut IdList {
-    let old = if let Some(l) = p.as_ref() {
-        l
-    } else {
-        return std::ptr::null_mut();
-    };
-
+pub unsafe extern "C" fn sqlite3IdListDup(
+    db: &mut sqlite3,
+    p: Option<&IdList>,
+) -> Option<&mut IdList> {
+    let old = p?;
     debug_assert!(old.eU4 != EU4::EXPR);
     let pNew = sqlite3DbMallocRawNN(
         db,
         (size_of::<IdList>() + (old.nId as usize - 1) * size_of::<IdList_item>()) as u64,
     ) as *mut IdList;
-    let new = if let Some(l) = pNew.as_mut() {
-        l
-    } else {
-        return pNew;
-    };
+    let new = pNew.as_mut()?;
     new.nId = old.nId;
     new.eU4 = old.eU4;
     for (oldItem, newItem) in old.items().iter().zip(new.items_mut().into_iter()) {
         newItem.zName = sqlite3DbStrDup(db, oldItem.zName);
         newItem.u4 = (*oldItem).u4;
     }
-    new as *mut IdList
+    Some(new)
 }
