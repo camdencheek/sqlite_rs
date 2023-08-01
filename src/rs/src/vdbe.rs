@@ -1,8 +1,8 @@
 use libc::{c_char, c_int, c_schar, c_void};
 
 use crate::{
-    coll_seq::CollSeq, expr::Expr, func::FuncDef, sqlite3_context, sqlite3_value, table::Table,
-    vtable::VTable,
+    coll_seq::CollSeq, db::sqlite3, expr::Expr, func::FuncDef, sqlite3_context, sqlite3_value,
+    table::Table, vtable::VTable,
 };
 
 /// A sub-routine used to implement a trigger program.
@@ -99,10 +99,27 @@ pub union p4union {
     pExpr: *mut Expr,
 }
 
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
+/// An instance of the following structure is passed as the first
+/// argument to sqlite3VdbeKeyCompare and is used to control the
+/// comparison of the two index keys.
+///
+/// Note that aSortOrder[] and aColl[] have nField+1 slots.  There
+/// are nField slots for the columns of an index then one extra slot
+/// for the rowid at the end.
+#[repr(C)]
 pub struct KeyInfo {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    /// Number of references to this KeyInfo object
+    nRef: u32,
+    /// Text encoding - one of the SQLITE_UTF* values
+    enc: u8,
+    /// Number of key columns in the index
+    nKeyField: u16,
+    /// Total columns, including key plus others
+    nAllField: u16,
+    /// The database connection
+    db: *mut sqlite3,
+    /// Sort order for each column.
+    aSortFlags: *mut u8,
+    /// Collating sequence for each term of the key
+    aColl: [*mut CollSeq; 1],
 }

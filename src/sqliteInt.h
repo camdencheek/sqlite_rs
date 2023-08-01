@@ -1143,18 +1143,13 @@ extern u32 sqlite3WhereTrace;
 ** Forward references to structures
 */
 typedef struct AuthContext AuthContext;
-typedef struct Bitvec Bitvec;
 typedef struct DbFixer DbFixer;
-typedef struct FKey FKey;
 typedef struct FuncDefHash FuncDefHash;
-typedef struct IdList IdList;
 typedef struct KeyClass KeyClass;
-typedef struct KeyInfo KeyInfo;
 typedef struct NameContext NameContext;
 typedef struct OnOrUsing OnOrUsing;
 typedef struct PreUpdate PreUpdate;
 typedef struct PrintfArguments PrintfArguments;
-typedef struct RowSet RowSet;
 typedef struct SQLiteThread SQLiteThread;
 typedef struct SrcList SrcList;
 typedef struct sqlite3_str StrAccum; /* Internal alias for sqlite3_str */
@@ -1658,26 +1653,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 #define OE_SetDflt  9   /* Set the foreign key value to its default */
 #define OE_Cascade  10  /* Cascade the changes */
 #define OE_Default  11  /* Do whatever the default action is */
-
-
-/*
-** An instance of the following structure is passed as the first
-** argument to sqlite3VdbeKeyCompare and is used to control the
-** comparison of the two index keys.
-**
-** Note that aSortOrder[] and aColl[] have nField+1 slots.  There
-** are nField slots for the columns of an index then one extra slot
-** for the rowid at the end.
-*/
-struct KeyInfo {
-  u32 nRef;           /* Number of references to this KeyInfo object */
-  u8 enc;             /* Text encoding - one of the SQLITE_UTF* values */
-  u16 nKeyField;      /* Number of key columns in the index */
-  u16 nAllField;      /* Total columns, including key plus others */
-  sqlite3 *db;        /* The database connection */
-  u8 *aSortFlags;     /* Sort order for each column. */
-  CollSeq *aColl[1];  /* Collating sequence for each term of the key */
-};
 
 /*
 ** Allowed bit values for entries in the KeyInfo.aSortFlags[] array.
