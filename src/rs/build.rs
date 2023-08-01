@@ -36,6 +36,20 @@ typedef uint16_t WO;
             h.insert("omit_windowfunc".into(), "SQLITE_OMIT_WINDOWFUNC".into());
             h.insert("omit_cast".into(), "SQLITE_OMIT_CAST".into());
             h.insert("omit_wal".into(), "SQLITE_OMIT_WAL".into());
+            h.insert("vdbe_coverage".into(), "SQLITE_VDBE_COVERAGE".into());
+            h.insert("vdbe_profile".into(), "VDBE_PROFILE".into());
+            h.insert(
+                "enable_cursor_hints".into(),
+                "SQLITE_ENABLE_CURSOR_HINTS".into(),
+            );
+            h.insert(
+                "enable_stmt_scanstatus".into(),
+                "SQLITE_ENABLE_STMT_SCANSTATUS".into(),
+            );
+            h.insert(
+                "enable_explain_comments".into(),
+                "SQLITE_ENABLE_EXPLAIN_COMMENTS".into(),
+            );
             h.insert("enable_stat4".into(), "SQLITE_ENABLE_STAT4".into());
             h.insert(
                 "user_authentication".into(),

@@ -26,57 +26,6 @@
 */
 typedef struct Vdbe Vdbe;
 
-/*
-** The names of the following types declared in vdbeInt.h are required
-** for the VdbeOp definition.
-*/
-typedef struct sqlite3_value Mem;
-
-/*
-** A single instruction of the virtual machine has an opcode
-** and as many as three operands.  The instruction is recorded
-** as an instance of the following structure:
-*/
-struct VdbeOp {
-  u8 opcode;          /* What operation to perform */
-  signed char p4type; /* One of the P4_xxx constants for p4 */
-  u16 p5;             /* Fifth parameter is an unsigned 16-bit integer */
-  int p1;             /* First operand */
-  int p2;             /* Second parameter (often the jump destination) */
-  int p3;             /* The third parameter */
-  union p4union {     /* fourth parameter */
-    int i;                 /* Integer value if p4type==P4_INT32 */
-    void *p;               /* Generic pointer */
-    char *z;               /* Pointer to data for string (char array) types */
-    i64 *pI64;             /* Used when p4type is P4_INT64 */
-    double *pReal;         /* Used when p4type is P4_REAL */
-    FuncDef *pFunc;        /* Used when p4type is P4_FUNCDEF */
-    sqlite3_context *pCtx; /* Used when p4type is P4_FUNCCTX */
-    CollSeq *pColl;        /* Used when p4type is P4_COLLSEQ */
-    Mem *pMem;             /* Used when p4type is P4_MEM */
-    VTable *pVtab;         /* Used when p4type is P4_VTAB */
-    KeyInfo *pKeyInfo;     /* Used when p4type is P4_KEYINFO */
-    u32 *ai;               /* Used when p4type is P4_INTARRAY */
-    SubProgram *pProgram;  /* Used when p4type is P4_SUBPROGRAM */
-    Table *pTab;           /* Used when p4type is P4_TABLE */
-#ifdef SQLITE_ENABLE_CURSOR_HINTS
-    Expr *pExpr;           /* Used when p4type is P4_EXPR */
-#endif
-  } p4;
-#ifdef SQLITE_ENABLE_EXPLAIN_COMMENTS
-  char *zComment;          /* Comment to improve readability */
-#endif
-#ifdef SQLITE_VDBE_COVERAGE
-  u32 iSrcLine;            /* Source-code line that generated this opcode
-                           ** with flags in the upper 8 bits */
-#endif
-#if defined(SQLITE_ENABLE_STMT_SCANSTATUS) || defined(VDBE_PROFILE)
-  u64 nExec;
-  u64 nCycle;
-#endif
-};
-typedef struct VdbeOp VdbeOp;
-
 
 /*
 ** A smaller version of VdbeOp used for the VdbeAddOpList() function because
