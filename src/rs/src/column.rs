@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_char, c_int, strlen};
 
 use crate::global::{StdType, SQLITE_N_STDTYPE};
@@ -54,7 +55,7 @@ pub struct Column {
     iDflt: u16,
 
     /// Boolean properties. See COLFLAG_ defines below
-    pub colFlags: u16,
+    pub colFlags: COLFLAG,
 }
 
 impl Column {
@@ -63,7 +64,7 @@ impl Column {
     /// The column type is an extra string stored after the zero-terminator on the column name if
     /// and only if the COLFLAG_HASTYPE flag is set.
     pub unsafe fn std_type(&self) -> Option<*const c_char> {
-        if self.colFlags & Colflag::Hastype as u16 != 0 {
+        if self.colFlags.contains(COLFLAG::HASTYPE) {
             Some(self.zCnName.add(strlen(self.zCnName) + 1))
         } else if self.eCType != 0 {
             debug_assert!(self.eCType <= SQLITE_N_STDTYPE);
@@ -106,28 +107,44 @@ pub enum Coltype {
     Text = 6,
 }
 
-/* Allowed values for Column.colFlags.
-**
-** Constraints:
-**         TF_HasVirtual == COLFLAG_VIRTUAL
-**         TF_HasStored  == COLFLAG_STORED
-**         TF_HasHidden  == COLFLAG_HIDDEN
-*/
-#[repr(C)]
-pub enum Colflag {
-    Primkey = 0x0001,   /* Column is part of the primary key */
-    Hidden = 0x0002,    /* A hidden column in a virtual table */
-    Hastype = 0x0004,   /* Type name follows column name */
-    Unique = 0x0008,    /* Column def contains "UNIQUE" or "PK" */
-    Sorterref = 0x0010, /* Use sorter-refs with this column */
-    Virtual = 0x0020,   /* GENERATED ALWAYS AS ... VIRTUAL */
-    Stored = 0x0040,    /* GENERATED ALWAYS AS ... STORED */
-    Notavail = 0x0080,  /* STORED column not yet calculated */
-    Busy = 0x0100,      /* Blocks recursion on GENERATED columns */
-    Hascoll = 0x0200,   /* Has collating sequence name in zCnName */
-    Noexpand = 0x0400,  /* Omit this column when expanding "*" */
-    Generated = 0x0060, /* Combo: _STORED, _VIRTUAL */
-    Noinsert = 0x0062,  /* Combo: _HIDDEN, _STORED, _VIRTUAL */
+bitflags! {
+    /// Allowed values for Column.colFlags.
+    ///
+    /// Constraints:
+    ///         TF_HasVirtual == COLFLAG_VIRTUAL
+    ///         TF_HasStored  == COLFLAG_STORED
+    ///         TF_HasHidden  == COLFLAG_HIDDEN
+    #[repr(transparent)]
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct COLFLAG: u16 {
+        /// Column is part of the primary key
+        const PRIMKEY = 0x0001;
+        /// A hidden column in a virtual table
+        const HIDDEN = 0x0002;
+        /// Type name follows column name
+        const HASTYPE = 0x0004;
+        /// Column def contains "UNIQUE" or "PK"
+        const UNIQUE = 0x0008;
+        /// Use sorter-refs with this column
+        const SORTERREF = 0x0010;
+        /// GENERATED ALWAYS AS ... VIRTUAL
+        const VIRTUAL = 0x0020;
+        /// GENERATED ALWAYS AS ... STORED
+        const STORED = 0x0040;
+        /// STORED column not yet calculated
+        const NOTAVAIL = 0x0080;
+        /// Blocks recursion on GENERATED columns
+        const BUSY = 0x0100;
+        /// Has collating sequence name in zCnName
+        const HASCOLL = 0x0200;
+        /// Omit this column when expanding "*"
+        const NOEXPAND = 0x0400;
+        /// Combo: _STORED, _VIRTUAL
+        const GENERATED = 0x0060;
+        /// Combo: _HIDDEN, _STORED, _VIRTUAL
+        const NOINSERT = 0x0062;
+    }
+
 }
 
 /*
