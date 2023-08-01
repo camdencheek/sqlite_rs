@@ -30,6 +30,16 @@ pub struct IdList {
     a: [IdList_item; 1],
 }
 
+impl IdList {
+    fn items(&self) -> &[IdList_item] {
+        unsafe { std::slice::from_raw_parts(self.a.as_ptr(), self.nId as usize) }
+    }
+
+    fn items_mut(&mut self) -> &mut [IdList_item] {
+        unsafe { std::slice::from_raw_parts_mut(self.a.as_mut_ptr(), self.nId as usize) }
+    }
+}
+
 #[repr(C)]
 pub struct IdList_item {
     zName: *mut c_char, /* Name of the identifier */
@@ -61,11 +71,8 @@ pub enum EU4 {
 pub unsafe extern "C" fn sqlite3IdListDelete(db: &mut sqlite3, pList: *mut IdList) {
     if let Some(list) = pList.as_mut() {
         debug_assert!(list.eU4 != EU4::EXPR); // EU4_EXPR mode is not currently used
-        for i in 0..list.nId as usize {
-            sqlite3DbFree(
-                db as *mut sqlite3,
-                (*list.a.as_mut_ptr().add(i)).zName as *mut c_void,
-            );
+        for item in list.items_mut() {
+            sqlite3DbFree(db as *mut sqlite3, item.zName as *mut c_void);
         }
         sqlite3DbNNFreeNN(db, (list as *mut IdList).cast());
     }
@@ -91,11 +98,9 @@ pub unsafe extern "C" fn sqlite3IdListDup(db: &mut sqlite3, p: *const IdList) ->
     };
     new.nId = old.nId;
     new.eU4 = old.eU4;
-    for i in 0..old.nId as usize {
-        let oldItem = old.a.as_ptr().add(i);
-        let newItem = new.a.as_mut_ptr().add(i);
-        (*newItem).zName = sqlite3DbStrDup(db, (*oldItem).zName);
-        (*newItem).u4 = (*oldItem).u4;
+    for (oldItem, newItem) in old.items().iter().zip(new.items_mut().into_iter()) {
+        newItem.zName = sqlite3DbStrDup(db, oldItem.zName);
+        newItem.u4 = (*oldItem).u4;
     }
     new as *mut IdList
 }
