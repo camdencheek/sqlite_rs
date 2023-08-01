@@ -1,7 +1,8 @@
 use libc::{c_char, c_int, c_void};
+use std::mem::size_of;
 
 use crate::{
-    db::{sqlite3, sqlite3DbFree, sqlite3DbNNFreeNN},
+    db::{sqlite3, sqlite3DbFree, sqlite3DbMallocRawNN, sqlite3DbNNFreeNN, sqlite3DbStrDup},
     expr::Expr,
 };
 
@@ -35,6 +36,7 @@ pub struct IdList_item {
     u4: IdList_item_u,
 }
 
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub union IdList_item_u {
     idx: c_int,       /* Index in some Table.aCol[] of a column named zName */
@@ -43,7 +45,7 @@ pub union IdList_item_u {
 
 /// Allowed values for IdList.eType, which determines which value of the a.u4
 /// is valid.
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 #[repr(u8)]
 pub enum EU4 {
     /// Does not use IdList.a.u4
@@ -67,4 +69,33 @@ pub unsafe extern "C" fn sqlite3IdListDelete(db: &mut sqlite3, pList: *mut IdLis
         }
         sqlite3DbNNFreeNN(db, (list as *mut IdList).cast());
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3IdListDup(db: &mut sqlite3, p: *const IdList) -> *mut IdList {
+    let old = if let Some(l) = p.as_ref() {
+        l
+    } else {
+        return std::ptr::null_mut();
+    };
+
+    debug_assert!(old.eU4 != EU4::EXPR);
+    let pNew = sqlite3DbMallocRawNN(
+        db,
+        (size_of::<IdList>() + (old.nId as usize - 1) * size_of::<IdList_item>()) as u64,
+    ) as *mut IdList;
+    let new = if let Some(l) = pNew.as_mut() {
+        l
+    } else {
+        return pNew;
+    };
+    new.nId = old.nId;
+    new.eU4 = old.eU4;
+    for i in 0..old.nId as usize {
+        let oldItem = old.a.as_ptr().add(i);
+        let newItem = new.a.as_mut_ptr().add(i);
+        (*newItem).zName = sqlite3DbStrDup(db, (*oldItem).zName);
+        (*newItem).u4 = (*oldItem).u4;
+    }
+    new as *mut IdList
 }

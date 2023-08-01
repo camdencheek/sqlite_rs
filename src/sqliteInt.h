@@ -3073,7 +3073,6 @@ void sqlite3RowidConstraint(Parse*, int, Table*);
 Expr *sqlite3ExprDup(sqlite3*,const Expr*,int);
 ExprList *sqlite3ExprListDup(sqlite3*,const ExprList*,int);
 SrcList *sqlite3SrcListDup(sqlite3*,const SrcList*,int);
-IdList *sqlite3IdListDup(sqlite3*,const IdList*);
 Select *sqlite3SelectDup(sqlite3*,const Select*,int);
 FuncDef *sqlite3FunctionSearch(int,const char*);
 void sqlite3InsertBuiltinFuncs(FuncDef*,int);
