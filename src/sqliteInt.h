@@ -1156,12 +1156,10 @@ typedef struct PreUpdate PreUpdate;
 typedef struct PrintfArguments PrintfArguments;
 typedef struct RowSet RowSet;
 typedef struct SQLiteThread SQLiteThread;
-typedef struct SelectDest SelectDest;
 typedef struct SrcList SrcList;
 typedef struct sqlite3_str StrAccum; /* Internal alias for sqlite3_str */
 typedef struct TableLock TableLock;
 typedef struct TreeView TreeView;
-typedef struct TriggerPrg TriggerPrg;
 typedef struct UnpackedRecord UnpackedRecord;
 typedef struct Walker Walker;
 typedef struct WhereInfo WhereInfo;
@@ -2080,32 +2078,6 @@ struct NameContext {
 #define SRT_Coroutine   13  /* Generate a single row of result */
 #define SRT_Table       14  /* Store result as data with an automatic rowid */
 #define SRT_Upfrom      15  /* Store result as data with rowid */
-
-/*
-** At least one instance of the following structure is created for each
-** trigger that may be fired while parsing an INSERT, UPDATE or DELETE
-** statement. All such objects are stored in the linked list headed at
-** Parse.pTriggerPrg and deleted once statement compilation has been
-** completed.
-**
-** A Vdbe sub-program that implements the body and WHEN clause of trigger
-** TriggerPrg.pTrigger, assuming a default ON CONFLICT clause of
-** TriggerPrg.orconf, is stored in the TriggerPrg.pProgram variable.
-** The Parse.pTriggerPrg list never contains two entries with the same
-** values for both pTrigger and orconf.
-**
-** The TriggerPrg.aColmask[0] variable is set to a mask of old.* columns
-** accessed (or set to 0 for triggers fired as a result of INSERT
-** statements). Similarly, the TriggerPrg.aColmask[1] variable is set to
-** a mask of new.* columns used by the program.
-*/
-struct TriggerPrg {
-  Trigger *pTrigger;      /* Trigger this program was coded from */
-  TriggerPrg *pNext;      /* Next entry in Parse.pTriggerPrg list */
-  SubProgram *pProgram;   /* Program implementing pTrigger/orconf */
-  int orconf;             /* Default ON CONFLICT policy */
-  u32 aColmask[2];        /* Masks of old.*, new.* columns accessed */
-};
 
 /*
 ** The yDbMask datatype for the bitmask of all attached databases.

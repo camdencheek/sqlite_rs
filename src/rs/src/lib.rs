@@ -37,6 +37,7 @@ mod token_type;
 mod trigger;
 mod upsert;
 mod util;
+mod vdbe;
 mod vtable;
 mod whereint;
 mod window;
