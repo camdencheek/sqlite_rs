@@ -511,3 +511,18 @@ pub struct sqlite3_vfs {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
+
+extern "C" {
+    fn sqlite3DbMallocZero(db: *mut sqlite3, n: u64) -> *mut c_void;
+    fn sqlite3DbMallocRaw(db: *mut sqlite3, n: u64) -> *mut c_void;
+    fn sqlite3DbMallocRawNN(db: *mut sqlite3, n: u64) -> *mut c_void;
+    fn sqlite3DbStrDup(db: *mut sqlite3, z: *const c_char) -> *mut c_char;
+    fn sqlite3DbStrNDup(db: *mut sqlite3, z: *const c_char, n: u64) -> *mut c_char;
+    fn sqlite3DbSpanDup(db: *mut sqlite3, z1: *const c_char, z2: *const c_char) -> *mut c_char;
+    fn sqlite3DbReallocOrFree(db: *mut sqlite3, p: *mut c_void, n: u64) -> *mut c_void;
+    fn sqlite3DbRealloc(db: *mut sqlite3, p: *mut c_void, n: u64) -> *mut c_void;
+    fn sqlite3DbFree(db: *mut sqlite3, p: *mut c_void);
+    fn sqlite3DbFreeNN(db: *mut sqlite3, p: *mut c_void);
+    fn sqlite3DbNNFreeNN(db: *mut sqlite3, p: *mut c_void);
+    fn sqlite3DbMallocSize(db: *mut sqlite3, p: *const c_void) -> c_int;
+}
