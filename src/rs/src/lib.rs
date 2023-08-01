@@ -1,6 +1,9 @@
 #![allow(non_snake_case, unused, non_camel_case_types, non_upper_case_globals)]
 #![feature(allocator_api, new_uninit)]
 mod agg;
+
+#[cfg(user_authentication)]
+mod auth;
 mod autoinc;
 mod btree;
 mod build;

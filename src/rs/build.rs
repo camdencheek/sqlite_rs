@@ -76,6 +76,10 @@ typedef uint16_t WO;
                 "omit_shared_cache".into(),
                 "SQLITE_OMIT_SHARED_CACHE".into(),
             );
+            h.insert(
+                "user_authentication".into(),
+                "SQLITE_USER_AUTHENTICATION".into(),
+            );
             h.insert("omit_deprecated".into(), "SQLITE_OMITE_DEPRECATED".into());
             h.insert(
                 "enable_preupdate_hook".into(),

@@ -1230,23 +1230,6 @@ struct FuncDefHash {
 #define SQLITE_FUNC_HASH(C,L) (((C)+(L))%SQLITE_FUNC_HASH_SZ)
 
 #ifdef SQLITE_USER_AUTHENTICATION
-/*
-** Information held in the "sqlite3" database connection object and used
-** to manage user authentication.
-*/
-typedef struct sqlite3_userauth sqlite3_userauth;
-struct sqlite3_userauth {
-  u8 authLevel;                 /* Current authentication level */
-  int nAuthPW;                  /* Size of the zAuthPW in bytes */
-  char *zAuthPW;                /* Password used to authenticate */
-  char *zAuthUser;              /* User name used to authenticate */
-};
-
-/* Allowed values for sqlite3_userauth.authLevel */
-#define UAUTH_Unknown     0     /* Authentication not yet checked */
-#define UAUTH_Fail        1     /* User authentication failed */
-#define UAUTH_User        2     /* Authenticated as a normal user */
-#define UAUTH_Admin       3     /* Authenticated as an administrator */
 
 /* Functions used only by user authorization logic */
 int sqlite3UserAuthTable(const char*);
