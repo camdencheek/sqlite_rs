@@ -49,6 +49,18 @@ impl IdList {
         }
         None
     }
+
+    fn get(&self, i: usize) -> &IdList_item {
+        &self.items()[i]
+    }
+
+    fn get_mut(&mut self, i: usize) -> &mut IdList_item {
+        &mut self.items_mut()[i]
+    }
+
+    fn len(&self) -> usize {
+        self.nId as usize
+    }
 }
 
 #[repr(C)]
@@ -111,6 +123,21 @@ pub unsafe extern "C" fn sqlite3IdListDup(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sqlite3IdListIndex(list: &IdList, target: *const c_char) -> c_int {
+pub extern "C" fn sqlite3IdListIndex(list: &IdList, target: *const c_char) -> c_int {
     list.find(target).map(|u| u as c_int).unwrap_or(-1)
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3IdListGet(list: &IdList, i: c_int) -> &IdList_item {
+    list.get(i as usize)
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3IdListGetMut(list: &mut IdList, i: c_int) -> &mut IdList_item {
+    list.get_mut(i as usize)
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3IdListLen(list: &mut IdList) -> c_int {
+    list.len() as c_int
 }

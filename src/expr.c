@@ -1730,21 +1730,21 @@ ExprList *sqlite3ExprListAppendVector(
   ** wildcards ("*") in the result set of the SELECT must be expanded before
   ** we can do the size check, so defer the size check until code generation.
   */
-  if( pExpr->op!=TK_SELECT && pColumns->nId!=(n=sqlite3ExprVectorSize(pExpr)) ){
+  if( pExpr->op!=TK_SELECT && sqlite3IdListLen(pColumns)!=(n=sqlite3ExprVectorSize(pExpr)) ){
     sqlite3ErrorMsg(pParse, "%d columns assigned %d values",
-                    pColumns->nId, n);
+                    sqlite3IdListLen(pColumns), n);
     goto vector_append_error;
   }
 
-  for(i=0; i<pColumns->nId; i++){
-    Expr *pSubExpr = sqlite3ExprForVectorField(pParse, pExpr, i, pColumns->nId);
+  for(i=0; i<sqlite3IdListLen(pColumns); i++){
+    Expr *pSubExpr = sqlite3ExprForVectorField(pParse, pExpr, i, sqlite3IdListLen(pColumns));
     assert( pSubExpr!=0 || db->mallocFailed );
     if( pSubExpr==0 ) continue;
     pList = sqlite3ExprListAppend(pParse, pList, pSubExpr);
     if( pList ){
       assert( pList->nExpr==iFirst+i+1 );
-      pList->a[pList->nExpr-1].zEName = pColumns->a[i].zName;
-      pColumns->a[i].zName = 0;
+      pList->a[pList->nExpr-1].zEName = sqlite3IdListGet(pColumns, i)->zName;
+      sqlite3IdListGetMut(pColumns, i)->zName = 0;
     }
   }
 
@@ -1760,7 +1760,7 @@ ExprList *sqlite3ExprListAppendVector(
 
     /* Remember the size of the LHS in iTable so that we can check that
     ** the RHS and LHS sizes match during code generation. */
-    pFirst->iTable = pColumns->nId;
+    pFirst->iTable = sqlite3IdListLen(pColumns);
   }
 
 vector_append_error:
