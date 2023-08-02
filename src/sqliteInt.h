@@ -2044,12 +2044,6 @@ struct NameContext {
 # define DbMaskNonZero(M)   ((M)!=0)
 #endif
 
-/* Allowed values for Parse.eParseMode
-*/
-#define PARSE_MODE_NORMAL        0
-#define PARSE_MODE_DECLARE_VTAB  1
-#define PARSE_MODE_RENAME        2
-#define PARSE_MODE_UNMAP         3
 
 /*
 ** Sizes and pointers of various parts of the Parse object.
@@ -2746,7 +2740,6 @@ void sqlite3Insert(Parse*, SrcList*, Select*, IdList*, int, Upsert*);
   void sqlite3ComputeGeneratedColumns(Parse*, int, Table*);
 #endif
 void *sqlite3ArrayAllocate(sqlite3*,void*,int,int*,int*);
-IdList *sqlite3IdListAppend(Parse*, IdList*, Token*);
 SrcList *sqlite3SrcListEnlarge(Parse*, SrcList*, int, int);
 SrcList *sqlite3SrcListAppendList(Parse *pParse, SrcList *p1, SrcList *p2);
 SrcList *sqlite3SrcListAppend(Parse*, SrcList*, Token*, Token*);

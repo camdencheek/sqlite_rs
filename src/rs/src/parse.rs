@@ -39,7 +39,7 @@ type VList = c_int;
 */
 #[repr(C)]
 pub struct Parse {
-    db: *mut sqlite3,     /* The main database structure */
+    pub db: *mut sqlite3, /* The main database structure */
     zErrMsg: *mut c_char, /* An error message */
     pVdbe: *mut Vdbe,     /* An engine for executing database bytecode */
     rc: c_int,            /* Return code from execution */
@@ -117,11 +117,11 @@ pub struct Parse {
      ** using offsetof(Parse,sLastToken) so the sLastToken field must be the
      ** first field in the recursive region.
      ************************************************************************/
-    sLastToken: Token, /* The last token parsed */
-    nVar: ynVar,       /* Number of '?' variables seen in the SQL so far */
-    iPkSortOrder: u8,  /* ASC or DESC for INTEGER PRIMARY KEY */
-    explain: u8,       /* True if the EXPLAIN flag is found on the query */
-    eParseMode: u8,    /* PARSE_MODE_XXX constant */
+    sLastToken: Token,      /* The last token parsed */
+    nVar: ynVar,            /* Number of '?' variables seen in the SQL so far */
+    iPkSortOrder: u8,       /* ASC or DESC for INTEGER PRIMARY KEY */
+    explain: u8,            /* True if the EXPLAIN flag is found on the query */
+    eParseMode: PARSE_MODE, /* PARSE_MODE_XXX constant */
 
     #[cfg(not(omit_virtualtable))]
     nVtabLock: c_int, /* Number of virtual tables to lock */
@@ -191,6 +191,24 @@ impl Parse {
         self.nTempReg = 0;
         self.nRangeReg = 0;
     }
+
+    pub fn in_rename_object(&self) -> bool {
+        if cfg!(omit_virtualtable) {
+            false
+        } else {
+            self.eParseMode >= PARSE_MODE::RENAME
+        }
+    }
+}
+
+/// Allowed values for Parse.eParseMode
+#[derive(PartialEq, PartialOrd)]
+#[repr(u8)]
+pub enum PARSE_MODE {
+    NORMAL = 0,
+    DECLARE_VTAB = 1,
+    RENAME = 2,
+    UNMAP = 3,
 }
 
 #[no_mangle]

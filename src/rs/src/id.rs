@@ -2,8 +2,13 @@ use libc::{c_char, c_int, c_void};
 use std::{mem::size_of, ptr::NonNull};
 
 use crate::{
-    db::{sqlite3, sqlite3DbFree, sqlite3DbMallocRawNN, sqlite3DbNNFreeNN, sqlite3DbStrDup},
+    db::{
+        sqlite3, sqlite3DbFree, sqlite3DbMallocRawNN, sqlite3DbMallocZero, sqlite3DbNNFreeNN,
+        sqlite3DbRealloc, sqlite3DbStrDup,
+    },
     expr::Expr,
+    parse::Parse,
+    token::Token,
     util::strings::sqlite3StrICmp,
 };
 
@@ -140,4 +145,48 @@ pub extern "C" fn sqlite3IdListGetMut(list: &mut IdList, i: c_int) -> &mut IdLis
 #[no_mangle]
 pub extern "C" fn sqlite3IdListLen(list: &mut IdList) -> c_int {
     list.len() as c_int
+}
+
+/// Append a new element to the given IdList.  Create a new IdList if
+/// need be.
+///
+/// A new IdList is returned, or NULL if malloc() fails.
+#[no_mangle]
+pub unsafe extern "C" fn sqlite3IdListAppend(
+    pParse: &mut Parse,
+    pList: Option<NonNull<IdList>>,
+    pToken: *mut Token,
+) -> Option<NonNull<IdList>> {
+    let db = pParse.db.as_mut().unwrap();
+    let list = if let Some(l) = pList {
+        let new = sqlite3DbRealloc(
+            db,
+            l.as_ptr() as *mut c_void,
+            (size_of::<IdList>() + l.as_ref().len() * size_of::<IdList_item>()) as u64,
+        ) as *mut IdList;
+        if new.is_null() {
+            sqlite3IdListDelete(db, l.as_ptr());
+            return None;
+        }
+        new.as_mut().unwrap()
+    } else {
+        let new = sqlite3DbMallocZero(db, size_of::<IdList>() as u64) as *mut IdList;
+        new.as_mut()?
+    };
+    let i = list.len();
+    list.nId += 1;
+    list.get_mut(i).zName = sqlite3NameFromToken(db, pToken);
+    if pParse.in_rename_object() && !list.get(i).zName.is_null() {
+        sqlite3RenameTokenMap(pParse, list.get(i).zName as *mut c_void, pToken);
+    }
+    Some(NonNull::from(list))
+}
+
+extern "C" {
+    fn sqlite3NameFromToken(db: &mut sqlite3, pName: *const Token) -> *mut c_char;
+    fn sqlite3RenameTokenMap(
+        pParse: &mut Parse,
+        pPtr: *const c_void,
+        pToken: *const Token,
+    ) -> *const c_void;
 }

@@ -4659,36 +4659,6 @@ void *sqlite3ArrayAllocate(
 }
 
 /*
-** Append a new element to the given IdList.  Create a new IdList if
-** need be.
-**
-** A new IdList is returned, or NULL if malloc() fails.
-*/
-IdList *sqlite3IdListAppend(Parse *pParse, IdList *pList, Token *pToken){
-  sqlite3 *db = pParse->db;
-  int i;
-  if( pList==0 ){
-    pList = sqlite3DbMallocZero(db, sizeof(IdList) );
-    if( pList==0 ) return 0;
-  }else{
-    IdList *pNew;
-    pNew = sqlite3DbRealloc(db, pList,
-                 sizeof(IdList) + sqlite3IdListLen(pList)*sizeof(IdList_item));
-    if( pNew==0 ){
-      sqlite3IdListDelete(db, pList);
-      return 0;
-    }
-    pList = pNew;
-  }
-  i = pList->nId++;
-  pList->a[i].zName = sqlite3NameFromToken(db, pToken);
-  if( IN_RENAME_OBJECT && pList->a[i].zName ){
-    sqlite3RenameTokenMap(pParse, (void*)pList->a[i].zName, pToken);
-  }
-  return pList;
-}
-
-/*
 ** Maximum size of a SrcList object.
 ** The SrcList object is used to represent the FROM clause of a
 ** SELECT statement, and the query planner cannot deal with more
