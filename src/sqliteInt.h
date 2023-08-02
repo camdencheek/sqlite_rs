@@ -1766,13 +1766,6 @@ struct OnOrUsing {
   IdList *pUsing;    /* The USING clause of a join */
 };
 
-// Retained definition because cbindgen does not work with variable-length structs
-struct SrcList {
-  int nSrc;        
-  u32 nAlloc;      
-  SrcItem a[1];    
-};
-
 /*
 ** Permitted values of the SrcList.a.jointype field
 */
