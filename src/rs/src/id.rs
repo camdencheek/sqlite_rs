@@ -29,8 +29,10 @@ use crate::{
 */
 #[repr(C)]
 pub struct IdList {
-    nId: c_int, /* Number of identifiers on the list */
-    eU4: EU4,   /* Which element of a.u4 is valid */
+    /// Number of identifiers on the list
+    n: c_int,
+    /// Which element of a.u4 is valid
+    eU4: EU4,
     // Not actually a single element, but we don't want the pointer to be
     // double-wide for the unsized type.
     a: [IdList_item; 1],
@@ -38,11 +40,11 @@ pub struct IdList {
 
 impl IdList {
     fn items(&self) -> &[IdList_item] {
-        unsafe { std::slice::from_raw_parts(self.a.as_ptr(), self.nId as usize) }
+        unsafe { std::slice::from_raw_parts(self.a.as_ptr(), self.n as usize) }
     }
 
     fn items_mut(&mut self) -> &mut [IdList_item] {
-        unsafe { std::slice::from_raw_parts_mut(self.a.as_mut_ptr(), self.nId as usize) }
+        unsafe { std::slice::from_raw_parts_mut(self.a.as_mut_ptr(), self.n as usize) }
     }
 
     /// Return the index in pList of the identifier named zId or None if not found
@@ -64,7 +66,7 @@ impl IdList {
     }
 
     fn len(&self) -> usize {
-        self.nId as usize
+        self.n as usize
     }
 }
 
@@ -115,10 +117,10 @@ pub unsafe extern "C" fn sqlite3IdListDup(
     debug_assert!(old.eU4 != EU4::EXPR);
     let pNew = sqlite3DbMallocRawNN(
         db,
-        (size_of::<IdList>() + (old.nId as usize - 1) * size_of::<IdList_item>()) as u64,
+        (size_of::<IdList>() + (old.n as usize - 1) * size_of::<IdList_item>()) as u64,
     ) as *mut IdList;
     let new = pNew.as_mut()?;
-    new.nId = old.nId;
+    new.n = old.n;
     new.eU4 = old.eU4;
     for (oldItem, newItem) in old.items().iter().zip(new.items_mut().into_iter()) {
         newItem.zName = sqlite3DbStrDup(db, oldItem.zName);
@@ -174,7 +176,7 @@ pub unsafe extern "C" fn sqlite3IdListAppend(
         new.as_mut()?
     };
     let i = list.len();
-    list.nId += 1;
+    list.n += 1;
     list.get_mut(i).zName = sqlite3NameFromToken(db, pToken);
     if pParse.in_rename_object() && !list.get(i).zName.is_null() {
         sqlite3RenameTokenMap(pParse, list.get(i).zName as *mut c_void, pToken);

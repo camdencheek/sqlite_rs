@@ -870,7 +870,7 @@ void sqlite3Insert(
     for(i=0; i<sqlite3IdListLen(pColumn); i++){
       pColumn->a[i].u4.idx = -1;
     }
-    for(i=0; i<pColumn->nId; i++){
+    for(i=0; i<sqlite3IdListLen(pColumn); i++){
       for(j=0; j<pTab->nCol; j++){
         if( sqlite3StrICmp(sqlite3IdListGet(pColumn, i)->zName, pTab->aCol[j].zCnName)==0 ){
           sqlite3IdListGetMut(pColumn, i)->u4.idx = j;
@@ -1029,8 +1029,8 @@ void sqlite3Insert(
      goto insert_cleanup;
     }
   }
-  if( pColumn!=0 && nColumn!=pColumn->nId ){
-    sqlite3ErrorMsg(pParse, "%d values for %d columns", nColumn, pColumn->nId);
+  if( pColumn!=0 && nColumn!=sqlite3IdListLen(pColumn) ){
+    sqlite3ErrorMsg(pParse, "%d values for %d columns", nColumn, sqlite3IdListLen(pColumn));
     goto insert_cleanup;
   }
     
@@ -1176,8 +1176,8 @@ void sqlite3Insert(
     }
     if( pColumn ){
       assert( pColumn->eU4==EU4_IDX );
-      for(j=0; j<pColumn->nId && pColumn->a[j].u4.idx!=i; j++){}
-      if( j>=pColumn->nId ){
+      for(j=0; j<sqlite3IdListLen(pColumn) && sqlite3IdListGet(pColumn, j)->u4.idx!=i; j++){}
+      if( j>=sqlite3IdListLen(pColumn) ){
         /* A column not named in the insert column list gets its
         ** default value */
         sqlite3ExprCodeFactorable(pParse, 
