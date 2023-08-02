@@ -945,7 +945,7 @@ void sqlite3TreeViewBareIdList(
     int i;
     sqlite3TreeViewLine(pView, "%s", zLabel);
     for(i=0; i<sqlite3IdListLen(pList); i++){
-      char *zName = sqlite3IdListGet(pList,i)->zName;
+      char *zName = sqlite3IdListGetName(pList,i);
       int moreToFollow = i<sqlite3IdListLen(pList) - 1;
       if( zName==0 ) zName = "(null)";
       sqlite3TreeViewPush(&pView, moreToFollow);

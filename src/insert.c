@@ -872,7 +872,7 @@ void sqlite3Insert(
     }
     for(i=0; i<sqlite3IdListLen(pColumn); i++){
       for(j=0; j<pTab->nCol; j++){
-        if( sqlite3StrICmp(sqlite3IdListGet(pColumn, i)->zName, pTab->aCol[j].zCnName)==0 ){
+        if( sqlite3StrICmp(sqlite3IdListGetName(pColumn, i), pTab->aCol[j].zCnName)==0 ){
           sqlite3IdListGetMut(pColumn, i)->u4.idx = j;
           if( i!=j ) bIdListInOrder = 0;
           if( j==pTab->iPKey ){
@@ -890,12 +890,12 @@ void sqlite3Insert(
         }
       }
       if( j>=pTab->nCol ){
-        if( sqlite3IsRowid(sqlite3IdListGet(pColumn, i)->zName) && !withoutRowid ){
+        if( sqlite3IsRowid(sqlite3IdListGetName(pColumn, i)) && !withoutRowid ){
           ipkColumn = i;
           bIdListInOrder = 0;
         }else{
           sqlite3ErrorMsg(pParse, "table %S has no column named %s",
-              pTabList->a, sqlite3IdListGet(pColumn, i)->zName);
+              pTabList->a, sqlite3IdListGetName(pColumn, i));
           pParse->checkSchema = 1;
           goto insert_cleanup;
         }

@@ -65,6 +65,10 @@ impl IdList {
         &mut self.items_mut()[i]
     }
 
+    fn get_name(&self, i: usize) -> *mut c_char {
+        self.items()[i].zName
+    }
+
     fn len(&self) -> usize {
         self.n as usize
     }
@@ -124,7 +128,7 @@ pub unsafe extern "C" fn sqlite3IdListDup(
     new.eU4 = old.eU4;
     for (oldItem, newItem) in old.items().iter().zip(new.items_mut().into_iter()) {
         newItem.zName = sqlite3DbStrDup(db, oldItem.zName);
-        newItem.u4 = (*oldItem).u4;
+        newItem.u4 = oldItem.u4;
     }
     Some(NonNull::from(new))
 }
@@ -132,6 +136,11 @@ pub unsafe extern "C" fn sqlite3IdListDup(
 #[no_mangle]
 pub extern "C" fn sqlite3IdListIndex(list: &IdList, target: *const c_char) -> c_int {
     list.find(target).map(|u| u as c_int).unwrap_or(-1)
+}
+
+#[no_mangle]
+pub extern "C" fn sqlite3IdListGetName(list: &IdList, i: c_int) -> *mut c_char {
+    list.get_name(i as usize)
 }
 
 #[no_mangle]

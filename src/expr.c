@@ -1743,7 +1743,7 @@ ExprList *sqlite3ExprListAppendVector(
     pList = sqlite3ExprListAppend(pParse, pList, pSubExpr);
     if( pList ){
       assert( pList->nExpr==iFirst+i+1 );
-      pList->a[pList->nExpr-1].zEName = sqlite3IdListGet(pColumns, i)->zName;
+      pList->a[pList->nExpr-1].zEName = sqlite3IdListGetName(pColumns, i);
       sqlite3IdListGetMut(pColumns, i)->zName = 0;
     }
   }
