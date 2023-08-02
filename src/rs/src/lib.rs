@@ -25,6 +25,7 @@ mod macros;
 mod mem;
 mod mem2;
 mod module;
+mod namecontext;
 mod pager;
 mod parse;
 mod pcache;

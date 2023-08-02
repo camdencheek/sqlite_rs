@@ -167,6 +167,8 @@ typedef uint16_t WO;
                 "WhereLevel".into(),
                 "InLoop".into(),
                 "FuncDefHash".into(),
+                "NameContext".into(),
+                "NC".into(),
                 "SelectDest".into(),
                 "WhereLoop".into(),
                 "WhereTerm".into(),
