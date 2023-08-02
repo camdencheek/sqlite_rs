@@ -521,9 +521,9 @@ static int sqlite3ProcessJoin(Parse *pParse, Select *p){
         if( tableAndColumnIndex(pSrc, 0, i, zName, 0, 0, 1) ){
           pUsing = sqlite3IdListAppend(pParse, pUsing, 0);
           if( pUsing ){
-            assert( pUsing->nId>0 );
-            assert( pUsing->a[pUsing->nId-1].zName==0 );
-            pUsing->a[pUsing->nId-1].zName = sqlite3DbStrDup(pParse->db, zName);
+            assert( sqlite3IdListLen(pUsing)>0 );
+            assert( sqlite3IdListGet(pUsing, sqlite3IdListLen(pUsing)-1)->zName==0 );
+            sqlite3IdListGetMut(pUsing, sqlite3IdListLen(pUsing)-1)->zName = sqlite3DbStrDup(pParse->db, zName);
           }
         }
       }
@@ -546,7 +546,7 @@ static int sqlite3ProcessJoin(Parse *pParse, Select *p){
       IdList *pList = pRight->u3.pUsing;
       sqlite3 *db = pParse->db;
       assert( pList!=0 );
-      for(j=0; j<pList->nId; j++){
+      for(j=0; j<sqlite3IdListLen(pList); j++){
         char *zName;     /* Name of the term in the USING clause */
         int iLeft;       /* Table on the left with matching column name */
         int iLeftCol;    /* Column number of matching column on the left */
@@ -555,7 +555,7 @@ static int sqlite3ProcessJoin(Parse *pParse, Select *p){
         Expr *pE2;       /* Reference to the column on the RIGHT of the join */
         Expr *pEq;       /* Equality constraint.  pE1 == pE2 */
 
-        zName = pList->a[j].zName;
+        zName = sqlite3IdListGet(pList, j)->zName;
         iRightCol = sqlite3ColumnIndex(pRightTab, zName);
         if( iRightCol<0
          || tableAndColumnIndex(pSrc, 0, i, zName, &iLeft, &iLeftCol,
@@ -6101,8 +6101,8 @@ static int selectExpander(Walker *pWalker, Select *p){
           ){
             int ii;
             pUsing = pFrom[1].u3.pUsing;
-            for(ii=0; ii<pUsing->nId; ii++){
-              const char *zUName = pUsing->a[ii].zName;
+            for(ii=0; ii<sqlite3IdListLen(pUsing); ii++){
+              const char *zUName = sqlite3IdListGet(pUsing,ii)->zName;
               pRight = sqlite3Expr(db, TK_ID, zUName);
               pNew = sqlite3ExprListAppend(pParse, pNew, pRight);
               if( pNew ){

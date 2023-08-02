@@ -944,24 +944,24 @@ void sqlite3TreeViewBareIdList(
   }else{
     int i;
     sqlite3TreeViewLine(pView, "%s", zLabel);
-    for(i=0; i<pList->nId; i++){
-      char *zName = pList->a[i].zName;
-      int moreToFollow = i<pList->nId - 1;
+    for(i=0; i<sqlite3IdListLen(pList); i++){
+      char *zName = sqlite3IdListGet(pList,i)->zName;
+      int moreToFollow = i<sqlite3IdListLen(pList) - 1;
       if( zName==0 ) zName = "(null)";
       sqlite3TreeViewPush(&pView, moreToFollow);
       sqlite3TreeViewLine(pView, 0);
       if( pList->eU4==EU4_NONE ){
         fprintf(stdout, "%s\n", zName);
       }else if( pList->eU4==EU4_IDX ){
-        fprintf(stdout, "%s (%d)\n", zName, pList->a[i].u4.idx);
+        fprintf(stdout, "%s (%d)\n", zName, sqlite3IdListGet(pList, i)->u4.idx);
       }else{
         assert( pList->eU4==EU4_EXPR );
-        if( pList->a[i].u4.pExpr==0 ){
+        if( sqlite3IdListGet(pList,i)->u4.pExpr==0 ){
           fprintf(stdout, "%s (pExpr=NULL)\n", zName);
         }else{
           fprintf(stdout, "%s\n", zName);
-          sqlite3TreeViewPush(&pView, i<pList->nId-1);
-          sqlite3TreeViewExpr(pView, pList->a[i].u4.pExpr, 0);
+          sqlite3TreeViewPush(&pView, i<sqlite3IdListLen(pList)-1);
+          sqlite3TreeViewExpr(pView, sqlite3IdListGet(pList, i)->u4.pExpr, 0);
           sqlite3TreeViewPop(&pView);
         }
       }

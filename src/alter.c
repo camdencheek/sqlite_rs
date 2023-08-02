@@ -838,8 +838,8 @@ static void unmapColumnIdlistNames(
 ){
   int ii;
   assert( pIdList!=0 );
-  for(ii=0; ii<pIdList->nId; ii++){
-    sqlite3RenameTokenRemap(pParse, 0, (const void*)pIdList->a[ii].zName);
+  for(ii=0; ii<sqlite3IdListLen(pIdList); ii++){
+    sqlite3RenameTokenRemap(pParse, 0, (const void*)sqlite3IdListGet(pIdList, ii)->zName);
   }
 }
 
@@ -1088,8 +1088,8 @@ static void renameColumnIdlistNames(
 ){
   if( pIdList ){
     int i;
-    for(i=0; i<pIdList->nId; i++){
-      const char *zName = pIdList->a[i].zName;
+    for(i=0; i<sqlite3IdListLen(pIdList); i++){
+      const char *zName = sqlite3IdListGet(pIdList, i)->zName;
       if( 0==sqlite3_stricmp(zName, zOld) ){
         renameTokenFind(pParse, pCtx, (const void*)zName);
       }

@@ -4673,7 +4673,7 @@ IdList *sqlite3IdListAppend(Parse *pParse, IdList *pList, Token *pToken){
   }else{
     IdList *pNew;
     pNew = sqlite3DbRealloc(db, pList,
-                 sizeof(IdList) + pList->nId*sizeof(pList->a));
+                 sizeof(IdList) + sqlite3IdListLen(pList)*sizeof(IdList_item));
     if( pNew==0 ){
       sqlite3IdListDelete(db, pList);
       return 0;
