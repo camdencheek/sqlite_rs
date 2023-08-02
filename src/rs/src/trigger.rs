@@ -1,8 +1,8 @@
 use crate::expr::{Expr, ExprList};
+use crate::from::SrcList;
 use crate::id::IdList;
 use crate::schema::Schema;
 use crate::select::Select;
-use crate::src::SrcList;
 use crate::upsert::Upsert;
 use crate::vdbe::SubProgram;
 

@@ -1,8 +1,8 @@
 use libc::{c_int, c_void};
 
 use crate::expr::{Expr, ExprList};
+use crate::from::SrcList;
 use crate::index::Index;
-use crate::src::SrcList;
 
 /*
 ** An instance of the following object describes a single ON CONFLICT

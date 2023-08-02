@@ -33,7 +33,6 @@ mod rowset;
 mod savepoint;
 mod schema;
 mod select;
-mod src;
 mod table;
 mod token;
 mod token_type;
