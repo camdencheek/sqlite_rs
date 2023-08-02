@@ -150,6 +150,7 @@ typedef uint16_t WO;
                 "SqliteAff".into(),
                 "VTable".into(),
                 "SrcItem".into(),
+                "AuthContext".into(),
                 "Table".into(),
                 "Token".into(),
                 "DB".into(),

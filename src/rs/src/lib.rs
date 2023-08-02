@@ -2,7 +2,6 @@
 #![feature(allocator_api, new_uninit)]
 mod agg;
 
-#[cfg(user_authentication)]
 mod auth;
 mod autoinc;
 mod btree;

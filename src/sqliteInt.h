@@ -1142,7 +1142,6 @@ extern u32 sqlite3WhereTrace;
 /*
 ** Forward references to structures
 */
-typedef struct AuthContext AuthContext;
 typedef struct DbFixer DbFixer;
 typedef struct FuncDefHash FuncDefHash;
 typedef struct KeyClass KeyClass;
@@ -1987,15 +1986,6 @@ struct OnOrUsing {
 #else
   #define IN_SPECIAL_PARSE (pParse->eParseMode!=PARSE_MODE_NORMAL)
 #endif
-
-/*
-** An instance of the following structure can be declared on a stack and used
-** to save the Parse.zAuthContext value so that it can be restored later.
-*/
-struct AuthContext {
-  const char *zAuthContext;   /* Put saved Parse.zAuthContext here */
-  Parse *pParse;              /* The Parse structure */
-};
 
 /*
 ** Bitfield flags for P5 value in various opcodes.
