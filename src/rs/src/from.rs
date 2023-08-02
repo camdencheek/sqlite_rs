@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_char, c_int};
 
 use crate::cte::CteUse;
@@ -59,7 +60,7 @@ pub struct SrcItem {
 #[repr(C)]
 pub struct SrcItem_fg {
     /// Type of join between this table and the previous
-    jointype: u8,
+    jointype: JT,
     // TODO: pack all these fields
     // unsigned notIndexed :1;
     // unsigned isIndexedBy :1;
@@ -144,4 +145,29 @@ pub struct SrcList {
     // a VLA. We don't want SrcList to be unsized because that changes
     // the size of its pointer.
     a: [SrcItem; 1],
+}
+
+bitflags! {
+    /// Permitted values of the SrcList.a.jointype field
+    // TODO: should this be an enum instead?
+    #[repr(transparent)]
+    pub struct JT: u8 {
+        /// Any kind of inner or cross join
+        const INNER     = 0x01;
+        /// Explicit use of the CROSS keyword
+        const CROSS     = 0x02;
+        /// True for a "natural" join
+        const NATURAL   = 0x04;
+        /// Left outer join
+        const LEFT      = 0x08;
+        /// Right outer join
+        const RIGHT     = 0x10;
+        /// The "OUTER" keyword is present
+        const OUTER     = 0x20;
+        /// One of the LEFT operands of a RIGHT J
+        /// Mnemonic: Left Table Of Right Join
+        const LTORJ     = 0x40;
+        /// unknown or unsupported join type
+        const ERROR     = 0x80;
+    }
 }

@@ -170,6 +170,7 @@ typedef uint16_t WO;
                 "NameContext".into(),
                 "NC".into(),
                 "SelectDest".into(),
+                "JT".into(),
                 "WhereLoop".into(),
                 "WhereTerm".into(),
                 "WhereClause".into(),

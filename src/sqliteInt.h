@@ -1766,18 +1766,6 @@ struct OnOrUsing {
   IdList *pUsing;    /* The USING clause of a join */
 };
 
-/*
-** Permitted values of the SrcList.a.jointype field
-*/
-#define JT_INNER     0x01    /* Any kind of inner or cross join */
-#define JT_CROSS     0x02    /* Explicit use of the CROSS keyword */
-#define JT_NATURAL   0x04    /* True for a "natural" join */
-#define JT_LEFT      0x08    /* Left outer join */
-#define JT_RIGHT     0x10    /* Right outer join */
-#define JT_OUTER     0x20    /* The "OUTER" keyword is present */
-#define JT_LTORJ     0x40    /* One of the LEFT operands of a RIGHT JOIN
-                             ** Mnemonic: Left Table Of Right Join */
-#define JT_ERROR     0x80    /* unknown or unsupported join type */
 
 /*
 ** Flags appropriate for the wctrlFlags parameter of sqlite3WhereBegin()
