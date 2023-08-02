@@ -1215,18 +1215,6 @@ typedef int VList;
 #  define LOOKASIDE_SMALL         128
 #endif
 
-/*
-** A hash table for built-in function definitions.  (Application-defined
-** functions use a regular table table from hash.h.)
-**
-** Hash each FuncDef structure into one of the FuncDefHash.a[] slots.
-** Collisions are on the FuncDef.u.pHash chain.  Use the SQLITE_FUNC_HASH()
-** macro to compute a hash on the function name.
-*/
-#define SQLITE_FUNC_HASH_SZ 23
-struct FuncDefHash {
-  FuncDef *a[SQLITE_FUNC_HASH_SZ];       /* Hash table for functions */
-};
 #define SQLITE_FUNC_HASH(C,L) (((C)+(L))%SQLITE_FUNC_HASH_SZ)
 
 #ifdef SQLITE_USER_AUTHENTICATION
