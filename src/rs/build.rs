@@ -152,6 +152,7 @@ typedef uint16_t WO;
                 "SrcItem".into(),
                 "AuthContext".into(),
                 "Table".into(),
+                "SQLITE_FUNC".into(),
                 "Token".into(),
                 "DB".into(),
                 "Window".into(),

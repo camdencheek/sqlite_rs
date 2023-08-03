@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_char, c_int, c_void};
 
 use crate::{sqlite3_context, sqlite3_value};
@@ -15,7 +16,7 @@ pub struct FuncDef {
     /// Number of arguments.  -1 means unlimited
     nArg: i8,
     /// Some combination of SQLITE_FUNC_*
-    funcFlags: u32,
+    funcFlags: SQLITE_FUNC,
     /// User data parameter
     pUserData: *mut c_void,
     /// Next function with same name
@@ -70,4 +71,75 @@ pub const SQLITE_FUNC_HASH_SZ: usize = 23;
 #[repr(C)]
 pub struct FuncDefHash {
     a: [*mut FuncDef; SQLITE_FUNC_HASH_SZ],
+}
+
+bitflags! {
+    /// Possible values for FuncDef.flags.  Note that the _LENGTH and _TYPEOF
+    /// values must correspond to OPFLAG_LENGTHARG and OPFLAG_TYPEOFARG.  And
+    /// SQLITE_FUNC_CONSTANT must be the same as SQLITE_DETERMINISTIC.  There
+    /// are assert() statements in the code to verify this.
+    ///
+    /// Value constraints (enforced via assert()):
+    ///     SQLITE_FUNC_MINMAX      ==  NC_MinMaxAgg      == SF_MinMaxAgg
+    ///     SQLITE_FUNC_ANYORDER    ==  NC_OrderAgg       == SF_OrderByReqd
+    ///     SQLITE_FUNC_LENGTH      ==  OPFLAG_LENGTHARG
+    ///     SQLITE_FUNC_TYPEOF      ==  OPFLAG_TYPEOFARG
+    ///     SQLITE_FUNC_CONSTANT    ==  SQLITE_DETERMINISTIC from the API
+    ///     SQLITE_FUNC_DIRECT      ==  SQLITE_DIRECTONLY from the API
+    ///     SQLITE_FUNC_UNSAFE      ==  SQLITE_INNOCUOUS  -- opposite meanings!!!
+    ///     SQLITE_FUNC_ENCMASK   depends on SQLITE_UTF* macros in the API
+    ///
+    /// Note that even though SQLITE_FUNC_UNSAFE and SQLITE_INNOCUOUS have the
+    /// same bit value, their meanings are inverted.  SQLITE_FUNC_UNSAFE is
+    /// used internally and if set means tha the function has side effects.
+    /// SQLITE_INNOCUOUS is used by application code and means "not unsafe".
+    /// See multiple instances of tag-20230109-1.
+    #[repr(transparent)]
+    pub struct SQLITE_FUNC: u32 {
+        /// SQLITE_UTF8, SQLITE_UTF16BE or UTF16LE
+        const ENCMASK  = 0x0003;
+        /// Candidate for the LIKE optimization
+        const LIKE     = 0x0004;
+        /// Case-sensitive LIKE-type function
+        const CASE     = 0x0008;
+        /// Ephemeral.  Delete with VDBE
+        const EPHEM    = 0x0010;
+        /// sqlite3GetFuncCollSeq() might be calle
+        const NEEDCOLL = 0x0020;
+        /// Built-in length() function
+        const LENGTH   = 0x0040;
+        /// Built-in typeof() function
+        const TYPEOF   = 0x0080;
+        /// Built-in count(*) aggregate
+        const COUNT    = 0x0100;
+        // 0x0200 -- available for reuse
+        /// Built-in unlikely() function
+        const UNLIKELY = 0x0400;
+        /// Constant inputs give a constant output
+        const CONSTANT = 0x0800;
+        /// True for min() and max() aggregates
+        const MINMAX   = 0x1000;
+        /// "Slow Change". Value constant during a
+        /// single query - might change over time */
+        const SLOCHNG  = 0x2000;
+        /// Built-in testing functions
+        const TEST     = 0x4000;
+        // 0x8000 -- available for reuse */
+        /// Built-in window-only function
+        const WINDOW   = 0x00010000;
+        /// For use by NestedParse() only
+        const INTERNAL = 0x00040000;
+        /// Not for use in TRIGGERs or VIEWs
+        const DIRECT   = 0x00080000;
+        /// Result likely to have sub-type
+        const SUBTYPE  = 0x00100000;
+        /// Function has side effects
+        const UNSAFE   = 0x00200000;
+        /// Functions implemented in-line
+        const INLINE   = 0x00400000;
+        /// This is a built-in function
+        const BUILTIN  = 0x00800000;
+        /// count/min/max aggregate
+        const ANYORDER = 0x08000000;
+    }
 }

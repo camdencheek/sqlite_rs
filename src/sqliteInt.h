@@ -1308,53 +1308,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 */
 #define ConstFactorOk(P) ((P)->okConstFactor)
 
-/*
-** Possible values for FuncDef.flags.  Note that the _LENGTH and _TYPEOF
-** values must correspond to OPFLAG_LENGTHARG and OPFLAG_TYPEOFARG.  And
-** SQLITE_FUNC_CONSTANT must be the same as SQLITE_DETERMINISTIC.  There
-** are assert() statements in the code to verify this.
-**
-** Value constraints (enforced via assert()):
-**     SQLITE_FUNC_MINMAX      ==  NC_MinMaxAgg      == SF_MinMaxAgg
-**     SQLITE_FUNC_ANYORDER    ==  NC_OrderAgg       == SF_OrderByReqd
-**     SQLITE_FUNC_LENGTH      ==  OPFLAG_LENGTHARG
-**     SQLITE_FUNC_TYPEOF      ==  OPFLAG_TYPEOFARG
-**     SQLITE_FUNC_CONSTANT    ==  SQLITE_DETERMINISTIC from the API
-**     SQLITE_FUNC_DIRECT      ==  SQLITE_DIRECTONLY from the API
-**     SQLITE_FUNC_UNSAFE      ==  SQLITE_INNOCUOUS  -- opposite meanings!!!
-**     SQLITE_FUNC_ENCMASK   depends on SQLITE_UTF* macros in the API
-**
-** Note that even though SQLITE_FUNC_UNSAFE and SQLITE_INNOCUOUS have the
-** same bit value, their meanings are inverted.  SQLITE_FUNC_UNSAFE is
-** used internally and if set means tha the function has side effects.
-** SQLITE_INNOCUOUS is used by application code and means "not unsafe".
-** See multiple instances of tag-20230109-1.
-*/
-#define SQLITE_FUNC_ENCMASK  0x0003 /* SQLITE_UTF8, SQLITE_UTF16BE or UTF16LE */
-#define SQLITE_FUNC_LIKE     0x0004 /* Candidate for the LIKE optimization */
-#define SQLITE_FUNC_CASE     0x0008 /* Case-sensitive LIKE-type function */
-#define SQLITE_FUNC_EPHEM    0x0010 /* Ephemeral.  Delete with VDBE */
-#define SQLITE_FUNC_NEEDCOLL 0x0020 /* sqlite3GetFuncCollSeq() might be called*/
-#define SQLITE_FUNC_LENGTH   0x0040 /* Built-in length() function */
-#define SQLITE_FUNC_TYPEOF   0x0080 /* Built-in typeof() function */
-#define SQLITE_FUNC_COUNT    0x0100 /* Built-in count(*) aggregate */
-/*                           0x0200 -- available for reuse */
-#define SQLITE_FUNC_UNLIKELY 0x0400 /* Built-in unlikely() function */
-#define SQLITE_FUNC_CONSTANT 0x0800 /* Constant inputs give a constant output */
-#define SQLITE_FUNC_MINMAX   0x1000 /* True for min() and max() aggregates */
-#define SQLITE_FUNC_SLOCHNG  0x2000 /* "Slow Change". Value constant during a
-                                    ** single query - might change over time */
-#define SQLITE_FUNC_TEST     0x4000 /* Built-in testing functions */
-/*                           0x8000 -- available for reuse */
-#define SQLITE_FUNC_WINDOW   0x00010000 /* Built-in window-only function */
-#define SQLITE_FUNC_INTERNAL 0x00040000 /* For use by NestedParse() only */
-#define SQLITE_FUNC_DIRECT   0x00080000 /* Not for use in TRIGGERs or VIEWs */
-#define SQLITE_FUNC_SUBTYPE  0x00100000 /* Result likely to have sub-type */
-#define SQLITE_FUNC_UNSAFE   0x00200000 /* Function has side effects */
-#define SQLITE_FUNC_INLINE   0x00400000 /* Functions implemented in-line */
-#define SQLITE_FUNC_BUILTIN  0x00800000 /* This is a built-in function */
-#define SQLITE_FUNC_ANYORDER 0x08000000 /* count/min/max aggregate */
-
 /* Identifier numbers for each in-line function */
 #define INLINEFUNC_coalesce             0
 #define INLINEFUNC_implies_nonnull_row  1
