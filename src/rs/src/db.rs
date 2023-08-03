@@ -33,7 +33,7 @@ pub struct sqlite3 {
     /// Number of backends currently in use
     nDb: c_int,
     /// flags recording internal state
-    mDbFlags: u32,
+    mDbFlags: DBFLAG,
     /// flags settable by pragmas. See below
     flags: SQLITE,
     /// ROWID of most recent insert (see above)
@@ -525,4 +525,25 @@ extern "C" {
     pub fn sqlite3DbFreeNN(db: *mut sqlite3, p: *mut c_void);
     pub fn sqlite3DbNNFreeNN(db: *mut sqlite3, p: *mut c_void);
     pub fn sqlite3DbMallocSize(db: *mut sqlite3, p: *const c_void) -> c_int;
+}
+
+bitflags! {
+    /// Allowed values for sqlite3.mDbFlags
+    #[repr(transparent)]
+    pub struct DBFLAG: u32 {
+        /// Uncommitted Hash table changes
+        const SchemaChange   = 0x0001;
+        /// Preference to built-in funcs
+        const PreferBuiltin  = 0x0002;
+        /// Currently in a VACUUM
+        const Vacuum         = 0x0004;
+        /// Currently running VACUUM INTO
+        const VacuumInto     = 0x0008;
+        /// Schema is known to be valid
+        const SchemaKnownOk  = 0x0010;
+        /// Allow use of internal functions
+        const InternalFunc   = 0x0020;
+        /// No longer possible to change enc.
+        const EncodingFixed  = 0x0040;
+    }
 }

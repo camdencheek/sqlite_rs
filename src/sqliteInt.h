@@ -1259,18 +1259,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 */
 #define HI(X)  ((u64)(X)<<32)
 
-
-/*
-** Allowed values for sqlite3.mDbFlags
-*/
-#define DBFLAG_SchemaChange   0x0001  /* Uncommitted Hash table changes */
-#define DBFLAG_PreferBuiltin  0x0002  /* Preference to built-in funcs */
-#define DBFLAG_Vacuum         0x0004  /* Currently in a VACUUM */
-#define DBFLAG_VacuumInto     0x0008  /* Currently running VACUUM INTO */
-#define DBFLAG_SchemaKnownOk  0x0010  /* Schema is known to be valid */
-#define DBFLAG_InternalFunc   0x0020  /* Allow use of internal functions */
-#define DBFLAG_EncodingFixed  0x0040  /* No longer possible to change enc. */
-
 /*
 ** Bits of the sqlite3.dbOptFlags field that are used by the
 ** sqlite3_test_control(SQLITE_TESTCTRL_OPTIMIZATIONS,...) interface to
