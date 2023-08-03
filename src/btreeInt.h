@@ -257,10 +257,6 @@ typedef struct BtLock BtLock;
 #define PTF_LEAFDATA  0x04
 #define PTF_LEAF      0x08
 
-/* Candidate values for BtLock.eLock */
-#define READ_LOCK     1
-#define WRITE_LOCK    2
-
 /*
 ** Btree.inTrans may take one of the following values.
 **
@@ -284,18 +280,6 @@ typedef struct BtLock BtLock;
 #if TRANS_WRITE!=SQLITE_TXN_WRITE
 # error wrong numeric code for write-transaction
 #endif
-
-
-/*
-** Maximum depth of an SQLite B-Tree structure. Any B-Tree deeper than
-** this will be declared corrupt. This value is calculated based on a
-** maximum database size of 2^31 pages a minimum fanout of 2 for a
-** root-node and 3 for all other internal nodes.
-**
-** If a tree that appears to be taller than this is encountered, it is
-** assumed that the database is corrupt.
-*/
-#define BTCURSOR_MAX_DEPTH 20
 
 /*
 ** A cursor is a pointer to a particular entry within a particular

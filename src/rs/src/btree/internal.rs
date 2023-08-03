@@ -7,6 +7,15 @@ use super::Btree;
 
 pub type DbPage = PgHdr;
 
+/// Maximum depth of an SQLite B-Tree structure. Any B-Tree deeper than
+/// this will be declared corrupt. This value is calculated based on a
+/// maximum database size of 2^31 pages a minimum fanout of 2 for a
+/// root-node and 3 for all other internal nodes.
+///
+/// If a tree that appears to be taller than this is encountered, it is
+/// assumed that the database is corrupt.
+pub const BTCURSOR_MAX_DEPTH: usize = 20;
+
 /// An instance of this object stores information about each a single database
 /// page that has been loaded into memory.  The information in this object
 /// is derived from the raw on-disk page content.
@@ -63,6 +72,11 @@ pub struct BtLock {
     eLock: u8,          /* READ_LOCK or WRITE_LOCK */
     pNext: *mut BtLock, /* Next in BtShared.pLock list */
 }
+
+/// Candidate values for BtLock.eLock
+// TODO: make this an enum
+pub const READ_LOCK: u8 = 1;
+pub const WRITE_LOCK: u8 = 2;
 
 /// An instance of the following structure is used to hold information
 /// about a cell.  The parseCellPtr() function fills in this structure
