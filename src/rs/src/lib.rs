@@ -1,7 +1,7 @@
 #![allow(non_snake_case, unused, non_camel_case_types, non_upper_case_globals)]
 #![feature(allocator_api, new_uninit)]
-mod agg;
 
+mod agg;
 mod auth;
 mod autoinc;
 mod btree;
@@ -28,6 +28,7 @@ mod namecontext;
 mod pager;
 mod parse;
 mod pcache;
+mod record;
 mod returning;
 mod rowset;
 mod savepoint;
