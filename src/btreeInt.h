@@ -261,47 +261,6 @@ typedef struct BtLock BtLock;
 #define READ_LOCK     1
 #define WRITE_LOCK    2
 
-/* A Btree handle
-**
-** A database connection contains a pointer to an instance of
-** this object for every database file that it has open.  This structure
-** is opaque to the database connection.  The database connection cannot
-** see the internals of this structure and only deals with pointers to
-** this structure.
-**
-** For some database files, the same underlying database cache might be 
-** shared between multiple connections.  In that case, each connection
-** has it own instance of this object.  But each instance of this object
-** points to the same BtShared object.  The database cache and the
-** schema associated with the database file are all contained within
-** the BtShared object.
-**
-** All fields in this structure are accessed under sqlite3.mutex.
-** The pBt pointer itself may not be changed while there exists cursors 
-** in the referenced BtShared that point back to this Btree since those
-** cursors have to go through this Btree to find their BtShared and
-** they often do so without holding sqlite3.mutex.
-*/
-struct Btree {
-  sqlite3 *db;       /* The database connection holding this btree */
-  BtShared *pBt;     /* Sharable content of this btree */
-  u8 inTrans;        /* TRANS_NONE, TRANS_READ or TRANS_WRITE */
-  u8 sharable;       /* True if we can share pBt with another db */
-  u8 locked;         /* True if db currently has pBt locked */
-  u8 hasIncrblobCur; /* True if there are one or more Incrblob cursors */
-  int wantToLock;    /* Number of nested calls to sqlite3BtreeEnter() */
-  int nBackup;       /* Number of backup operations reading this btree */
-  u32 iBDataVersion; /* Combines with pBt->pPager->iDataVersion */
-  Btree *pNext;      /* List of other sharable Btrees from the same db */
-  Btree *pPrev;      /* Back pointer of the same list */
-#ifdef SQLITE_DEBUG
-  u64 nSeek;         /* Calls to sqlite3BtreeMovetoUnpacked() */
-#endif
-#ifndef SQLITE_OMIT_SHARED_CACHE
-  BtLock lock;       /* Object used to lock page 1 */
-#endif
-};
-
 /*
 ** Btree.inTrans may take one of the following values.
 **
