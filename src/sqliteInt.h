@@ -1611,45 +1611,6 @@ typedef int ynVar;
 #define WHERE_USE_LIMIT        0x4000 /* Use the LIMIT in cost estimates */
                         /*     0x8000    not currently used */
 
-/*
-** Allowed values for Select.selFlags.  The "SF" prefix stands for
-** "Select Flag".
-**
-** Value constraints (all checked via assert())
-**     SF_HasAgg      == NC_HasAgg
-**     SF_MinMaxAgg   == NC_MinMaxAgg     == SQLITE_FUNC_MINMAX
-**     SF_OrderByReqd == NC_OrderAgg      == SQLITE_FUNC_ANYORDER
-**     SF_FixedLimit  == WHERE_USE_LIMIT
-*/
-#define SF_Distinct      0x0000001 /* Output should be DISTINCT */
-#define SF_All           0x0000002 /* Includes the ALL keyword */
-#define SF_Resolved      0x0000004 /* Identifiers have been resolved */
-#define SF_Aggregate     0x0000008 /* Contains agg functions or a GROUP BY */
-#define SF_HasAgg        0x0000010 /* Contains aggregate functions */
-#define SF_UsesEphemeral 0x0000020 /* Uses the OpenEphemeral opcode */
-#define SF_Expanded      0x0000040 /* sqlite3SelectExpand() called on this */
-#define SF_HasTypeInfo   0x0000080 /* FROM subqueries have Table metadata */
-#define SF_Compound      0x0000100 /* Part of a compound query */
-#define SF_Values        0x0000200 /* Synthesized from VALUES clause */
-#define SF_MultiValue    0x0000400 /* Single VALUES term with multiple rows */
-#define SF_NestedFrom    0x0000800 /* Part of a parenthesized FROM clause */
-#define SF_MinMaxAgg     0x0001000 /* Aggregate containing min() or max() */
-#define SF_Recursive     0x0002000 /* The recursive part of a recursive CTE */
-#define SF_FixedLimit    0x0004000 /* nSelectRow set by a constant LIMIT */
-#define SF_MaybeConvert  0x0008000 /* Need convertCompoundSelectToSubquery() */
-#define SF_Converted     0x0010000 /* By convertCompoundSelectToSubquery() */
-#define SF_IncludeHidden 0x0020000 /* Include hidden columns in output */
-#define SF_ComplexResult 0x0040000 /* Result contains subquery or function */
-#define SF_WhereBegin    0x0080000 /* Really a WhereBegin() call.  Debug Only */
-#define SF_WinRewrite    0x0100000 /* Window function rewrite accomplished */
-#define SF_View          0x0200000 /* SELECT statement is a view */
-#define SF_NoopOrderBy   0x0400000 /* ORDER BY is ignored for this query */
-#define SF_UFSrcCheck    0x0800000 /* Check pSrc as required by UPDATE...FROM */
-#define SF_PushDown      0x1000000 /* SELECT has be modified by push-down opt */
-#define SF_MultiPart     0x2000000 /* Has multiple incompatible PARTITIONs */
-#define SF_CopyCte       0x4000000 /* SELECT statement is a copy of a CTE */
-#define SF_OrderByReqd   0x8000000 /* The ORDER BY clause may not be omitted */
-#define SF_UpdateFrom   0x10000000 /* Query originates with UPDATE FROM */
 
 /* True if S exists and has SF_NestedFrom */
 #define IsNestedFrom(S) ((S)!=0 && ((S)->selFlags&SF_NestedFrom)!=0)
@@ -1830,16 +1791,6 @@ typedef int ynVar;
 #define OPFLAG_AUXDELETE     0x04    /* OP_Delete: index in a DELETE op */
 #define OPFLAG_NOCHNG_MAGIC  0x6d    /* OP_MakeRecord: serialtype 10 is ok */
 #define OPFLAG_PREFORMAT     0x80    /* OP_Insert uses preformatted cell */ 
-
-/*
-** A trigger is either a BEFORE or an AFTER trigger.  The following constants
-** determine which.
-**
-** If there are multiple triggers, you might of some BEFORE and some AFTER.
-** In that cases, the constants below can be ORed together.
-*/
-#define TRIGGER_BEFORE  1
-#define TRIGGER_AFTER   2
 
 /*
 ** An objected used to accumulate the text of a string where we

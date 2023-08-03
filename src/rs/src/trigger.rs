@@ -6,6 +6,7 @@ use crate::select::Select;
 use crate::upsert::Upsert;
 use crate::vdbe::SubProgram;
 
+use bitflags::bitflags;
 use libc::{c_char, c_int};
 
 /// Each trigger present in the database schema is stored as an instance of
@@ -147,4 +148,17 @@ pub struct TriggerPrg {
     orconf: c_int,
     /// Masks of old.*, new.* columns accessed
     aColmask: [u32; 2],
+}
+
+bitflags! {
+    /// A trigger is either a BEFORE or an AFTER trigger.  The following constants
+    /// determine which.
+    ///
+    /// If there are multiple triggers, you might of some BEFORE and some AFTER.
+    /// In that cases, the constants below can be ORed together.
+    #[repr(transparent)]
+    pub struct TRIGGER: u8 {
+        const BEFORE = 1;
+        const AFTER = 2;
+    }
 }

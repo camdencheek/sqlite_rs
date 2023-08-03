@@ -4,6 +4,7 @@ use crate::util::log_est::LogEst;
 use crate::window::Window;
 use crate::with::With;
 
+use bitflags::bitflags;
 use libc::{c_char, c_int};
 
 /*
@@ -67,4 +68,77 @@ pub struct SelectDest {
     zAffSdst: *mut c_char,
     /// Key columns for SRT_Queue and SRT_DistQueue
     pOrderBy: *mut ExprList,
+}
+
+bitflags! {
+
+    /// Allowed values for Select.selFlags.  The "SF" prefix stands for
+    /// "Select Flag".
+    ///
+    /// Value constraints (all checked via assert())
+    ///     HasAgg      == NC_HasAgg
+    ///     MinMaxAgg   == NC_MinMaxAgg     == SQLITE_FUNC_MINMAX
+    ///     OrderByReqd == NC_OrderAgg      == SQLITE_FUNC_ANYORDER
+    ///     FixedLimit  == WHERE_USE_LIMIT
+    #[repr(transparent)]
+    pub struct SF: u32 {
+        /// Output should be DISTINCT
+        const Distinct      = 0x0000001;
+        /// Includes the ALL keyword
+        const All           = 0x0000002;
+        /// Identifiers have been resolved
+        const Resolved      = 0x0000004;
+        /// Contains agg functions or a GROUP BY
+        const Aggregate     = 0x0000008;
+        /// Contains aggregate functions
+        const HasAgg        = 0x0000010;
+        /// Uses the OpenEphemeral opcode
+        const UsesEphemeral = 0x0000020;
+        /// sqlite3SelectExpand() called on this
+        const Expanded      = 0x0000040;
+        /// FROM subqueries have Table metadata
+        const HasTypeInfo   = 0x0000080;
+        /// Part of a compound query
+        const Compound      = 0x0000100;
+        /// Synthesized from VALUES clause
+        const Values        = 0x0000200;
+        /// Single VALUES term with multiple rows
+        const MultiValue    = 0x0000400;
+        /// Part of a parenthesized FROM clause
+        const NestedFrom    = 0x0000800;
+        /// Aggregate containing min() or max()
+        const MinMaxAgg     = 0x0001000;
+        /// The recursive part of a recursive CTE
+        const Recursive     = 0x0002000;
+        /// nSelectRow set by a constant LIMIT
+        const FixedLimit    = 0x0004000;
+        /// Need convertCompoundSelectToSubquery()
+        const MaybeConvert  = 0x0008000;
+        /// By convertCompoundSelectToSubquery()
+        const Converted     = 0x0010000;
+        /// Include hidden columns in output
+        const IncludeHidden = 0x0020000;
+        /// Result contains subquery or function
+        const ComplexResult = 0x0040000;
+        /// Really a WhereBegin() call.  Debug Only
+        const WhereBegin    = 0x0080000;
+        /// Window function rewrite accomplished
+        const WinRewrite    = 0x0100000;
+        /// SELECT statement is a view
+        const View          = 0x0200000;
+        /// ORDER BY is ignored for this query
+        const NoopOrderBy   = 0x0400000;
+        /// Check pSrc as required by UPDATE...FROM
+        const UFSrcCheck    = 0x0800000;
+        /// SELECT has be modified by push-down opt
+        const PushDown      = 0x1000000;
+        /// Has multiple incompatible PARTITIONs
+        const MultiPart     = 0x2000000;
+        /// SELECT statement is a copy of a CTE
+        const CopyCte       = 0x4000000;
+        /// The ORDER BY clause may not be omitted
+        const OrderByReqd   = 0x8000000;
+        /// Query originates with UPDATE FROM
+        const UpdateFrom   = 0x10000000;
+    }
 }

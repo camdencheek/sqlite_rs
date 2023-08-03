@@ -115,7 +115,9 @@ typedef uint16_t WO;
         export: ExportConfig {
             include: vec![
                 "AggInfo".into(),
+                "SF".into(),
                 "WhereOrSet".into(),
+                "TRIGGER".into(),
                 "WhereMaskSet".into(),
                 "WherePath".into(),
                 "WhereScan".into(),
