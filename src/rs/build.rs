@@ -108,7 +108,6 @@ typedef uint16_t WO;
             ..Default::default()
         },
         enumeration: EnumConfig {
-            rename_variants: RenameRule::ScreamingSnakeCase,
             prefix_with_name: true,
             ..Default::default()
         },
@@ -123,7 +122,7 @@ typedef uint16_t WO;
                 "WhereLoopBuilder".into(),
                 "Colflag".into(),
                 "CollSeq".into(),
-                "Coltype".into(),
+                "COLTYPE".into(),
                 "CellInfo".into(),
                 "Bitvec".into(),
                 "Bitvec_u".into(),
@@ -147,7 +146,7 @@ typedef uint16_t WO;
                 "Parse".into(),
                 "Savepoint".into(),
                 "Select".into(),
-                "SqliteAff".into(),
+                "SQLITE_AFF".into(),
                 "VTable".into(),
                 "SrcItem".into(),
                 "AuthContext".into(),
@@ -172,6 +171,7 @@ typedef uint16_t WO;
                 "FuncDefHash".into(),
                 "NameContext".into(),
                 "NC".into(),
+                "SQLITE_SO".into(),
                 "SelectDest".into(),
                 "JT".into(),
                 "WhereLoop".into(),

@@ -9,7 +9,7 @@ use crate::table::Table;
 use crate::token_type::TK;
 use crate::util::strings::sqlite3Dequote;
 use crate::window::Window;
-use crate::{agg::AggInfo, global::SqliteAff};
+use crate::{agg::AggInfo, global::SQLITE_AFF};
 use bitflags::bitflags;
 use libc::{c_char, c_int};
 
@@ -335,10 +335,10 @@ impl Expr {
                 | TK::SELECT_COLUMN
                 | TK::VECTOR => {
                     let aff = expr.as_ref().unwrap().affinity();
-                    if aff >= SqliteAff::Numeric as i8 {
+                    if aff >= SQLITE_AFF::NUMERIC as i8 {
                         return 0x05;
                     }
-                    if aff == SqliteAff::Text as i8 {
+                    if aff == SQLITE_AFF::TEXT as i8 {
                         return 0x06;
                     }
                     return 0x07;
@@ -850,4 +850,15 @@ pub enum ENAME {
     SPAN = 1,
     /// "DB.TABLE.NAME" for the result set
     TAB = 2,
+}
+
+/// A sort order can be either ASC or DESC.
+#[repr(i32)]
+pub enum SQLITE_SO {
+    /// Sort in ascending order
+    ASC = 0,
+    /// Sort in ascending order
+    DESC = 1,
+    /// No sort order specified
+    UNDEFINED = -1,
 }

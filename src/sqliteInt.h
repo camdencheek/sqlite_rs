@@ -1428,23 +1428,8 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
    0, 0, xFunc, 0, 0, 0, #zName, {0} }
 
 
-/*
-** A sort order can be either ASC or DESC.
-*/
-#define SQLITE_SO_ASC       0  /* Sort in ascending order */
-#define SQLITE_SO_DESC      1  /* Sort in ascending order */
-#define SQLITE_SO_UNDEFINED -1 /* No sort order specified */
-
-
 // TODO: move this to rust
 #define sqlite3IsNumericAffinity(X)  ((X)>=SQLITE_AFF_NUMERIC)
-
-
-/* Allowed values for VTable.eVtabRisk
-*/
-#define SQLITE_VTABRISK_Low          0
-#define SQLITE_VTABRISK_Normal       1
-#define SQLITE_VTABRISK_High         2
 
 /*
 ** Allowed values for Table.eTabType

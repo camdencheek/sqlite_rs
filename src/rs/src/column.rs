@@ -129,14 +129,14 @@ pub unsafe extern "C" fn sqlite3ColumnColl(col: &Column) -> *const c_char {
 ** Adjust the SQLITE_N_STDTYPE value if adding or removing entries.
 */
 #[repr(C)]
-pub enum Coltype {
-    Custom = 0,
-    Any = 1,
-    Blob = 2,
-    Int = 3,
-    Integer = 4,
-    Real = 5,
-    Text = 6,
+pub enum COLTYPE {
+    CUSTOM = 0,
+    ANY = 1,
+    BLOB = 2,
+    INT = 3,
+    INTEGER = 4,
+    REAL = 5,
+    TEXT = 6,
 }
 
 bitflags! {

@@ -58,7 +58,7 @@ pub struct VTable {
     /// True if constraints are supported
     bConstraint: u8,
     /// Riskiness of allowing hacker access
-    eVtabRisk: u8,
+    eVtabRisk: SQLITE_VTABRISK,
     /// Depth of the SAVEPOINT stack
     iSavepoint: c_int,
     /// Next in linked list (see above)
@@ -80,4 +80,12 @@ pub struct VtabCtx {
     pPrior: *mut VtabCtx,
     /// True after sqlite3_declare_vtab() is called
     bDeclared: c_int,
+}
+
+/// Allowed values for VTable.eVtabRisk
+#[repr(u8)]
+pub enum SQLITE_VTABRISK {
+    Low = 0,
+    Normal = 1,
+    High = 2,
 }

@@ -1,6 +1,6 @@
 use crate::expr::ExprList;
 use crate::fkey::FKey;
-use crate::global::SqliteAff;
+use crate::global::SQLITE_AFF;
 use crate::index::Index;
 use crate::schema::Schema;
 use crate::select::Select;
@@ -28,7 +28,7 @@ pub struct Table {
     /*   ... also used as column name list in a VIEW */
     tnum: Pgno,         /* Root BTree page for this table */
     nTabRef: u32,       /* Number of pointers to this Table */
-    tabFlags: TF,      /* Mask of TF_* values */
+    tabFlags: TF,       /* Mask of TF_* values */
     iPKey: i16,         /* If not negative, use aCol[iPKey] as the rowid */
     pub nCol: i16,      /* Number of columns in this table */
     nNVCol: i16,        /* Number of columns that are not VIRTUAL */
@@ -49,7 +49,7 @@ pub struct Table {
 impl Table {
     pub unsafe fn column_affinity(&self, col: c_int) -> c_char {
         if col < 0 || never!(col >= self.nCol as c_int) {
-            return SqliteAff::Integer as c_char;
+            return SQLITE_AFF::INTEGER as c_char;
         }
 
         (*self.aCol.add(col as usize)).affinity

@@ -77,14 +77,14 @@ impl StdType {
     }
 
     /// The affinity associated the type
-    pub const fn affinity(&self) -> SqliteAff {
+    pub const fn affinity(&self) -> SQLITE_AFF {
         match self {
-            StdType::Any => SqliteAff::Numeric,
-            StdType::Blob => SqliteAff::Blob,
-            StdType::Int => SqliteAff::Integer,
-            StdType::Integer => SqliteAff::Integer,
-            StdType::Real => SqliteAff::Real,
-            StdType::Text => SqliteAff::Text,
+            StdType::Any => SQLITE_AFF::NUMERIC,
+            StdType::Blob => SQLITE_AFF::BLOB,
+            StdType::Int => SQLITE_AFF::INTEGER,
+            StdType::Integer => SQLITE_AFF::INTEGER,
+            StdType::Real => SQLITE_AFF::REAL,
+            StdType::Text => SQLITE_AFF::TEXT,
         }
     }
 }
@@ -105,17 +105,17 @@ pub const SQLITE_N_STDTYPE: u8 = 6;
 /// Note also that the numeric types are grouped together so that testing
 /// for a numeric type is a single comparison.  And the BLOB type is first.
 #[repr(i8)]
-pub enum SqliteAff {
-    None = 0x40,    /* '@' */
-    Blob = 0x41,    /* 'A' */
-    Text = 0x42,    /* 'B' */
-    Numeric = 0x43, /* 'C' */
-    Integer = 0x44, /* 'D' */
-    Real = 0x45,    /* 'E' */
-    Flexnum = 0x46, /* 'F' */
+pub enum SQLITE_AFF {
+    NONE = 0x40,    /* '@' */
+    BLOB = 0x41,    /* 'A' */
+    TEXT = 0x42,    /* 'B' */
+    NUMERIC = 0x43, /* 'C' */
+    INTEGER = 0x44, /* 'D' */
+    REAL = 0x45,    /* 'E' */
+    FLEXNUM = 0x46, /* 'F' */
 }
 
-impl Into<i8> for SqliteAff {
+impl Into<i8> for SQLITE_AFF {
     fn into(self) -> i8 {
         self as i8
     }
