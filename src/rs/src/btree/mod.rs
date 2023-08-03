@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use libc::{c_int, c_void};
 
 use crate::{
@@ -132,7 +133,7 @@ pub struct BtShared {
     /// Desired number of extra bytes per page
     nReserveWanted: u8,
     /// Boolean parameters.  See BTS_* macros below
-    btsFlags: u16,
+    btsFlags: BTS,
     /// Maximum local payload in non-LEAFDATA tables
     maxLocal: u16,
     /// Minimum local payload in non-LEAFDATA tables
@@ -216,4 +217,29 @@ pub struct BtreePayload {
     nMem: u16,                /* Number of aMem[] value.  Might be zero */
     nData: c_int,             /* Size of pData.  0 if none. */
     nZero: c_int,             /* Extra zero data appended after pData,nData */
+}
+
+bitflags! {
+    /// Allowed values for BtShared.btsFlags
+    #[repr(transparent)]
+    pub struct BTS: u16 {
+        /// Underlying file is readonly
+        const READ_ONLY        = 0x0001;
+        /// Page size can no longer be changed
+        const PAGESIZE_FIXED   = 0x0002;
+        /// PRAGMA secure_delete is enabled
+        const SECURE_DELETE    = 0x0004;
+        /// Overwrite deleted content with zeros
+        const OVERWRITE        = 0x0008;
+        /// Combination of the previous two
+        const FAST_SECURE      = 0x000c;
+        /// Database was empty at trans start
+        const INITIALLY_EMPTY  = 0x0010;
+        /// Do not open write-ahead-log files
+        const NO_WAL           = 0x0020;
+        /// pWriter has an exclusive lock
+        const EXCLUSIVE        = 0x0040;
+        /// Waiting for read-locks to clear
+        const PENDING          = 0x0080;
+    }
 }
