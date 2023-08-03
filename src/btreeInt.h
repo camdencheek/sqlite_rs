@@ -283,53 +283,6 @@ typedef struct BtLock BtLock;
 
 #define BTCURSOR_FIRST_UNINIT pBt   /* Name of first uninitialized field */
 
-/*
-** Legal values for BtCursor.curFlags
-*/
-#define BTCF_WriteFlag    0x01   /* True if a write cursor */
-#define BTCF_ValidNKey    0x02   /* True if info.nKey is valid */
-#define BTCF_ValidOvfl    0x04   /* True if aOverflow is valid */
-#define BTCF_AtLast       0x08   /* Cursor is pointing ot the last entry */
-#define BTCF_Incrblob     0x10   /* True if an incremental I/O handle */
-#define BTCF_Multiple     0x20   /* Maybe another cursor on the same btree */
-#define BTCF_Pinned       0x40   /* Cursor is busy and cannot be moved */
-
-/*
-** Potential values for BtCursor.eState.
-**
-** CURSOR_INVALID:
-**   Cursor does not point to a valid entry. This can happen (for example) 
-**   because the table is empty or because BtreeCursorFirst() has not been
-**   called.
-**
-** CURSOR_VALID:
-**   Cursor points to a valid entry. getPayload() etc. may be called.
-**
-** CURSOR_SKIPNEXT:
-**   Cursor is valid except that the Cursor.skipNext field is non-zero
-**   indicating that the next sqlite3BtreeNext() or sqlite3BtreePrevious()
-**   operation should be a no-op.
-**
-** CURSOR_REQUIRESEEK:
-**   The table that this cursor was opened on still exists, but has been 
-**   modified since the cursor was last used. The cursor position is saved
-**   in variables BtCursor.pKey and BtCursor.nKey. When a cursor is in 
-**   this state, restoreCursorPosition() can be called to attempt to
-**   seek the cursor to the saved position.
-**
-** CURSOR_FAULT:
-**   An unrecoverable error (an I/O error or a malloc failure) has occurred
-**   on a different connection that shares the BtShared cache with this
-**   cursor.  The error has left the cache in an inconsistent state.
-**   Do nothing else with this cursor.  Any attempt to use the cursor
-**   should return the error code stored in BtCursor.skipNext
-*/
-#define CURSOR_VALID             0
-#define CURSOR_INVALID           1
-#define CURSOR_SKIPNEXT          2
-#define CURSOR_REQUIRESEEK       3
-#define CURSOR_FAULT             4
-
 /* 
 ** The database page the PENDING_BYTE occupies. This page is never used.
 */

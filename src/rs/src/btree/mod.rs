@@ -104,9 +104,9 @@ pub const BTCURSOR_MAX_DEPTH_MINUS_ONE: usize = BTCURSOR_MAX_DEPTH - 1;
 #[repr(C)]
 pub struct BtCursor {
     /// One of the CURSOR_XXX constants (see below)
-    eState: u8,
+    eState: CURSOR,
     /// zero or more BTCF_* flags defined below
-    curFlags: u8,
+    curFlags: BTCF,
     /// Flags to send to sqlite3PagerGet()
     curPagerFlags: u8,
     /// As configured by CursorSetHints()
@@ -147,6 +147,54 @@ pub struct BtCursor {
     pPage: *mut MemPage,
     /// Stack of parents of current page
     apPage: [*mut MemPage; BTCURSOR_MAX_DEPTH_MINUS_ONE],
+}
+
+bitflags! {
+    /// Legal values for BtCursor.curFlags
+    #[repr(transparent)]
+    pub struct BTCF: u8 {
+        /// True if a write cursor
+        const WriteFlag    = 0x01;
+        /// True if info.nKey is valid
+        const ValidNKey    = 0x02;
+        /// True if aOverflow is valid
+        const ValidOvfl    = 0x04;
+        /// Cursor is pointing ot the last entry
+        const AtLast       = 0x08;
+        /// True if an incremental I/O handle
+        const Incrblob     = 0x10;
+        /// Maybe another cursor on the same btree
+        const Multiple     = 0x20;
+        /// Cursor is busy and cannot be moved
+        const Pinned       = 0x40;
+    }
+}
+
+/// Potential values for BtCursor.eState.
+#[repr(u8)]
+pub enum CURSOR {
+    /// Cursor points to a valid entry. getPayload() etc. may be called.
+    VALID = 0,
+    /// Cursor does not point to a valid entry. This can happen (for example)
+    /// because the table is empty or because BtreeCursorFirst() has not been
+    /// called.
+    INVALID = 1,
+    /// Cursor is valid except that the Cursor.skipNext field is non-zero
+    /// indicating that the next sqlite3BtreeNext() or sqlite3BtreePrevious()
+    /// operation should be a no-op.
+    SKIPNEXT = 2,
+    /// The table that this cursor was opened on still exists, but has been
+    /// modified since the cursor was last used. The cursor position is saved
+    /// in variables BtCursor.pKey and BtCursor.nKey. When a cursor is in
+    /// this state, restoreCursorPosition() can be called to attempt to
+    /// seek the cursor to the saved position.
+    REQUIRESEEK = 3,
+    /// An unrecoverable error (an I/O error or a malloc failure) has occurred
+    /// on a different connection that shares the BtShared cache with this
+    /// cursor.  The error has left the cache in an inconsistent state.
+    /// Do nothing else with this cursor.  Any attempt to use the cursor
+    /// should return the error code stored in BtCursor.skipNext
+    FAULT = 4,
 }
 
 /// An instance of this object represents a single database file.
