@@ -47,50 +47,6 @@
 #endif
 
 /*
-** The WHERE clause processing routine has two halves.  The
-** first part does the start of the WHERE loop and the second
-** half does the tail of the WHERE loop.  An instance of
-** this structure is returned by the first half and passed
-** into the second half to give some continuity.
-**
-** An instance of this object holds the complete state of the query
-** planner.
-*/
-struct WhereInfo {
-  Parse *pParse;            /* Parsing and code generating context */
-  SrcList *pTabList;        /* List of tables in the join */
-  ExprList *pOrderBy;       /* The ORDER BY clause or NULL */
-  ExprList *pResultSet;     /* Result set of the query */
-#if WHERETRACE_ENABLED
-  Expr *pWhere;             /* The complete WHERE clause */
-#endif
-  Select *pSelect;          /* The entire SELECT statement containing WHERE */
-  int aiCurOnePass[2];      /* OP_OpenWrite cursors for the ONEPASS opt */
-  int iContinue;            /* Jump here to continue with next record */
-  int iBreak;               /* Jump here to break out of the loop */
-  int savedNQueryLoop;      /* pParse->nQueryLoop outside the WHERE loop */
-  u16 wctrlFlags;           /* Flags originally passed to sqlite3WhereBegin() */
-  LogEst iLimit;            /* LIMIT if wctrlFlags has WHERE_USE_LIMIT */
-  u8 nLevel;                /* Number of nested loop */
-  i8 nOBSat;                /* Number of ORDER BY terms satisfied by indices */
-  u8 eOnePass;              /* ONEPASS_OFF, or _SINGLE, or _MULTI */
-  u8 eDistinct;             /* One of the WHERE_DISTINCT_* values */
-  unsigned bDeferredSeek :1;   /* Uses OP_DeferredSeek */
-  unsigned untestedTerms :1;   /* Not all WHERE terms resolved by outer loop */
-  unsigned bOrderedInnerLoop:1;/* True if only the inner-most loop is ordered */
-  unsigned sorted :1;          /* True if really sorted (not just grouped) */
-  LogEst nRowOut;           /* Estimated number of output rows */
-  int iTop;                 /* The very beginning of the WHERE loop */
-  int iEndWhere;            /* End of the WHERE clause itself */
-  WhereLoop *pLoops;        /* List of all WhereLoop objects */
-  WhereMemBlock *pMemToFree;/* Memory to free when this object destroyed */
-  Bitmask revMask;          /* Mask of ORDER BY terms that need reversing */
-  WhereClause sWC;          /* Decomposition of the WHERE clause */
-  WhereMaskSet sMaskSet;    /* Map cursor numbers to bitmasks */
-  WhereLevel a[1];          /* Information about each nest loop in WHERE */
-};
-
-/*
 ** Private interfaces - callable only by other where.c routines.
 **
 ** where.c:

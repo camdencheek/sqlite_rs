@@ -4,8 +4,11 @@ use bitflags::bitflags;
 use libc::{c_char, c_int, c_uchar, c_uint};
 
 use crate::{
-    expr::Expr,
+    expr::{Expr, ExprList},
+    from::SrcList,
     index::Index,
+    parse::Parse,
+    select::Select,
     token_type::TK,
     util::{
         bitmask::{self, Bitmask, BMS},
@@ -584,12 +587,85 @@ pub struct WhereMaskSet {
     ix: [c_int; 64],
 }
 
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
+/// The WHERE clause processing routine has two halves.  The
+/// first part does the start of the WHERE loop and the second
+/// half does the tail of the WHERE loop.  An instance of
+/// this structure is returned by the first half and passed
+/// into the second half to give some continuity.
+///
+/// An instance of this object holds the complete state of the query
+/// planner.
+#[repr(C)]
 pub struct WhereInfo {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    /// Parsing and code generating context
+    pParse: *mut Parse,
+    /// List of tables in the join
+    pTabList: *mut SrcList,
+    /// The ORDER BY clause or NULL
+    pOrderBy: *mut ExprList,
+    /// Result set of the query
+    pResultSet: *mut ExprList,
+
+    /// The complete WHERE clause
+    #[cfg(wheretrace_enabled)]
+    pWhere: *mut Expr,
+
+    /// The entire SELECT statement containing WHERE
+    pSelect: *mut Select,
+    /// OP_OpenWrite cursors for the ONEPASS opt
+    aiCurOnePass: [c_int; 2],
+    /// Jump here to continue with next record
+    iContinue: c_int,
+    /// Jump here to break out of the loop
+    iBreak: c_int,
+    /// pParse->nQueryLoop outside the WHERE loop
+    savedNQueryLoop: c_int,
+    /// Flags originally passed to sqlite3WhereBegin()
+    wctrlFlags: u16,
+    /// LIMIT if wctrlFlags has WHERE_USE_LIMIT
+    iLimit: LogEst,
+    /// Number of nested loop
+    nLevel: u8,
+    /// Number of ORDER BY terms satisfied by indices
+    nOBSat: i8,
+    /// ONEPASS_OFF, or _SINGLE, or _MULTI
+    eOnePass: u8,
+    /// One of the WHERE_DISTINCT_* values
+    eDistinct: u8,
+    // TODO: pack these fields
+    // unsigned bDeferredSeek :1;   /* Uses OP_DeferredSeek */
+    // unsigned untestedTerms :1;   /* Not all WHERE terms resolved by outer loop */
+    // unsigned bOrderedInnerLoop:1;/* True if only the inner-most loop is ordered */
+    // unsigned sorted :1;          /* True if really sorted (not just grouped) */
+    /// Uses OP_DeferredSeek
+    bDeferredSeek: u8,
+    /// Not all WHERE terms resolved by outer loop
+    untestedTerms: u8,
+    /// True if only the inner-most loop is ordered
+    bOrderedInnerLoop: u8,
+    /// True if really sorted (not just grouped)
+    sorted: u8,
+    /// Estimated number of output rows
+    nRowOut: LogEst,
+    /// The very beginning of the WHERE loop
+    iTop: c_int,
+    /// End of the WHERE clause itself
+    iEndWhere: c_int,
+    /// List of all WhereLoop objects
+    pLoops: *mut WhereLoop,
+    /// Memory to free when this object destroyed
+    pMemToFree: *mut WhereMemBlock,
+    /// Mask of ORDER BY terms that need reversing
+    revMask: Bitmask,
+    /// Decomposition of the WHERE clause
+    sWC: WhereClause,
+    /// Map cursor numbers to bitmasks
+    sMaskSet: WhereMaskSet,
+
+    /// Information about each nest loop in WHERE
+    // NOTE: actually a VLA, but we don't want the pointer
+    // to this type to be double-width
+    a: [WhereLevel; 1],
 }
 
 bitflags! {
