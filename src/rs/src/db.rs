@@ -81,7 +81,7 @@ pub struct sqlite3 {
     /// Number of pending OP_SqlExec opcodes
     nSqlExec: u8,
     /// Current condition of the connection
-    eOpenState: u8,
+    eOpenState: SQLITE_STATE,
     /// Pagesize after VACUUM if >0
     nextPagesize: c_int,
     /// Value returned by sqlite3_changes()
@@ -546,4 +546,23 @@ bitflags! {
         /// No longer possible to change enc.
         const EncodingFixed  = 0x0040;
     }
+}
+
+/// Possible values for the sqlite3.eOpenState field.
+/// The numbers are randomly selected such that a minimum of three bits must
+/// change to convert any number to another or to zero
+#[repr(u8)]
+pub enum SQLITE_STATE {
+    /// Database is open
+    OPEN = 0x76,
+    /// Database is closed
+    CLOSED = 0xce,
+    /// Error and awaiting close
+    SICK = 0xba,
+    /// Database currently in use
+    BUSY = 0x6d,
+    /// An SQLITE_MISUSE error occurred
+    ERROR = 0xd5,
+    /// Close with last statement close
+    ZOMBIE = 0xa7,
 }
