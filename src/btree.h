@@ -33,14 +33,6 @@
 #define BTREE_AUTOVACUUM_FULL 1        /* Do full auto-vacuum */
 #define BTREE_AUTOVACUUM_INCR 2        /* Incremental vacuum */
 
-/*
-** Forward declarations of structure
-*/
-typedef struct Btree Btree;
-typedef struct BtCursor BtCursor;
-typedef struct BtShared BtShared;
-typedef struct BtreePayload BtreePayload;
-
 
 int sqlite3BtreeOpen(
   sqlite3_vfs *pVfs,       /* VFS to use with this b-tree */

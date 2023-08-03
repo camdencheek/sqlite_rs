@@ -1134,20 +1134,14 @@ extern u32 sqlite3WhereTrace;
 ** Forward references to structures
 */
 typedef struct DbFixer DbFixer;
-typedef struct FuncDefHash FuncDefHash;
 typedef struct KeyClass KeyClass;
-typedef struct NameContext NameContext;
 typedef struct PreUpdate PreUpdate;
 typedef struct PrintfArguments PrintfArguments;
 typedef struct SQLiteThread SQLiteThread;
-typedef struct SrcList SrcList;
 typedef struct sqlite3_str StrAccum; /* Internal alias for sqlite3_str */
 typedef struct TableLock TableLock;
 typedef struct TreeView TreeView;
-typedef struct UnpackedRecord UnpackedRecord;
 typedef struct Walker Walker;
-typedef struct WhereInfo WhereInfo;
-typedef struct With With;
 
 /* A VList object records a mapping between parameters/variables/wildcards
 ** in the SQL statement (such as $abc, @pqr, or :xyz) and the integer
