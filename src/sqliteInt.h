@@ -868,15 +868,6 @@ typedef INT8_TYPE i8;              /* 1-byte signed integer */
 #endif
 
 /*
-** Constants for the largest and smallest possible 64-bit signed integers.
-** These macros are designed to work correctly on both 32-bit and 64-bit
-** compilers.
-*/
-#define LARGEST_INT64  (0xffffffff|(((i64)0x7fffffff)<<32))
-#define LARGEST_UINT64 (0xffffffff|(((u64)0xffffffff)<<32))
-#define SMALLEST_INT64 (((i64)-1) - LARGEST_INT64)
-
-/*
 ** Round up a number to the next larger multiple of 8.  This is used
 ** to force 8-byte alignment on 64-bit architectures.
 **

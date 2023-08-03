@@ -2,6 +2,14 @@ use libc::{c_char, c_int};
 
 use crate::global::SqliteChar;
 
+/// Constants for the largest and smallest possible 64-bit signed integers.
+/// These macros are designed to work correctly on both 32-bit and 64-bit
+/// compilers.
+// TODO: get rid of these once they're no longer used
+pub const LARGEST_INT64: i64 = i64::MAX;
+pub const LARGEST_UINT64: u64 = u64::MAX;
+pub const SMALLEST_INT64: i64 = i64::MIN;
+
 /// Translate a single byte of Hex into an integer.
 /// This routine only works if h really is a valid hexadecimal
 /// character:  0..9a..fA..F
