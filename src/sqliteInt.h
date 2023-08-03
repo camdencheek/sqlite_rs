@@ -1137,7 +1137,6 @@ typedef struct DbFixer DbFixer;
 typedef struct FuncDefHash FuncDefHash;
 typedef struct KeyClass KeyClass;
 typedef struct NameContext NameContext;
-typedef struct OnOrUsing OnOrUsing;
 typedef struct PreUpdate PreUpdate;
 typedef struct PrintfArguments PrintfArguments;
 typedef struct SQLiteThread SQLiteThread;
@@ -1520,14 +1519,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 #define KEYINFO_ORDER_DESC    0x01    /* DESC sort order */
 #define KEYINFO_ORDER_BIGNULL 0x02    /* NULL is larger than any other value */
 
-/*
-** Allowed values for Index.idxType
-*/
-#define SQLITE_IDXTYPE_APPDEF      0   /* Created using CREATE INDEX */
-#define SQLITE_IDXTYPE_UNIQUE      1   /* Implements a UNIQUE constraint */
-#define SQLITE_IDXTYPE_PRIMARYKEY  2   /* Is the PRIMARY KEY for the table */
-#define SQLITE_IDXTYPE_IPK         3   /* INTEGER PRIMARY KEY index */
-
 /* Return true if index X is a PRIMARY KEY index */
 #define IsPrimaryKeyIndex(X)  ((X)->idxType==SQLITE_IDXTYPE_PRIMARYKEY)
 
@@ -1593,16 +1584,6 @@ typedef int ynVar;
     ExprHasProperty((p), EP_WinFunc) && p->y.pWin->eFrmType!=TK_FILTER \
  )
 #endif
-
-/*
-** The OnOrUsing object represents either an ON clause or a USING clause.
-** It can never be both at the same time, but it can be neither.
-*/
-struct OnOrUsing {
-  Expr *pOn;         /* The ON clause of a join */
-  IdList *pUsing;    /* The USING clause of a join */
-};
-
 
 /*
 ** Flags appropriate for the wctrlFlags parameter of sqlite3WhereBegin()

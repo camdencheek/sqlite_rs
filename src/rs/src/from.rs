@@ -171,3 +171,13 @@ bitflags! {
         const ERROR     = 0x80;
     }
 }
+
+/// The OnOrUsing object represents either an ON clause or a USING clause.
+/// It can never be both at the same time, but it can be neither.
+#[repr(C)]
+pub struct OnOrUsing {
+    /// The ON clause of a join
+    pOn: *mut Expr,
+    /// The USING clause of a join
+    pUsing: *mut IdList,
+}

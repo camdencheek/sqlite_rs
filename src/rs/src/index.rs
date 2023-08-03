@@ -171,3 +171,16 @@ pub struct IndexSample {
     anLt: *mut tRowcnt,  /* Est. number of rows where key is less than this sample */
     anDLt: *mut tRowcnt, /* Est. number of distinct keys less than this sample */
 }
+
+/// Allowed values for Index.idxType
+#[repr(u8)]
+pub enum SQLITE_IDXTYPE {
+    /// Created using CREATE INDEX
+    APPDEF = 0,
+    /// Implements a UNIQUE constraint
+    UNIQUE = 1,
+    /// Is the PRIMARY KEY for the table
+    PRIMARYKEY = 2,
+    /// INTEGER PRIMARY KEY index
+    IPK = 3,
+}
