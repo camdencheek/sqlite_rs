@@ -774,3 +774,16 @@ bitflags! {
         const SINGLE = 0x01ff;
     }
 }
+
+/// Allowed return values from sqlite3WhereIsDistinct()
+#[repr(u8)]
+pub enum WHERE_DISTINCT {
+    /// DISTINCT keyword not used
+    NOOP = 0,
+    /// No duplicates
+    UNIQUE = 1,
+    /// All duplicates are adjacent
+    ORDERED = 2,
+    /// Duplicates are scattered
+    UNORDERED = 3,
+}

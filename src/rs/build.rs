@@ -122,6 +122,7 @@ typedef uint16_t WO;
                 "WhereLoopBuilder".into(),
                 "OnOrUsing".into(),
                 "Colflag".into(),
+                "WHERE_DISTINCT".into(),
                 "CollSeq".into(),
                 "COLTYPE".into(),
                 "TABTYP".into(),

@@ -1611,14 +1611,6 @@ typedef int ynVar;
 #define WHERE_USE_LIMIT        0x4000 /* Use the LIMIT in cost estimates */
                         /*     0x8000    not currently used */
 
-/* Allowed return values from sqlite3WhereIsDistinct()
-*/
-#define WHERE_DISTINCT_NOOP      0  /* DISTINCT keyword not used */
-#define WHERE_DISTINCT_UNIQUE    1  /* No duplicates */
-#define WHERE_DISTINCT_ORDERED   2  /* All duplicates are adjacent */
-#define WHERE_DISTINCT_UNORDERED 3  /* Duplicates are scattered */
-
-
 /*
 ** Allowed values for Select.selFlags.  The "SF" prefix stands for
 ** "Select Flag".
