@@ -1308,15 +1308,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 */
 #define ConstFactorOk(P) ((P)->okConstFactor)
 
-/* Identifier numbers for each in-line function */
-#define INLINEFUNC_coalesce             0
-#define INLINEFUNC_implies_nonnull_row  1
-#define INLINEFUNC_expr_implies_expr    2
-#define INLINEFUNC_expr_compare         3      
-#define INLINEFUNC_affinity             4
-#define INLINEFUNC_iif                  5
-#define INLINEFUNC_sqlite_offset        6
-#define INLINEFUNC_unlikely            99  /* Default case */
 
 /*
 ** The following three macros, FUNCTION(), LIKEFUNC() and AGGREGATE() are

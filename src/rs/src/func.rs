@@ -143,3 +143,14 @@ bitflags! {
         const ANYORDER = 0x08000000;
     }
 }
+
+/// Identifier numbers for each in-line function
+// TODO: convert these to an enum
+pub const INLINEFUNC_coalesce: u32 = 0;
+pub const INLINEFUNC_implies_nonnull_row: u32 = 1;
+pub const INLINEFUNC_expr_implies_expr: u32 = 2;
+pub const INLINEFUNC_expr_compare: u32 = 3;
+pub const INLINEFUNC_affinity: u32 = 4;
+pub const INLINEFUNC_iif: u32 = 5;
+pub const INLINEFUNC_sqlite_offset: u32 = 6;
+pub const INLINEFUNC_unlikely: u32 = 99; // Default case
