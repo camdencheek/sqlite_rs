@@ -123,6 +123,7 @@ typedef uint16_t WO;
                 "Colflag".into(),
                 "CollSeq".into(),
                 "COLTYPE".into(),
+                "TABTYP".into(),
                 "CellInfo".into(),
                 "Bitvec".into(),
                 "Bitvec_u".into(),

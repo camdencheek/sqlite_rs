@@ -1431,13 +1431,6 @@ void sqlite3CryptFunc(sqlite3_context*,int,sqlite3_value**);
 // TODO: move this to rust
 #define sqlite3IsNumericAffinity(X)  ((X)>=SQLITE_AFF_NUMERIC)
 
-/*
-** Allowed values for Table.eTabType
-*/
-#define TABTYP_NORM      0     /* Ordinary table */
-#define TABTYP_VTAB      1     /* Virtual table */
-#define TABTYP_VIEW      2     /* A view */
-
 #define IsView(X)           ((X)->eTabType==TABTYP_VIEW)
 #define IsOrdinaryTable(X)  ((X)->eTabType==TABTYP_NORM)
 

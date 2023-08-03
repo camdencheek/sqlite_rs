@@ -38,8 +38,8 @@ pub struct Table {
     #[cfg(enable_costmult)]
     costMult: LogEst, /* Cost multiplier for using this table */
 
-    keyConf: u8,  /* What to do in case of uniqueness conflict on iPKey */
-    eTabType: u8, /* 0: normal, 1: virtual, 2: view */
+    keyConf: u8,      /* What to do in case of uniqueness conflict on iPKey */
+    eTabType: TABTYP, /* 0: normal, 1: virtual, 2: view */
 
     u: Table_u,
     pTrigger: *mut Trigger, /* List of triggers on this object */
@@ -137,4 +137,15 @@ bitflags! {
         /// STRICT mode
         const Strict = 0x00010000;
     }
+}
+
+/// Allowed values for Table.eTabType
+#[repr(u8)]
+pub enum TABTYP {
+    /// Ordinary table
+    NORM = 0,
+    /// Virtual table
+    VTAB = 1,
+    /// A view
+    VIEW = 2,
 }
