@@ -281,59 +281,7 @@ typedef struct BtLock BtLock;
 # error wrong numeric code for write-transaction
 #endif
 
-/*
-** A cursor is a pointer to a particular entry within a particular
-** b-tree within a database file.
-**
-** The entry is identified by its MemPage and the index in
-** MemPage.aCell[] of the entry.
-**
-** A single database file can be shared by two more database connections,
-** but cursors cannot be shared.  Each cursor is associated with a
-** particular database connection identified BtCursor.pBtree.db.
-**
-** Fields in this structure are accessed under the BtShared.mutex
-** found at self->pBt->mutex. 
-**
-** skipNext meaning:
-** The meaning of skipNext depends on the value of eState:
-**
-**   eState            Meaning of skipNext
-**   VALID             skipNext is meaningless and is ignored
-**   INVALID           skipNext is meaningless and is ignored
-**   SKIPNEXT          sqlite3BtreeNext() is a no-op if skipNext>0 and
-**                     sqlite3BtreePrevious() is no-op if skipNext<0.
-**   REQUIRESEEK       restoreCursorPosition() restores the cursor to
-**                     eState=SKIPNEXT if skipNext!=0
-**   FAULT             skipNext holds the cursor fault error code.
-*/
-struct BtCursor {
-  u8 eState;                /* One of the CURSOR_XXX constants (see below) */
-  u8 curFlags;              /* zero or more BTCF_* flags defined below */
-  u8 curPagerFlags;         /* Flags to send to sqlite3PagerGet() */
-  u8 hints;                 /* As configured by CursorSetHints() */
-  int skipNext;    /* Prev() is noop if negative. Next() is noop if positive.
-                   ** Error code if eState==CURSOR_FAULT */
-  Btree *pBtree;            /* The Btree to which this cursor belongs */
-  Pgno *aOverflow;          /* Cache of overflow page locations */
-  void *pKey;               /* Saved key that was cursor last known position */
-  /* All fields above are zeroed when the cursor is allocated.  See
-  ** sqlite3BtreeCursorZero().  Fields that follow must be manually
-  ** initialized. */
 #define BTCURSOR_FIRST_UNINIT pBt   /* Name of first uninitialized field */
-  BtShared *pBt;            /* The BtShared this cursor points to */
-  BtCursor *pNext;          /* Forms a linked list of all cursors */
-  CellInfo info;            /* A parse of the cell we are pointing at */
-  i64 nKey;                 /* Size of pKey, or last integer key */
-  Pgno pgnoRoot;            /* The root page of this tree */
-  i8 iPage;                 /* Index of current page in apPage */
-  u8 curIntKey;             /* Value of apPage[0]->intKey */
-  u16 ix;                   /* Current index for apPage[iPage] */
-  u16 aiIdx[BTCURSOR_MAX_DEPTH-1];     /* Current index in apPage[i] */
-  struct KeyInfo *pKeyInfo;            /* Arg passed to comparison function */
-  MemPage *pPage;                        /* Current page */
-  MemPage *apPage[BTCURSOR_MAX_DEPTH-1]; /* Stack of parents of current page */
-};
 
 /*
 ** Legal values for BtCursor.curFlags

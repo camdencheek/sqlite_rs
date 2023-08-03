@@ -3,14 +3,25 @@ use libc::{c_int, c_void};
 
 use crate::{
     db::{sqlite3, sqlite3_mutex},
+    global::Pgno,
     pager::Pager,
     sqlite3_value,
     util::bitvec::Bitvec,
+    vdbe::KeyInfo,
 };
 
-use self::internal::{BtLock, MemPage};
+use self::internal::{BtLock, CellInfo, MemPage};
 
 pub mod internal;
+
+/// Maximum depth of an SQLite B-Tree structure. Any B-Tree deeper than
+/// this will be declared corrupt. This value is calculated based on a
+/// maximum database size of 2^31 pages a minimum fanout of 2 for a
+/// root-node and 3 for all other internal nodes.
+///
+/// If a tree that appears to be taller than this is encountered, it is
+/// assumed that the database is corrupt.
+pub const BTCURSOR_MAX_DEPTH: usize = 20;
 
 /// A Btree handle
 ///
@@ -64,12 +75,78 @@ pub struct Btree {
     lock: BtLock,
 }
 
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
+pub const BTCURSOR_MAX_DEPTH_MINUS_ONE: usize = BTCURSOR_MAX_DEPTH - 1;
+
+/// A cursor is a pointer to a particular entry within a particular
+/// b-tree within a database file.
+///
+/// The entry is identified by its MemPage and the index in
+/// MemPage.aCell[] of the entry.
+///
+/// A single database file can be shared by two more database connections,
+/// but cursors cannot be shared.  Each cursor is associated with a
+/// particular database connection identified BtCursor.pBtree.db.
+///
+/// Fields in this structure are accessed under the BtShared.mutex
+/// found at self->pBt->mutex.
+///
+/// skipNext meaning:
+/// The meaning of skipNext depends on the value of eState:
+///
+///   eState            Meaning of skipNext
+///   VALID             skipNext is meaningless and is ignored
+///   INVALID           skipNext is meaningless and is ignored
+///   SKIPNEXT          sqlite3BtreeNext() is a no-op if skipNext>0 and
+///                     sqlite3BtreePrevious() is no-op if skipNext<0.
+///   REQUIRESEEK       restoreCursorPosition() restores the cursor to
+///                     eState=SKIPNEXT if skipNext!=0
+///   FAULT             skipNext holds the cursor fault error code.
+#[repr(C)]
 pub struct BtCursor {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
+    /// One of the CURSOR_XXX constants (see below)
+    eState: u8,
+    /// zero or more BTCF_* flags defined below
+    curFlags: u8,
+    /// Flags to send to sqlite3PagerGet()
+    curPagerFlags: u8,
+    /// As configured by CursorSetHints()
+    hints: u8,
+    /// Prev() is noop if negative. Next() is noop if positive.
+    /// Error code if eState==CURSOR_FAULT
+    skipNext: c_int,
+    /// The Btree to which this cursor belongs
+    pBtree: *mut Btree,
+    /// Cache of overflow page locations
+    aOverflow: *mut Pgno,
+    /// Saved key that was cursor last known position
+    pKey: *mut c_void,
+    // All fields above are zeroed when the cursor is allocated.  See
+    // sqlite3BtreeCursorZero().  Fields that follow must be manually
+    // initialized.
+    /// The BtShared this cursor points to
+    pBt: *mut BtShared,
+    /// Forms a linked list of all cursors
+    pNext: *mut BtCursor,
+    /// A parse of the cell we are pointing at
+    info: CellInfo,
+    /// Size of pKey, or last integer key
+    nKey: i64,
+    /// The root page of this tree
+    pgnoRoot: Pgno,
+    /// Index of current page in apPage
+    iPage: i8,
+    /// Value of apPage[0]->intKey
+    curIntKey: u8,
+    /// Current index for apPage[iPage]
+    ix: u16,
+    /// Current index in apPage[i]
+    aiIdx: [u16; BTCURSOR_MAX_DEPTH_MINUS_ONE],
+    /// Arg passed to comparison function
+    pKeyInfo: *mut KeyInfo,
+    /// Current page
+    pPage: *mut MemPage,
+    /// Stack of parents of current page
+    apPage: [*mut MemPage; BTCURSOR_MAX_DEPTH_MINUS_ONE],
 }
 
 /// An instance of this object represents a single database file.
