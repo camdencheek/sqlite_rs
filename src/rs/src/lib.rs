@@ -9,6 +9,7 @@ mod build;
 mod coll_seq;
 mod column;
 mod cte;
+mod date;
 mod db;
 mod errors;
 mod expr;
