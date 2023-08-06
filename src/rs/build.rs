@@ -120,6 +120,7 @@ typedef uint16_t WO;
                 "Bitvec".into(),
                 "Bitvec_u".into(),
                 "BtLock".into(),
+                "DateTime".into(),
                 "BtreePayload".into(),
                 "COLTYPE".into(),
                 "CellInfo".into(),

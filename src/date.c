@@ -61,26 +61,6 @@ struct tm *__cdecl localtime(const time_t *);
 #endif
 
 /*
-** A structure for holding a single date and time.
-*/
-typedef struct DateTime DateTime;
-struct DateTime {
-  sqlite3_int64 iJD;  /* The julian day number times 86400000 */
-  int Y, M, D;        /* Year, month, and day */
-  int h, m;           /* Hour and minutes */
-  int tz;             /* Timezone offset in minutes */
-  double s;           /* Seconds */
-  char validJD;       /* True (1) if iJD is valid */
-  char rawS;          /* Raw numeric value stored in s */
-  char validYMD;      /* True (1) if Y,M,D are valid */
-  char validHMS;      /* True (1) if h,m,s are valid */
-  char validTZ;       /* True (1) if tz is valid */
-  char tzSet;         /* Timezone was set explicitly */
-  char isError;       /* An overflow has occurred */
-};
-
-
-/*
 ** Convert zDate into one or more integers according to the conversion
 ** specifier zFormat.
 **
