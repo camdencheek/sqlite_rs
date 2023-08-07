@@ -215,50 +215,6 @@ static int parseHhMmSs(const char *zDate, DateTime *p){
 }
 
 /*
-** Convert from YYYY-MM-DD HH:MM:SS to julian day.  We always assume
-** that the YYYY-MM-DD is according to the Gregorian calendar.
-**
-** Reference:  Meeus page 61
-*/
-static void computeJD(DateTime *p){
-  int Y, M, D, A, B, X1, X2;
-
-  if( p->validJD ) return;
-  if( p->validYMD ){
-    Y = p->Y;
-    M = p->M;
-    D = p->D;
-  }else{
-    Y = 2000;  /* If no YMD specified, assume 2000-Jan-01 */
-    M = 1;
-    D = 1;
-  }
-  if( Y<-4713 || Y>9999 || p->rawS ){
-    datetimeError(p);
-    return;
-  }
-  if( M<=2 ){
-    Y--;
-    M += 12;
-  }
-  A = Y/100;
-  B = 2 - A + (A/4);
-  X1 = 36525*(Y+4716)/100;
-  X2 = 306001*(M+1)/10000;
-  p->iJD = (sqlite3_int64)((X1 + X2 + D + B - 1524.5 ) * 86400000);
-  p->validJD = 1;
-  if( p->validHMS ){
-    p->iJD += p->h*3600000 + p->m*60000 + (sqlite3_int64)(p->s*1000 + 0.5);
-    if( p->validTZ ){
-      p->iJD -= p->tz*60000;
-      p->validYMD = 0;
-      p->validHMS = 0;
-      p->validTZ = 0;
-    }
-  }
-}
-
-/*
 ** Parse dates of the form
 **
 **     YYYY-MM-DD HH:MM:SS.FFF
@@ -394,25 +350,6 @@ static void computeYMD(DateTime *p){
     p->Y = p->M>2 ? C - 4716 : C - 4715;
   }
   p->validYMD = 1;
-}
-
-/*
-** Compute the Hour, Minute, and Seconds from the julian day number.
-*/
-static void computeHMS(DateTime *p){
-  int s;
-  if( p->validHMS ) return;
-  computeJD(p);
-  s = (int)((p->iJD + 43200000) % 86400000);
-  p->s = s/1000.0;
-  s = (int)p->s;
-  p->s -= s;
-  p->h = s/3600;
-  s -= p->h*3600;
-  p->m = s/60;
-  p->s += s - p->m*60;
-  p->rawS = 0;
-  p->validHMS = 1;
 }
 
 /*

@@ -64,3 +64,64 @@ pub extern "C" fn validJulianDay(iJD: i64) -> c_int {
 pub unsafe extern "C" fn datetimeError(p: &mut DateTime) {
     *p = DateTime::err();
 }
+
+/// Convert from YYYY-MM-DD HH:MM:SS to julian day.  We always assume
+/// that the YYYY-MM-DD is according to the Gregorian calendar.
+///
+/// Reference:  Meeus page 61
+#[no_mangle]
+pub extern "C" fn computeJD(p: &mut DateTime) {
+    if p.validJD != 0 {
+        return;
+    }
+
+    let (mut Y, mut M, mut D) = if p.validYMD != 0 {
+        (p.Y, p.M, p.D)
+    } else {
+        /// If no YMD specified, assume 2000-Jan-01
+        (2000, 1, 1)
+    };
+
+    if Y < -4713 || Y > 9999 || p.rawS != 0 {
+        *p = DateTime::err();
+        return;
+    }
+    if M <= 2 {
+        Y -= 1;
+        M += 12;
+    }
+    let A = Y / 100;
+    let B = 2 - A + (A / 4);
+    let X1 = 36525 * (Y + 4716) / 100;
+    let X2 = 306001 * (M + 1) / 10000;
+    p.iJD = (((X1 + X2 + D + B) as f64 - 1524.5) * 86400000.0) as i64;
+    p.validJD = 1;
+    if p.validHMS != 0 {
+        p.iJD += p.h as i64 * 3600000 + p.m as i64 * 60000 + (p.s * 1000.0 + 0.5) as i64;
+        if p.validTZ != 0 {
+            p.iJD -= p.tz as i64 * 60000;
+            p.validYMD = 0;
+            p.validHMS = 0;
+            p.validTZ = 0;
+        }
+    }
+}
+
+/// Compute the Hour, Minute, and Seconds from the julian day number.
+#[no_mangle]
+pub extern "C" fn computeHMS(p: &mut DateTime) {
+    if p.validHMS != 0 {
+        return;
+    }
+    computeJD(p);
+    let mut s = ((p.iJD + 43200000) % 86400000) as c_int;
+    p.s = s as f64 / 1000.0;
+    s = p.s as c_int;
+    p.s -= s as f64;
+    p.h = s / 3600;
+    s -= p.h * 3600;
+    p.m = s / 60;
+    p.s += (s - p.m * 60) as f64;
+    p.rawS = 0;
+    p.validHMS = 1;
+}
