@@ -215,14 +215,6 @@ static int parseHhMmSs(const char *zDate, DateTime *p){
 }
 
 /*
-** Put the DateTime object into its error state.
-*/
-static void datetimeError(DateTime *p){
-  memset(p, 0, sizeof(*p));
-  p->isError = 1;
-}
-
-/*
 ** Convert from YYYY-MM-DD HH:MM:SS to julian day.  We always assume
 ** that the YYYY-MM-DD is according to the Gregorian calendar.
 **

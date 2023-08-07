@@ -1,6 +1,7 @@
 use libc::{c_char, c_int};
 
 /// A structure for holding a single date and time.
+#[derive(Default)]
 #[repr(C)]
 pub struct DateTime {
     /// The julian day number times 86400000
@@ -35,6 +36,15 @@ pub struct DateTime {
     isError: c_char,
 }
 
+impl DateTime {
+    pub fn err() -> Self {
+        Self {
+            isError: 1,
+            ..Default::default()
+        }
+    }
+}
+
 /// The julian day number for 9999-12-31 23:59:59.999 is 5373484.4999999.
 /// Multiplying this by 86400000 gives 464269060799999 as the maximum value
 /// for DateTime.iJD.
@@ -47,4 +57,10 @@ const INT_464269060799999: i64 = 0x1a6401072fdff;
 #[no_mangle]
 pub extern "C" fn validJulianDay(iJD: i64) -> c_int {
     (iJD >= 0 && iJD <= INT_464269060799999).into()
+}
+
+/// Put the DateTime object into its error state.
+#[no_mangle]
+pub unsafe extern "C" fn datetimeError(p: &mut DateTime) {
+    *p = DateTime::err();
 }
