@@ -125,3 +125,39 @@ pub extern "C" fn computeHMS(p: &mut DateTime) {
     p.rawS = 0;
     p.validHMS = 1;
 }
+
+/// Compute the Year, Month, and Day from the julian day number.
+#[no_mangle]
+pub extern "C" fn computeYMD(p: &mut DateTime) {
+    if p.validYMD != 0 {
+        return;
+    }
+    if p.validJD == 0 {
+        p.Y = 2000;
+        p.M = 1;
+        p.D = 1;
+    } else if validJulianDay(p.iJD) == 0 {
+        *p = DateTime::err();
+        return;
+    } else {
+        let Z = ((p.iJD + 43200000) / 86400000) as c_int;
+        let mut A = ((Z as f64 - 1867216.25) / 36524.25) as c_int;
+        A = Z + 1 + A - (A / 4);
+        let B = A + 1524;
+        let C = ((B as f64 - 122.1) / 365.25) as c_int;
+        let D = (36525 * (C & 32767)) / 100;
+        let E = ((B - D) as f64 / 30.6001) as c_int;
+        let X1 = (30.6001 * E as f64) as c_int;
+        p.D = B - D - X1;
+        p.M = if E < 14 { E - 1 } else { E - 13 };
+        p.Y = if p.M > 2 { C - 4716 } else { C - 4715 };
+    }
+    p.validYMD = 1;
+}
+
+/// Compute both YMD and HMS
+#[no_mangle]
+pub extern "C" fn computeYMD_HMS(p: &mut DateTime) {
+    computeYMD(p);
+    computeHMS(p);
+}
