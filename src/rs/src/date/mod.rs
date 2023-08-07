@@ -156,3 +156,11 @@ pub extern "C" fn computeYMD_HMS(p: &mut DateTime) {
     computeYMD(p);
     computeHMS(p);
 }
+
+/// Clear the YMD and HMS and the TZ
+#[no_mangle]
+pub extern "C" fn clearYMD_HMS_TZ(p: &mut DateTime) {
+    p.validYMD = 0;
+    p.validHMS = 0;
+    p.validTZ = 0;
+}

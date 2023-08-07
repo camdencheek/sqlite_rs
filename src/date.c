@@ -323,15 +323,6 @@ static int parseDateOrTime(
   return 1;
 }
 
-/*
-** Clear the YMD and HMS and the TZ
-*/
-static void clearYMD_HMS_TZ(DateTime *p){
-  p->validYMD = 0;
-  p->validHMS = 0;
-  p->validTZ = 0;
-}
-
 #ifndef SQLITE_OMIT_LOCALTIME
 /*
 ** On recent Windows platforms, the localtime_s() function is available
