@@ -37,6 +37,7 @@ pub struct DateTime {
 }
 
 impl DateTime {
+    /// Return a DateTime object in its error state.
     pub fn err() -> Self {
         Self {
             isError: 1,
@@ -57,12 +58,6 @@ const INT_464269060799999: i64 = 0x1a6401072fdff;
 #[no_mangle]
 pub extern "C" fn validJulianDay(iJD: i64) -> c_int {
     (iJD >= 0 && iJD <= INT_464269060799999).into()
-}
-
-/// Put the DateTime object into its error state.
-#[no_mangle]
-pub unsafe extern "C" fn datetimeError(p: &mut DateTime) {
-    *p = DateTime::err();
 }
 
 /// Convert from YYYY-MM-DD HH:MM:SS to julian day.  We always assume
