@@ -126,51 +126,6 @@ end_getDigits:
 }
 
 /*
-** Parse a timezone extension on the end of a date-time.
-** The extension is of the form:
-**
-**        (+/-)HH:MM
-**
-** Or the "zulu" notation:
-**
-**        Z
-**
-** If the parse is successful, write the number of minutes
-** of change in p->tz and return 0.  If a parser error occurs,
-** return non-zero.
-**
-** A missing specifier is not considered an error.
-*/
-static int parseTimezone(const char *zDate, DateTime *p){
-  int sgn = 0;
-  int nHr, nMn;
-  int c;
-  while( sqlite3Isspace(*zDate) ){ zDate++; }
-  p->tz = 0;
-  c = *zDate;
-  if( c=='-' ){
-    sgn = -1;
-  }else if( c=='+' ){
-    sgn = +1;
-  }else if( c=='Z' || c=='z' ){
-    zDate++;
-    goto zulu_time;
-  }else{
-    return c!=0;
-  }
-  zDate++;
-  if( getDigits(zDate, "20b:20e", &nHr, &nMn)!=2 ){
-    return 1;
-  }
-  zDate += 5;
-  p->tz = sgn*(nMn + nHr*60);
-zulu_time:
-  while( sqlite3Isspace(*zDate) ){ zDate++; }
-  p->tzSet = 1;
-  return *zDate!=0;
-}
-
-/*
 ** Parse times of the form HH:MM or HH:MM:SS or HH:MM:SS.FFFF.
 ** The HH, MM, and SS must each be exactly 2 digits.  The
 ** fractional seconds FFFF can be one or more digits.

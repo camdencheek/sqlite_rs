@@ -1,4 +1,9 @@
+use std::ffi::CStr;
+
 use libc::{c_char, c_int};
+
+use crate::global::sqlite3Isspace;
+use nom::IResult;
 
 /// A structure for holding a single date and time.
 #[derive(Default)]
@@ -163,4 +168,68 @@ pub extern "C" fn clearYMD_HMS_TZ(p: &mut DateTime) {
     p.validYMD = 0;
     p.validHMS = 0;
     p.validTZ = 0;
+}
+
+/// Parse a timezone extension on the end of a date-time.
+/// The extension is of the form:
+///
+///        (+/-)HH:MM
+///
+/// Or the "zulu" notation:
+///
+///        Z
+///
+/// If the parse is successful, write the number of minutes
+/// of change in p->tz and return 0.  If a parser error occurs,
+/// return non-zero.
+///
+/// A missing specifier is not considered an error.
+pub extern "C" fn parseTimezone(zDate: *const c_char, p: &mut DateTime) -> c_int {
+    use nom::bytes::complete::{tag, take_while_m_n};
+    use nom::character::complete::char;
+    use nom::{character::is_digit, sequence::tuple};
+
+    let mut input = unsafe { CStr::from_ptr(zDate) }.to_bytes_with_nul();
+    input = skip_spaces(input);
+    p.tz = 0;
+    let (sgn, zulu) = match input[0] {
+        b'-' => (-1, false),
+        b'+' => (1, false),
+        b'z' | b'Z' => (0, true),
+        0u8 => return 0,
+        _ => return 1,
+    };
+    input = &input[1..];
+    if !zulu {
+        let res = tuple((two_digit_u8, char(':'), two_digit_u8))(input);
+
+        if let Ok((i, (h, _, m))) = res {
+            if h > 24 || m > 59 {
+                return 1;
+            }
+            input = i;
+            p.tz = sgn * (m as i32 + (h as i32) * 60);
+        } else {
+            return 1;
+        }
+    }
+    input = skip_spaces(input);
+    p.tzSet = 0;
+    (input[0] != 0).into()
+}
+
+pub fn two_digit_u8(input: &[u8]) -> IResult<&[u8], u8> {
+    use nom::bytes::complete::take_while_m_n;
+    use nom::character::is_digit;
+    use nom::combinator::map_res;
+    map_res(take_while_m_n(2, 2, is_digit), |s| {
+        u8::from_str_radix(unsafe { std::str::from_utf8_unchecked(s) }, 10)
+    })(input)
+}
+
+pub fn skip_spaces(mut input: &[u8]) -> &[u8] {
+    while sqlite3Isspace(input[0] as i8) != 0 {
+        input = &input[1..];
+    }
+    input
 }
