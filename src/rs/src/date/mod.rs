@@ -56,6 +56,24 @@ impl DateTime {
             ..Default::default()
         }
     }
+
+    /// Input "r" is a numeric quantity which might be a julian day number,
+    /// or the number of seconds since 1970.  If the value if r is within
+    /// range of a julian day number, install it as such and set validJD.
+    /// If the value is a valid unix timestamp, put it in p->s and set p->rawS.
+    pub fn set_raw_date_number(&mut self, r: f64) {
+        self.s = r;
+        self.rawS = 1;
+        if r >= 0.0 && r < 5373484.5 {
+            self.iJD = (r * 86400000.0 + 0.5) as i64;
+            self.validJD = 1;
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn setRawDateNumber(d: &mut DateTime, r: f64) {
+    d.set_raw_date_number(r)
 }
 
 /// The julian day number for 9999-12-31 23:59:59.999 is 5373484.4999999.

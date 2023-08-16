@@ -76,21 +76,6 @@ static int setDateTimeToCurrent(sqlite3_context *context, DateTime *p){
 }
 
 /*
-** Input "r" is a numeric quantity which might be a julian day number,
-** or the number of seconds since 1970.  If the value if r is within
-** range of a julian day number, install it as such and set validJD.
-** If the value is a valid unix timestamp, put it in p->s and set p->rawS.
-*/
-static void setRawDateNumber(DateTime *p, double r){
-  p->s = r;
-  p->rawS = 1;
-  if( r>=0.0 && r<5373484.5 ){
-    p->iJD = (sqlite3_int64)(r*86400000.0 + 0.5);
-    p->validJD = 1;
-  }
-}
-
-/*
 ** Attempt to parse the given string into a julian day number.  Return
 ** the number of errors.
 **
