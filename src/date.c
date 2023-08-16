@@ -126,50 +126,6 @@ end_getDigits:
 }
 
 /*
-** Parse times of the form HH:MM or HH:MM:SS or HH:MM:SS.FFFF.
-** The HH, MM, and SS must each be exactly 2 digits.  The
-** fractional seconds FFFF can be one or more digits.
-**
-** Return 1 if there is a parsing error and 0 on success.
-*/
-static int parseHhMmSs(const char *zDate, DateTime *p){
-  int h, m, s;
-  double ms = 0.0;
-  if( getDigits(zDate, "20c:20e", &h, &m)!=2 ){
-    return 1;
-  }
-  zDate += 5;
-  if( *zDate==':' ){
-    zDate++;
-    if( getDigits(zDate, "20e", &s)!=1 ){
-      return 1;
-    }
-    zDate += 2;
-    if( *zDate=='.' && sqlite3Isdigit(zDate[1]) ){
-      double rScale = 1.0;
-      zDate++;
-      while( sqlite3Isdigit(*zDate) ){
-        ms = ms*10.0 + *zDate - '0';
-        rScale *= 10.0;
-        zDate++;
-      }
-      ms /= rScale;
-    }
-  }else{
-    s = 0;
-  }
-  p->validJD = 0;
-  p->rawS = 0;
-  p->validHMS = 1;
-  p->h = h;
-  p->m = m;
-  p->s = s + ms;
-  if( parseTimezone(zDate, p) ) return 1;
-  p->validTZ = (p->tz!=0)?1:0;
-  return 0;
-}
-
-/*
 ** Parse dates of the form
 **
 **     YYYY-MM-DD HH:MM:SS.FFF

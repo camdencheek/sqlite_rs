@@ -3,7 +3,13 @@ use std::ffi::CStr;
 use libc::{c_char, c_int};
 
 use crate::global::sqlite3Isspace;
-use nom::IResult;
+use nom::{
+    bytes::complete::take_while1,
+    character::is_digit,
+    combinator::opt,
+    sequence::{preceded, tuple},
+    IResult,
+};
 
 /// A structure for holding a single date and time.
 #[derive(Default)]
@@ -216,6 +222,67 @@ pub extern "C" fn parseTimezone(zDate: *const c_char, p: &mut DateTime) -> c_int
     input = skip_spaces(input);
     p.tzSet = 0;
     (input[0] != 0).into()
+}
+
+/// Parse times of the form HH:MM or HH:MM:SS or HH:MM:SS.FFFF.
+/// The HH, MM, and SS must each be exactly 2 digits.  The
+/// fractional seconds FFFF can be one or more digits.
+///
+/// Return 1 if there is a parsing error and 0 on success.
+#[no_mangle]
+pub extern "C" fn parseHhMmSs(zDate: *const c_char, p: &mut DateTime) -> c_int {
+    use nom::character::complete::char;
+
+    let mut input = unsafe { CStr::from_ptr(zDate) }.to_bytes_with_nul();
+    let res = tuple((two_digit_u8, char(':'), two_digit_u8))(input);
+    let (input, h, m) = if let Ok((i, (h, _, m))) = res {
+        if h > 24 || m > 59 {
+            return 1;
+        }
+        (i, h, m)
+    } else {
+        return 1;
+    };
+
+    let res: IResult<&[u8], Option<(u8, Option<&[u8]>)>> = opt(preceded(
+        char(':'),
+        tuple((
+            two_digit_u8,
+            opt(preceded(char('.'), take_while1(is_digit))),
+        )),
+    ))(input);
+
+    let (input, s) = match res {
+        Ok((input, Some((whole, fractional)))) => {
+            if whole > 59 {
+                return 1;
+            }
+            let mut r_scale = 1.0;
+            let mut ms = 0.0;
+            if let Some(f) = fractional {
+                for c in f.iter().copied() {
+                    ms = ms * 10.0 + (c - b'0') as f64;
+                    r_scale *= 10.0;
+                }
+            }
+            ms /= r_scale;
+            (input, whole as f64 + ms)
+        }
+        Ok((input, None)) => (input, 0.0),
+        Err(_) => return 1,
+    };
+
+    p.validJD = 0;
+    p.rawS = 0;
+    p.validHMS = 1;
+    p.h = h as i32;
+    p.m = m as i32;
+    p.s = s;
+    if parseTimezone(input.as_ptr() as *const i8, p) != 0 {
+        return 1;
+    }
+    p.validTZ = if p.tz != 0 { 1 } else { 0 };
+    0
 }
 
 pub fn two_digit_u8(input: &[u8]) -> IResult<&[u8], u8> {
