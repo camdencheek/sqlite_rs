@@ -126,50 +126,6 @@ end_getDigits:
 }
 
 /*
-** Parse dates of the form
-**
-**     YYYY-MM-DD HH:MM:SS.FFF
-**     YYYY-MM-DD HH:MM:SS
-**     YYYY-MM-DD HH:MM
-**     YYYY-MM-DD
-**
-** Write the result into the DateTime structure and return 0
-** on success and 1 if the input string is not a well-formed
-** date.
-*/
-static int parseYyyyMmDd(const char *zDate, DateTime *p){
-  int Y, M, D, neg;
-
-  if( zDate[0]=='-' ){
-    zDate++;
-    neg = 1;
-  }else{
-    neg = 0;
-  }
-  if( getDigits(zDate, "40f-21a-21d", &Y, &M, &D)!=3 ){
-    return 1;
-  }
-  zDate += 10;
-  while( sqlite3Isspace(*zDate) || 'T'==*(u8*)zDate ){ zDate++; }
-  if( parseHhMmSs(zDate, p)==0 ){
-    /* We got the time */
-  }else if( *zDate==0 ){
-    p->validHMS = 0;
-  }else{
-    return 1;
-  }
-  p->validJD = 0;
-  p->validYMD = 1;
-  p->Y = neg ? -Y : Y;
-  p->M = M;
-  p->D = D;
-  if( p->validTZ ){
-    computeJD(p);
-  }
-  return 0;
-}
-
-/*
 ** Set the time to the current time reported by the VFS.
 **
 ** Return the number of errors.

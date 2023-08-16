@@ -4,9 +4,10 @@ use libc::{c_char, c_int};
 
 use crate::global::sqlite3Isspace;
 use nom::{
-    bytes::complete::take_while1,
+    bytes::complete::{take_while1, take_while_m_n},
     character::is_digit,
-    combinator::opt,
+    combinator::{map_parser, opt},
+    number::complete,
     sequence::{preceded, tuple},
     IResult,
 };
@@ -281,6 +282,74 @@ pub extern "C" fn parseHhMmSs(zDate: *const c_char, p: &mut DateTime) -> c_int {
         return 1;
     }
     p.validTZ = if p.tz != 0 { 1 } else { 0 };
+    0
+}
+
+/// Parse dates of the form
+///
+///     YYYY-MM-DD HH:MM:SS.FFF
+///     YYYY-MM-DD HH:MM:SS
+///     YYYY-MM-DD HH:MM
+///     YYYY-MM-DD
+///
+/// Write the result into the DateTime structure and return 0
+/// on success and 1 if the input string is not a well-formed
+/// date.
+#[no_mangle]
+pub extern "C" fn parseYyyyMmDd(zDate: *const c_char, p: &mut DateTime) -> c_int {
+    use nom::character::complete::char;
+    use nom::character::complete::i32 as parse_i32;
+    let mut input = unsafe { CStr::from_ptr(zDate) }.to_bytes_with_nul();
+
+    let neg = if input[0] == b'-' {
+        input = &input[1..];
+        true
+    } else {
+        false
+    };
+
+    let ymdRes = tuple((
+        map_parser(take_while_m_n(4, 4, is_digit), parse_i32::<&[u8], ()>),
+        preceded(
+            char('-'),
+            map_parser(take_while_m_n(2, 2, is_digit), parse_i32::<&[u8], ()>),
+        ),
+        preceded(
+            char('-'),
+            map_parser(take_while_m_n(2, 2, is_digit), parse_i32::<&[u8], ()>),
+        ),
+    ))(input);
+
+    let (mut input, (y, m, d)): (&[u8], (i32, i32, i32)) = match ymdRes {
+        Ok((input, (y, m, d))) => {
+            if !(0..=9999).contains(&y) || !(1..=12).contains(&m) || !(1..=31).contains(&d) {
+                return 1;
+            }
+            (input, (y, m, d))
+        }
+        _ => return 1,
+    };
+
+    while sqlite3Isspace(input[0] as i8) != 0 || input[0] == b'T' {
+        input = &input[1..];
+    }
+
+    if parseHhMmSs(input.as_ptr() as *const c_char, p) == 0 {
+        // We got the time
+    } else if input[0] == 0 {
+        p.validHMS = 0;
+    } else {
+        return 1;
+    }
+
+    p.validJD = 0;
+    p.validYMD = 1;
+    p.Y = if neg { -y } else { y };
+    p.M = m;
+    p.D = d;
+    if p.validTZ != 0 {
+        computeJD(p);
+    }
     0
 }
 
