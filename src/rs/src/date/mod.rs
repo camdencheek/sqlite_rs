@@ -190,12 +190,11 @@ pub extern "C" fn clearYMD_HMS_TZ(p: &mut DateTime) {
 /// return non-zero.
 ///
 /// A missing specifier is not considered an error.
-pub extern "C" fn parseTimezone(zDate: *const c_char, p: &mut DateTime) -> c_int {
+fn parse_timezone(mut input: &[u8], p: &mut DateTime) -> c_int {
     use nom::bytes::complete::{tag, take_while_m_n};
     use nom::character::complete::char;
     use nom::{character::is_digit, sequence::tuple};
 
-    let mut input = unsafe { CStr::from_ptr(zDate) }.to_bytes_with_nul();
     input = skip_spaces(input);
     p.tz = 0;
     let (sgn, zulu) = match input[0] {
@@ -278,7 +277,7 @@ pub extern "C" fn parseHhMmSs(zDate: *const c_char, p: &mut DateTime) -> c_int {
     p.h = h as i32;
     p.m = m as i32;
     p.s = s;
-    if parseTimezone(input.as_ptr() as *const i8, p) != 0 {
+    if parse_timezone(input, p) != 0 {
         return 1;
     }
     p.validTZ = if p.tz != 0 { 1 } else { 0 };
