@@ -142,3 +142,18 @@ bitflags! {
         const UpdateFrom   = 0x10000000;
     }
 }
+
+/// An instance of the following object is used to record information about
+/// how to process the DISTINCT keyword, to simplify passing that information
+/// into the selectInnerLoop() routine.
+#[repr(C)]
+pub struct DistinctCtx {
+    /// 0: Not distinct. 1: DISTICT  2: DISTINCT and ORDER BY
+    isTnct: u8,
+    /// One of the WHERE_DISTINCT_* operators
+    eTnctType: u8,
+    /// Ephemeral table used for DISTINCT processing
+    tabTnct: c_int,
+    /// Address of OP_OpenEphemeral opcode for tabTnct
+    addrTnct: c_int,
+}

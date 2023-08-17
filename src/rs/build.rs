@@ -174,6 +174,7 @@ typedef uint16_t WO;
                 "WhereLevel".into(),
                 "WhereLoop".into(),
                 "WhereLoopBuilder".into(),
+                "DistinctCtx".into(),
                 "WhereMaskSet".into(),
                 "WhereMaskSet".into(),
                 "WhereMemBlock".into(),

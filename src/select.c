@@ -16,19 +16,6 @@
 
 /*
 ** An instance of the following object is used to record information about
-** how to process the DISTINCT keyword, to simplify passing that information
-** into the selectInnerLoop() routine.
-*/
-typedef struct DistinctCtx DistinctCtx;
-struct DistinctCtx {
-  u8 isTnct;      /* 0: Not distinct. 1: DISTICT  2: DISTINCT and ORDER BY */
-  u8 eTnctType;   /* One of the WHERE_DISTINCT_* operators */
-  int tabTnct;    /* Ephemeral table used for DISTINCT processing */
-  int addrTnct;   /* Address of OP_OpenEphemeral opcode for tabTnct */
-};
-
-/*
-** An instance of the following object is used to record information about
 ** the ORDER BY (or GROUP BY) clause of query is being coded.
 **
 ** The aDefer[] array is used by the sorter-references optimization. For
