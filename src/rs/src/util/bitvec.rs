@@ -314,6 +314,7 @@ pub extern "C" fn sqlite3BitvecSize(bv: &Bitvec) -> u32 {
     bv.size()
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 
@@ -323,6 +324,17 @@ mod test {
         ClearRange(usize, u32, usize),
         SetRandom(usize),
         ClearRandom(usize),
+    }
+
+    impl TestInst {
+        fn max(&self) -> usize {
+            match self {
+                Self::SetRange(n, start, step) => *start as usize + (n - 1) * step,
+                Self::ClearRange(n, start, step) => *start as usize + (n - 1) * step,
+                Self::SetRandom(n) => n + 1,
+                Self::ClearRandom(n) => n + 1,
+            }
+        }
     }
 
     fn set_bit(v: &mut [u8], i: u32) {
@@ -383,10 +395,11 @@ mod test {
         }
     }
 
-    #[no_mangle]
-    pub extern "C" fn sqlite3BitvecBuiltinTest(sz: u32, ops: *mut c_int) -> c_int {
+    #[test]
+    fn test_bitvec() {
         use TestInst::*;
-        let mut cases: Vec<(u32, Vec<TestInst>)> = vec![
+
+        let cases = vec![
             (400, vec![SetRange(400, 1, 1)]),
             (4000, vec![SetRange(4000, 1, 1)]),
             (40000, vec![SetRange(40000, 1, 1)]),
@@ -415,62 +428,74 @@ mod test {
             ),
         ];
 
+        for (sz, instructions) in cases {
+            run_test(sz, &instructions);
+        }
+    }
+
+    #[test]
+    fn test_bitvec_hash_collisions() {
+        use TestInst::*;
+
         // Attempt to induce hash collisions
         for start in 1..=8 {
             for incr in 120..=130 {
-                cases.push((
-                    5000,
-                    vec![SetRange(60, start, incr), ClearRange(5000, 1, 1)],
-                ))
+                run_test(5000, &[SetRange(60, start, incr), ClearRange(5000, 1, 1)])
             }
         }
+    }
 
-        // big and slow
-        #[cfg(test_slow)]
-        cases.push((
+    #[cfg(test_slow)]
+    #[test]
+    fn test_bitvec_big_and_slow() {
+        use TestInst::*;
+
+        run_test(
             17000000,
-            vec![SetRange(17000000, 1, 1), ClearRange(17000000, 1, 1)],
-        ));
+            &[SetRange(17000000, 1, 1), ClearRange(17000000, 1, 1)],
+        )
+    }
 
-        // test setting and clearing a random subset of bits
-        cases.push((10, vec![SetRandom(5), ClearRandom(5)]));
-        cases.push((4000, vec![SetRandom(2000), ClearRandom(2000)]));
-        cases.push((
-            4000,
-            vec![
-                SetRandom(1000),
-                ClearRandom(1000),
-                SetRandom(1000),
-                ClearRandom(1000),
-                SetRandom(1000),
-                ClearRandom(1000),
-                SetRandom(1000),
-                ClearRandom(1000),
-                SetRandom(1000),
-                ClearRandom(1000),
-                SetRandom(1000),
-                ClearRandom(1000),
-            ],
-        ));
-        cases.push((400000, vec![SetRandom(10)]));
-        cases.push((4000, vec![SetRandom(10), ClearRange(4000, 1, 1)]));
-        cases.push((5000, vec![SetRandom(20), ClearRange(5000, 1, 1)]));
-        cases.push((50000, vec![SetRandom(60), ClearRange(50000, 1, 1)]));
-        cases.push((
-            5000,
-            vec![
-                SetRange(25, 121, 125),
-                SetRange(50, 121, 125),
-                ClearRange(25, 121, 125),
-            ],
-        ));
+    #[test]
+    fn test_bitvec_set_clear() {
+        use TestInst::*;
 
-        for (sz, instructions) in cases.to_owned() {
+        let cases = vec![
+            (10, vec![SetRandom(5), ClearRandom(5)]),
+            (4000, vec![SetRandom(2000), ClearRandom(2000)]),
+            (
+                4000,
+                vec![
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                    SetRandom(1000),
+                    ClearRandom(1000),
+                ],
+            ),
+            (400000, vec![SetRandom(10)]),
+            (4000, vec![SetRandom(10), ClearRange(4000, 1, 1)]),
+            (5000, vec![SetRandom(20), ClearRange(5000, 1, 1)]),
+            (50000, vec![SetRandom(60), ClearRange(50000, 1, 1)]),
+            (
+                5000,
+                vec![
+                    SetRange(25, 121, 125),
+                    SetRange(50, 121, 125),
+                    ClearRange(25, 121, 125),
+                ],
+            ),
+        ];
+
+        for (sz, instructions) in cases {
             run_test(sz, &instructions);
         }
-
-        // TODO: test malloc failures
-        //
-        0
     }
 }
