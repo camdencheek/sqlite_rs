@@ -1,7 +1,7 @@
 use libc::c_char;
 use std::ffi::CStr;
 
-use crate::util::strings::sqlite3UpperToLower;
+use crate::{cstr, util::strings::sqlite3UpperToLower};
 
 /// SQLITE_MAX_U32 is a u64 constant that is the maximum u64 value
 /// that can be stored in a u32 without loss of data.  The value
@@ -24,21 +24,6 @@ pub enum StdType {
 /// Standard typenames.  These names must match the COLTYPE_* definitions.
 /// Adjust the SQLITE_N_STDTYPE value if adding or removing entries.
 impl StdType {
-    const ANY_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"ANY\0") };
-    const BLOB_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"BLOB\0") };
-    const INT_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"INT\0") };
-    const INTEGER_NAME: &'static CStr =
-        unsafe { CStr::from_bytes_with_nul_unchecked(b"INTEGER\0") };
-    const REAL_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"REAL\0") };
-    const TEXT_NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"TEXT\0") };
-
-    const ANY_LEN: usize = Self::ANY_NAME.to_bytes().len();
-    const BLOB_LEN: usize = Self::BLOB_NAME.to_bytes().len();
-    const INT_LEN: usize = Self::INT_NAME.to_bytes().len();
-    const INTEGER_LEN: usize = Self::INTEGER_NAME.to_bytes().len();
-    const REAL_LEN: usize = Self::REAL_NAME.to_bytes().len();
-    const TEXT_LEN: usize = Self::TEXT_NAME.to_bytes().len();
-
     pub const fn from_u8(u: u8) -> Option<Self> {
         match u {
             1 => Some(Self::Any),
@@ -54,26 +39,18 @@ impl StdType {
     /// The name of the data type
     pub const fn name(&self) -> &'static CStr {
         match self {
-            StdType::Any => Self::ANY_NAME,
-            StdType::Blob => Self::BLOB_NAME,
-            StdType::Int => Self::INT_NAME,
-            StdType::Integer => Self::INTEGER_NAME,
-            StdType::Real => Self::REAL_NAME,
-            StdType::Text => Self::TEXT_NAME,
+            StdType::Any => cstr!("ANY"),
+            StdType::Blob => cstr!("BLOB"),
+            StdType::Int => cstr!("INT"),
+            StdType::Integer => cstr!("INTEGER"),
+            StdType::Real => cstr!("REAL"),
+            StdType::Text => cstr!("TEXT"),
         }
     }
 
     /// The length (in bytes) of the type name
-    // TODO: consider removing this and calculating it at runtime?
     pub const fn name_len(&self) -> usize {
-        match self {
-            StdType::Any => Self::ANY_LEN,
-            StdType::Blob => Self::BLOB_LEN,
-            StdType::Int => Self::INT_LEN,
-            StdType::Integer => Self::INTEGER_LEN,
-            StdType::Real => Self::REAL_LEN,
-            StdType::Text => Self::TEXT_LEN,
-        }
+        self.name().to_bytes().len()
     }
 
     /// The affinity associated the type

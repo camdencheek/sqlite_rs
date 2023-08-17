@@ -169,3 +169,11 @@ pub unsafe extern "C" fn sqlite3Dequote(z: *mut c_char) {
 pub extern "C" fn sqlite3DequoteExpr(expr: &mut Expr) {
     expr.dequote()
 }
+
+#[macro_export]
+
+macro_rules! cstr {
+    ( $s:literal ) => {{
+        unsafe { std::mem::transmute::<_, &std::ffi::CStr>(concat!($s, "\0")) }
+    }};
+}
