@@ -94,19 +94,6 @@ static void clearSelect(sqlite3 *db, Select *p, int bFree){
 }
 
 /*
-** Initialize a SelectDest structure.
-*/
-void sqlite3SelectDestInit(SelectDest *pDest, int eDest, int iParm){
-  pDest->eDest = (u8)eDest;
-  pDest->iSDParm = iParm;
-  pDest->iSDParm2 = 0;
-  pDest->zAffSdst = 0;
-  pDest->iSdst = 0;
-  pDest->nSdst = 0;
-}
-
-
-/*
 ** Allocate a new Select structure and return a pointer to that
 ** structure.
 */

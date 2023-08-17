@@ -70,6 +70,26 @@ pub struct SelectDest {
     pOrderBy: *mut ExprList,
 }
 
+impl SelectDest {
+    fn new(eDest: c_int, iParm: c_int) -> Self {
+        Self {
+            eDest: eDest as u8,
+            iSDParm: iParm,
+            iSDParm2: 0,
+            iSdst: 0,
+            nSdst: 0,
+            zAffSdst: std::ptr::null_mut(),
+            pOrderBy: std::ptr::null_mut(),
+        }
+    }
+}
+
+/// Initialize a SelectDest structure.
+#[no_mangle]
+pub extern "C" fn sqlite3SelectDestInit(pDest: &mut SelectDest, eDest: c_int, iParm: c_int) {
+    *pDest = SelectDest::new(eDest, iParm);
+}
+
 bitflags! {
 
     /// Allowed values for Select.selFlags.  The "SF" prefix stands for
