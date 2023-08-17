@@ -4070,21 +4070,6 @@ int sqlite3_test_control(int op, ...){
 #endif
 
     /*
-    **  sqlite3_test_control(BITVEC_TEST, size, program)
-    **
-    ** Run a test against a Bitvec object of size.  The program argument
-    ** is an array of integers that defines the test.  Return -1 on a
-    ** memory allocation error, 0 on success, or non-zero for an error.
-    ** See the sqlite3BitvecBuiltinTest() for additional information.
-    */
-    case SQLITE_TESTCTRL_BITVEC_TEST: {
-      int sz = va_arg(ap, int);
-      int *aProg = va_arg(ap, int*);
-      rc = sqlite3BitvecBuiltinTest(sz, aProg);
-      break;
-    }
-
-    /*
     **  sqlite3_test_control(FAULT_INSTALL, xCallback)
     **
     ** Arrange to invoke xCallback() whenever sqlite3FaultSim() is called,

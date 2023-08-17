@@ -445,7 +445,6 @@ mod test {
         }
     }
 
-    #[cfg(test_slow)]
     #[test]
     fn test_bitvec_big_and_slow() {
         use TestInst::*;

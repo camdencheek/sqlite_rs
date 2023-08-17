@@ -8,6 +8,7 @@ use crate::hash::Hash;
 use crate::lookaside::Lookaside;
 use crate::savepoint::Savepoint;
 use crate::schema::{Schema, DB};
+use crate::vfs::sqlite3_vfs;
 use crate::vtable::VtabCtx;
 use crate::{parse::Parse, sqlite3_value, vtable::VTable};
 
@@ -500,14 +501,6 @@ pub struct sqlite3_mutex {
 /// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 // cbindgen:ignore
 pub struct Vdbe {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
-}
-
-/// Temporary opaque struct
-/// Using tricks from here: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-// cbindgen:ignore
-pub struct sqlite3_vfs {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }

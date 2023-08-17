@@ -42,6 +42,7 @@ mod trigger;
 mod upsert;
 mod util;
 mod vdbe;
+mod vfs;
 mod vtable;
 mod whereint;
 mod window;

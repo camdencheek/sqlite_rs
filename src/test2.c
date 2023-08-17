@@ -666,40 +666,6 @@ static int SQLITE_TCLAPI faultInstallCmd(
 }
 
 /*
-** sqlite3BitvecBuiltinTest SIZE PROGRAM
-**
-** Invoke the SQLITE_TESTCTRL_BITVEC_TEST operator on test_control.
-** See comments on sqlite3BitvecBuiltinTest() for additional information.
-*/
-static int SQLITE_TCLAPI testBitvecBuiltinTest(
-  void *NotUsed,
-  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
-  int argc,              /* Number of arguments */
-  const char **argv      /* Text of each argument */
-){
-  int sz, rc;
-  int nProg = 0;
-  int aProg[100];
-  const char *z;
-  if( argc!=3 ){
-    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-                     " SIZE PROGRAM\"", (void*)0);
-  }
-  if( Tcl_GetInt(interp, argv[1], &sz) ) return TCL_ERROR;
-  z = argv[2];
-  while( nProg<99 && *z ){
-    while( *z && !sqlite3Isdigit(*z) ){ z++; }
-    if( *z==0 ) break;
-    aProg[nProg++] = atoi(z);
-    while( sqlite3Isdigit(*z) ){ z++; }
-  }
-  aProg[nProg] = 0;
-  rc = sqlite3_test_control(SQLITE_TESTCTRL_BITVEC_TEST, sz, aProg);
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(rc));
-  return TCL_OK;
-}  
-
-/*
 ** Register commands with the TCL interpreter.
 */
 int Sqlitetest2_Init(Tcl_Interp *interp){
@@ -732,7 +698,6 @@ int Sqlitetest2_Init(Tcl_Interp *interp){
 #ifndef SQLITE_OMIT_DISKIO
     { "fake_big_file",           (Tcl_CmdProc*)fake_big_file       },
 #endif
-    { "sqlite3BitvecBuiltinTest",(Tcl_CmdProc*)testBitvecBuiltinTest     },
     { "sqlite3_test_control_pending_byte",  (Tcl_CmdProc*)testPendingByte },
     { "sqlite3_test_control_fault_install", (Tcl_CmdProc*)faultInstallCmd },
   };
