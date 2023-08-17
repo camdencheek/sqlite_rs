@@ -76,6 +76,7 @@ use std::alloc::GlobalAlloc;
 ** a block of memory after it has been released using
 ** [sqlite3_free()] or [sqlite3_realloc()].
 */
+#[link(name = "sqlite3")]
 extern "C" {
     pub fn sqlite3_malloc(n: c_int) -> *mut c_void;
     pub fn sqlite3_malloc64(n: u64) -> *mut c_void;

@@ -386,3 +386,23 @@ pub fn skip_spaces(mut input: &[u8]) -> &[u8] {
     }
     input
 }
+
+#[cfg(test)]
+mod test {
+    use std::{convert::TryFrom, ffi::CString};
+
+    use super::{parseYyyyMmDd, DateTime};
+
+    #[test]
+    fn test_parse_hms() {
+        let s1 = CString::new("invalid".as_bytes()).unwrap();
+        let mut d = DateTime::default();
+        let res = parseYyyyMmDd(s1.as_c_str().as_ptr(), &mut d);
+        assert!(res != 0);
+
+        let s1 = CString::new("2020-06-28".as_bytes()).unwrap();
+        let mut d = DateTime::default();
+        let res = parseYyyyMmDd(s1.as_c_str().as_ptr(), &mut d);
+        assert!(res == 0);
+    }
+}

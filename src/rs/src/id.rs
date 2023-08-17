@@ -193,6 +193,7 @@ pub unsafe extern "C" fn sqlite3IdListAppend(
     Some(NonNull::from(list))
 }
 
+#[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3NameFromToken(db: &mut sqlite3, pName: *const Token) -> *mut c_char;
     fn sqlite3RenameTokenMap(

@@ -512,6 +512,7 @@ pub struct sqlite3_vfs {
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
 
+#[link(name = "sqlite3")]
 extern "C" {
     pub fn sqlite3DbMallocZero(db: *mut sqlite3, n: u64) -> *mut c_void;
     pub fn sqlite3DbMallocRaw(db: *mut sqlite3, n: u64) -> *mut c_void;

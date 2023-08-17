@@ -35,6 +35,7 @@ pub const MEMTYPE_LOOKASIDE: u8 = 0x02;
 pub const MEMTYPE_PCACHE: u8 = 0x04;
 
 #[cfg(memdebug)]
+#[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3MemdebugSetType(p: *mut c_void, eType: u8);
     fn sqlite3MemdebugHasType(p: *mut c_void, eType: u8) -> c_int;

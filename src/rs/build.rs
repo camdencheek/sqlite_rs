@@ -9,6 +9,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 fn main() {
+    println!("cargo:rustc-link-search=../../build");
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
