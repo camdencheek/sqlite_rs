@@ -44,6 +44,10 @@ typedef uint16_t WO;
                 "SQLITE_ENABLE_CURSOR_HINTS".into(),
             );
             h.insert(
+                "enable_sorter_references".into(),
+                "SQLITE_ENABLE_SORTER_REFERENCES".into(),
+            );
+            h.insert(
                 "enable_stmt_scanstatus".into(),
                 "SQLITE_ENABLE_STMT_SCANSTATUS".into(),
             );
@@ -182,6 +186,7 @@ typedef uint16_t WO;
                 "WherePath".into(),
                 "WhereRightJoin".into(),
                 "WhereScan".into(),
+                "RowLoadInfo".into(),
                 "WhereTerm".into(),
                 "Window".into(),
                 "sColMap".into(),

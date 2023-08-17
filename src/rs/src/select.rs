@@ -177,3 +177,20 @@ pub struct DistinctCtx {
     /// Address of OP_OpenEphemeral opcode for tabTnct
     addrTnct: c_int,
 }
+
+/// An instance of this object holds information (beyond pParse and pSelect)
+/// needed to load the next result row that is to be added to the sorter.
+#[repr(C)]
+pub struct RowLoadInfo {
+    /// Store results in array of registers here
+    regResult: c_int,
+    /// Flag argument to ExprCodeExprList()
+    ecelFlags: u8,
+
+    /// Extra columns needed by sorter refs
+    #[cfg(enable_sorter_references)]
+    pExtra: *mut ExprList,
+    /// Where to load the extra columns
+    #[cfg(enable_sorter_references)]
+    regExtraResult: c_int,
+}

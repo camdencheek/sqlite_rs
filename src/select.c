@@ -603,20 +603,6 @@ static int sqlite3ProcessJoin(Parse *pParse, Select *p){
 }
 
 /*
-** An instance of this object holds information (beyond pParse and pSelect)
-** needed to load the next result row that is to be added to the sorter.
-*/
-typedef struct RowLoadInfo RowLoadInfo;
-struct RowLoadInfo {
-  int regResult;               /* Store results in array of registers here */
-  u8 ecelFlags;                /* Flag argument to ExprCodeExprList() */
-#ifdef SQLITE_ENABLE_SORTER_REFERENCES
-  ExprList *pExtra;            /* Extra columns needed by sorter refs */
-  int regExtraResult;          /* Where to load the extra columns */
-#endif
-};
-
-/*
 ** This routine does the work of loading query data into an array of
 ** registers so that it can be added to the sorter.
 */
