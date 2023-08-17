@@ -1,5 +1,6 @@
 use crate::expr::{Expr, ExprList};
 use crate::from::SrcList;
+use crate::table::Table;
 use crate::util::log_est::LogEst;
 use crate::window::Window;
 use crate::with::With;
@@ -193,4 +194,65 @@ pub struct RowLoadInfo {
     /// Where to load the extra columns
     #[cfg(enable_sorter_references)]
     regExtraResult: c_int,
+}
+
+/// An instance of the following object is used to record information about
+/// the ORDER BY (or GROUP BY) clause of query is being coded.
+///
+/// The aDefer[] array is used by the sorter-references optimization. For
+/// example, assuming there is no index that can be used for the ORDER BY,
+/// for the query:
+///
+///     SELECT a, bigblob FROM t1 ORDER BY a LIMIT 10;
+///
+/// it may be more efficient to add just the "a" values to the sorter, and
+/// retrieve the associated "bigblob" values directly from table t1 as the
+/// 10 smallest "a" values are extracted from the sorter.
+///
+/// When the sorter-reference optimization is used, there is one entry in the
+/// aDefer[] array for each database table that may be read as values are
+/// extracted from the sorter.
+#[repr(C)]
+pub struct SortCtx {
+    /// The ORDER BY (or GROUP BY clause)
+    pOrderBy: *mut ExprList,
+    /// Number of ORDER BY terms satisfied by indices
+    nOBSat: c_int,
+    /// Cursor number for the sorter
+    iECursor: c_int,
+    /// Register holding block-output return address
+    regReturn: c_int,
+    /// Start label for the block-output subroutine
+    labelBkOut: c_int,
+    /// Address of the OP_SorterOpen or OP_OpenEphemeral
+    addrSortIndex: c_int,
+    /// Jump here when done, ex: LIMIT reached
+    labelDone: c_int,
+    /// Jump here when sorter is full
+    labelOBLopt: c_int,
+    /// Zero or more SORTFLAG_* bits
+    sortFlags: u8,
+    /// Number of valid entries in aDefer[]
+    #[cfg(enable_sorter_references)]
+    nDefer: u8,
+    #[cfg(enable_sorter_references)]
+    aDefer: [DeferredCsr; 4],
+    /// Deferred row loading info or NULL
+    pDeferredRowLoad: *mut RowLoadInfo,
+    /// First instruction to push data into sorter
+    #[cfg(enable_stmt_scanstatus)]
+    addrPush: c_int,
+    /// Last instruction that pushes data into sorter
+    #[cfg(enable_stmt_scanstatus)]
+    addrPushEnd: c_int,
+}
+
+#[repr(C)]
+pub struct DeferredCsr {
+    /// Table definition
+    pTab: *mut Table,
+    /// Cursor number for table
+    iCsr: c_int,
+    /// Number of PK columns for table pTab (>=1)
+    nKey: c_int,
 }

@@ -187,6 +187,7 @@ typedef uint16_t WO;
                 "WhereRightJoin".into(),
                 "WhereScan".into(),
                 "RowLoadInfo".into(),
+                "SortCtx".into(),
                 "WhereTerm".into(),
                 "Window".into(),
                 "sColMap".into(),

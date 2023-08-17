@@ -14,49 +14,6 @@
 */
 #include "sqliteInt.h"
 
-/*
-** An instance of the following object is used to record information about
-** the ORDER BY (or GROUP BY) clause of query is being coded.
-**
-** The aDefer[] array is used by the sorter-references optimization. For
-** example, assuming there is no index that can be used for the ORDER BY,
-** for the query:
-**
-**     SELECT a, bigblob FROM t1 ORDER BY a LIMIT 10;
-**
-** it may be more efficient to add just the "a" values to the sorter, and
-** retrieve the associated "bigblob" values directly from table t1 as the
-** 10 smallest "a" values are extracted from the sorter.
-**
-** When the sorter-reference optimization is used, there is one entry in the
-** aDefer[] array for each database table that may be read as values are
-** extracted from the sorter.
-*/
-typedef struct SortCtx SortCtx;
-struct SortCtx {
-  ExprList *pOrderBy;   /* The ORDER BY (or GROUP BY clause) */
-  int nOBSat;           /* Number of ORDER BY terms satisfied by indices */
-  int iECursor;         /* Cursor number for the sorter */
-  int regReturn;        /* Register holding block-output return address */
-  int labelBkOut;       /* Start label for the block-output subroutine */
-  int addrSortIndex;    /* Address of the OP_SorterOpen or OP_OpenEphemeral */
-  int labelDone;        /* Jump here when done, ex: LIMIT reached */
-  int labelOBLopt;      /* Jump here when sorter is full */
-  u8 sortFlags;         /* Zero or more SORTFLAG_* bits */
-#ifdef SQLITE_ENABLE_SORTER_REFERENCES
-  u8 nDefer;            /* Number of valid entries in aDefer[] */
-  struct DeferredCsr {
-    Table *pTab;        /* Table definition */
-    int iCsr;           /* Cursor number for table */
-    int nKey;           /* Number of PK columns for table pTab (>=1) */
-  } aDefer[4];
-#endif
-  struct RowLoadInfo *pDeferredRowLoad;  /* Deferred row loading info or NULL */
-#ifdef SQLITE_ENABLE_STMT_SCANSTATUS
-  int addrPush;         /* First instruction to push data into sorter */
-  int addrPushEnd;      /* Last instruction that pushes data into sorter */
-#endif
-};
 #define SORTFLAG_UseSorter  0x01   /* Use SorterOpen instead of OpenEphemeral */
 
 /*
